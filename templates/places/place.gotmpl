@@ -1,0 +1,27 @@
+{{ define "content" }}
+<ul>
+    {{ with .Name }}
+        <li>Name: {{ . }}</li>
+    {{ end }}
+
+    {{ with .Type }}
+        <li>Type: {{ . }}</li>
+    {{ end }}
+
+    {{ with .ParentID }}
+        <li>Part of {{ . }}</li>
+    {{ end }}
+
+    {{ with .Latitude }}
+        <li>Latitude: {{ . }}</li>
+    {{ end }}
+
+    {{ with .Longitude }}
+        <li>Longitude: {{ . }}</li>
+    {{ end }}
+
+    {{ range .Notes }}
+        <p>{{ . }}</p>
+    {{ end }}
+</ul>
+{{ end }}

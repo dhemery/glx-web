@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang='en-us'>
+
+<head>
+    <meta charset='utf-8' />
+    <meta viewport='width=device-width' />
+    <meta viewport='initial-scale=1' />
+    <meta viewport='user-scalable=yes' />
+    <link href='/favicon.ico' rel='icon' />
+
+    {{ block "head-title" . }}
+        <title>DFT | {{ .Title }}</title>
+    {{ end }}
+</head>
+
+<body>
+    {{ block "header" . }}
+        <header>
+            {{ block "header-title" . }}
+                <a class='title' href='/'>DFT</a>
+            {{ end }}
+
+            {{ block "header-nav" . }}
+                <nav>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/persons">People</a></li>
+                        <li><a href="/places">Places</a></li>
+                    </ul>
+                </nav>
+            {{ end }}
+        </header>
+    {{ end }}
+
+    {{ block "main" . }}
+        <main>
+            {{ block "title" . }}
+                <h1>{{ .Title }}</h1>
+            {{ end }}
+
+            {{ block "content" . }}
+                <div>NO CONTENT</div>
+            {{ end }}
+        </main>
+    {{ end }}
+
+    {{ block "footer" . }}
+        <footer>
+            {{ block "copyright" . }}
+                <div role='copyright'>
+                    COPYRIGHT TBD
+                </div>
+            {{ end }}
+        </footer>
+    {{ end }}
+</body>
+
+</html>
