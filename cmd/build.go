@@ -36,14 +36,14 @@ func runBuild(c *cobra.Command, args []string) error {
 	return site.Render(wa, templates)
 }
 
-func loadTemplates() (map[string]*template.Template, error) {
+func loadTemplates() (map[glx.EntityType]*template.Template, error) {
 	const tmplDir = "templates"
 	baseTemplate, err := template.ParseFiles(filepath.Join(tmplDir, "base.gotmpl"))
 	if err != nil {
 		return nil, err
 	}
 
-	entityTemplates := map[string]*template.Template{}
+	entityTemplates := map[glx.EntityType]*template.Template{}
 
 	for _, t := range glx.AllEntityTypes {
 		glob := filepath.Join(tmplDir, t.Plural(), "*.gotmpl")
@@ -59,7 +59,7 @@ func loadTemplates() (map[string]*template.Template, error) {
 			continue
 		}
 
-		entityTemplates[t.Plural()] = et
+		entityTemplates[t] = et
 	}
 
 	return entityTemplates, nil

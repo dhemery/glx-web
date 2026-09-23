@@ -10,30 +10,48 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-func Render(a *archive.Archive, templates map[string]*template.Template) error {
+type renderer struct {
+	siteDir   string
+	templates map[glx.EntityType]*template.Template
+	err       error
+}
+
+func Render(a *archive.Archive, templates map[glx.EntityType]*template.Template) error {
 	siteDir := "public"
 	if err := os.Mkdir(siteDir, 0755); err != nil {
 		return err
 	}
 
-	placesDir := filepath.Join(siteDir, glx.EntityTypePlaces.Plural())
-	if err := os.Mkdir(placesDir, 0755); err != nil {
-		return err
+	r := renderer{siteDir: siteDir, templates: templates}
+
+	r.renderEntities(glx.EntityTypePersons, a.Persons)
+	r.renderEntities(glx.EntityTypePlaces, a.Places)
+
+	return r.err
+}
+
+func (r *renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T) {
+	if r.err != nil {
+		return
+	}
+	typeDir := filepath.Join(r.siteDir, t.Plural())
+	if err := os.Mkdir(typeDir, 0755); err != nil {
+		r.err = err
+		return
 	}
 
-	placeTemplate := templates[glx.EntityTypePlaces.Plural()]
-
-	for id, e := range a.Places {
-		placeDir := filepath.Join(placesDir, id)
-		if err := os.Mkdir(placeDir, 0755); err != nil {
-			return err
+	for id, e := range entities {
+		entityDir := filepath.Join(typeDir, id)
+		if err := os.Mkdir(entityDir, 0755); err != nil {
+			r.err = err
+			return
 		}
 
-		if err := render(placeDir, e, placeTemplate); err != nil {
-			return err
+		if err := render(entityDir, e, r.templates[t]); err != nil {
+			r.err = err
+			return
 		}
 	}
-	return nil
 }
 
 func render(dir string, data any, tmpl *template.Template) error {
