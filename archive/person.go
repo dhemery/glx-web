@@ -10,7 +10,7 @@ func newPerson(g *glx.Person) *Person {
 	return new(Person{g: g})
 }
 
-func (p Person) Title() string {
+func (p Person) Name() string {
 	return glx.PersonDisplayName(p.g)
 }
 

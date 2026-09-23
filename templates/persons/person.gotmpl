@@ -1,5 +1,14 @@
+{{ define "title" -}}
+    {{ .Name }}
+{{- end }}
+
 {{ define "content" }}
-    {{ range .Notes }}
-        <p>{{ . }}</p>
-    {{ end }}
-{{ end }}
+
+    {{- with .Notes -}}
+        <h2>Notes</h2>
+        {{- range . }}
+            <p>{{ . }}</p>
+        {{ end -}}
+    {{ end -}}
+
+{{- end }}

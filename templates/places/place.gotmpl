@@ -1,27 +1,34 @@
+{{ define "title" -}}
+    {{ .Name }}
+{{- end }}
+
 {{ define "content" }}
 <ul>
-    {{ with .Name }}
+    {{- with .Name }}
         <li>Name: {{ . }}</li>
-    {{ end }}
+    {{ end -}}
 
-    {{ with .Type }}
+    {{- with .Type }}
         <li>Type: {{ . }}</li>
-    {{ end }}
+    {{ end -}}
 
-    {{ with .ParentID }}
+    {{- with .ParentID }}
         <li>Part of {{ . }}</li>
-    {{ end }}
+    {{ end -}}
 
-    {{ with .Latitude }}
+    {{- with .Latitude }}
         <li>Latitude: {{ . }}</li>
-    {{ end }}
+    {{ end -}}
 
-    {{ with .Longitude }}
+    {{- with .Longitude }}
         <li>Longitude: {{ . }}</li>
-    {{ end }}
+    {{ end -}}
 
-    {{ range .Notes }}
-        <p>{{ . }}</p>
-    {{ end }}
+    {{- with .Notes -}}
+        <h2>Notes</h2>
+        {{- range . }}
+            <p>{{ . }}</p>
+        {{ end -}}
+    {{ end -}}
 </ul>
 {{ end }}

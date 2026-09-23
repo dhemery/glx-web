@@ -8,51 +8,33 @@
     <meta viewport='user-scalable=yes' />
     <link href='/favicon.ico' rel='icon' />
 
-    {{ block "head-title" . }}
-        <title>DFT | {{ .Title }}</title>
-    {{ end }}
+    <title>DFT | {{ template "title" . }}</title>
 </head>
 
 <body>
-    {{ block "header" . }}
-        <header>
-            {{ block "header-title" . }}
-                <a class='title' href='/'>DFT</a>
-            {{ end }}
+    <header>
+        <a class='title' href='/'>DFT</a>
 
-            {{ block "header-nav" . }}
-                <nav>
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/persons">People</a></li>
-                        <li><a href="/places">Places</a></li>
-                    </ul>
-                </nav>
-            {{ end }}
-        </header>
-    {{ end }}
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/persons">People</a></li>
+                <li><a href="/places">Places</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    {{ block "main" . }}
-        <main>
-            {{ block "title" . }}
-                <h1>{{ .Title }}</h1>
-            {{ end }}
+    <main>
+        <h1>{{ template "title" . }}</h1>
 
-            {{ block "content" . }}
-                <div>NO CONTENT</div>
-            {{ end }}
-        </main>
-    {{ end }}
+        {{ template "content" . }}
+    </main>
 
-    {{ block "footer" . }}
-        <footer>
-            {{ block "copyright" . }}
-                <div role='copyright'>
-                    COPYRIGHT TBD
-                </div>
-            {{ end }}
-        </footer>
-    {{ end }}
+    <footer>
+        <div role='copyright'>
+            Copyright (c) 2026 Dale H. Emery
+        </div>
+    </footer>
 </body>
 
 </html>
