@@ -24,6 +24,7 @@ func Render(a *archive.Archive, templates map[glx.EntityType]*template.Template)
 
 	r := renderer{siteDir: siteDir, templates: templates}
 
+	r.renderEntities(glx.EntityTypeEvents, a.Events)
 	r.renderEntities(glx.EntityTypePersons, a.Persons)
 	r.renderEntities(glx.EntityTypePlaces, a.Places)
 

@@ -1,0 +1,26 @@
+{{ define "title" -}}
+    {{ .Title }}
+{{- end }}
+
+{{ define "content" }}
+    <ul>
+        {{- with .Date }}
+            <li>Date: {{ . }}</li>
+        {{ end -}}
+
+        {{- with .Place }}
+            <li>Place: {{ .FullName }}</li>
+        {{ end -}}
+
+        {{- with .Type }}
+            <li>Type: {{ . }}</li>
+        {{ end -}}
+    </ul>
+
+    {{- with .Notes -}}
+        <h2>Notes</h2>
+        {{- range . }}
+            <p>{{ . }}</p>
+        {{- end }}
+    {{ end -}}
+{{ end }}

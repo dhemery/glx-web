@@ -1,15 +1,35 @@
 package archive
 
-import "github.com/genealogix/glx/go-glx"
+import (
+	"path"
+
+	"github.com/genealogix/glx/go-glx"
+)
 
 type Place struct {
-	g *glx.Place
+	a  *Archive
+	g  *glx.Place
+	ID string
 }
 
-func newPlace(gp *glx.Place) *Place {
+func newPlace(id string, gp *glx.Place, a *Archive) *Place {
 	return &Place{
-		g: gp,
+		a:  a,
+		g:  gp,
+		ID: id,
 	}
+}
+
+func (p *Place) FullName() string {
+	return p.Name()
+}
+
+func (p *Place) Latitude() *float64 {
+	return p.g.Latitude
+}
+
+func (p *Place) Longitude() *float64 {
+	return p.g.Longitude
 }
 
 func (p *Place) Name() string {
@@ -20,18 +40,14 @@ func (p *Place) Notes() glx.NoteList {
 	return p.g.Notes
 }
 
+func (p *Place) Parent() *Place {
+	return p.a.Places[p.g.ParentID]
+}
+
+func (p *Place) Path() string {
+	return path.Join(glx.EntityTypePlaces.Plural(), p.ID)
+}
+
 func (p *Place) Type() string {
 	return p.g.Type
-}
-
-func (p *Place) ParentID() string {
-	return p.g.ParentID
-}
-
-func (p *Place) Latitude() *float64 {
-	return p.g.Latitude
-}
-
-func (p *Place) Longitude() *float64 {
-	return p.g.Longitude
 }

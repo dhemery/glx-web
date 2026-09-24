@@ -1,34 +1,34 @@
 {{ define "title" -}}
-    {{ .Name }}
+    {{ .FullName }}
 {{- end }}
 
 {{ define "content" }}
-<ul>
-    {{- with .Name }}
-        <li>Name: {{ . }}</li>
-    {{ end -}}
+    <ul>
+        {{- with .Name }}
+            <li>Name: {{ . }}</li>
+        {{ end -}}
 
-    {{- with .Type }}
-        <li>Type: {{ . }}</li>
-    {{ end -}}
+        {{- with .Type }}
+            <li>Type: {{ . }}</li>
+        {{ end -}}
 
-    {{- with .ParentID }}
-        <li>Part of {{ . }}</li>
-    {{ end -}}
+        {{- with .Parent }}
+            <li>Part of <a href='{{ .Path }}'>{{ .FullName }}</li>
+        {{ end -}}
 
-    {{- with .Latitude }}
-        <li>Latitude: {{ . }}</li>
-    {{ end -}}
+        {{- with .Latitude }}
+            <li>Latitude: {{ . }}</li>
+        {{ end -}}
 
-    {{- with .Longitude }}
-        <li>Longitude: {{ . }}</li>
-    {{ end -}}
+        {{- with .Longitude }}
+            <li>Longitude: {{ . }}</li>
+        {{ end -}}
+    </ul>
 
     {{- with .Notes -}}
         <h2>Notes</h2>
         {{- range . }}
             <p>{{ . }}</p>
-        {{ end -}}
+        {{- end }}
     {{ end -}}
-</ul>
 {{ end }}

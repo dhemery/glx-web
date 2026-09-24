@@ -12,6 +12,7 @@ import (
 )
 
 type Archive struct {
+	Events  map[string]*Event
 	Persons map[string]*Person
 	Places  map[string]*Place
 }
@@ -38,16 +39,21 @@ func Load(path string) (*Archive, error) {
 
 func compile(g *glx.GLXFile) *Archive {
 	a := &Archive{
+		Events:  make(map[string]*Event),
 		Persons: make(map[string]*Person),
 		Places:  make(map[string]*Place),
 	}
 
+	for id, ge := range g.Events {
+		a.Events[id] = newEvent(id, ge, a)
+	}
+
 	for id, gp := range g.Persons {
-		a.Persons[id] = newPerson(gp)
+		a.Persons[id] = newPerson(id, gp)
 	}
 
 	for id, gp := range g.Places {
-		a.Places[id] = newPlace(gp)
+		a.Places[id] = newPlace(id, gp, a)
 	}
 
 	return a
