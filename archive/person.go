@@ -3,15 +3,9 @@ package archive
 import "github.com/genealogix/glx/go-glx"
 
 type Person struct {
+	a  *Archive
 	g  *glx.Person
 	ID string
-}
-
-func newPerson(id string, gp *glx.Person) *Person {
-	return &Person{
-		ID: id,
-		g:  gp,
-	}
 }
 
 func (p Person) DisplayName() string {

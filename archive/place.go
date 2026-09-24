@@ -12,14 +12,6 @@ type Place struct {
 	ID string
 }
 
-func newPlace(id string, gp *glx.Place, a *Archive) *Place {
-	return &Place{
-		a:  a,
-		g:  gp,
-		ID: id,
-	}
-}
-
 func (p *Place) FullName() string {
 	return p.Name()
 }

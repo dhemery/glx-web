@@ -24,9 +24,15 @@ func Render(a *archive.Archive, templates map[glx.EntityType]*template.Template)
 
 	r := renderer{siteDir: siteDir, templates: templates}
 
+	r.renderEntities(glx.EntityTypeAssertions, a.Assertions)
+	r.renderEntities(glx.EntityTypeCitations, a.Citations)
 	r.renderEntities(glx.EntityTypeEvents, a.Events)
+	r.renderEntities(glx.EntityTypeMedia, a.Media)
 	r.renderEntities(glx.EntityTypePersons, a.Persons)
 	r.renderEntities(glx.EntityTypePlaces, a.Places)
+	r.renderEntities(glx.EntityTypeRelationships, a.Relationships)
+	r.renderEntities(glx.EntityTypeRepositories, a.Repositories)
+	r.renderEntities(glx.EntityTypeSources, a.Sources)
 
 	return r.err
 }

@@ -12,9 +12,15 @@ import (
 )
 
 type Archive struct {
-	Events  map[string]*Event
-	Persons map[string]*Person
-	Places  map[string]*Place
+	Assertions    map[string]*Assertion
+	Citations     map[string]*Citation
+	Events        map[string]*Event
+	Media         map[string]*Media
+	Persons       map[string]*Person
+	Places        map[string]*Place
+	Relationships map[string]*Relationship
+	Repositories  map[string]*Repository
+	Sources       map[string]*Source
 }
 
 func Load(path string) (*Archive, error) {
@@ -39,21 +45,51 @@ func Load(path string) (*Archive, error) {
 
 func compile(g *glx.GLXFile) *Archive {
 	a := &Archive{
-		Events:  make(map[string]*Event),
-		Persons: make(map[string]*Person),
-		Places:  make(map[string]*Place),
+		Assertions:    make(map[string]*Assertion),
+		Citations:     make(map[string]*Citation),
+		Events:        make(map[string]*Event),
+		Media:         make(map[string]*Media),
+		Persons:       make(map[string]*Person),
+		Places:        make(map[string]*Place),
+		Relationships: make(map[string]*Relationship),
+		Repositories:  make(map[string]*Repository),
+		Sources:       make(map[string]*Source),
+	}
+
+	for id, ga := range g.Assertions {
+		a.Assertions[id] = &Assertion{a: a, g: ga, ID: id}
+	}
+
+	for id, gc := range g.Citations {
+		a.Citations[id] = &Citation{a: a, g: gc, ID: id}
 	}
 
 	for id, ge := range g.Events {
-		a.Events[id] = newEvent(id, ge, a)
+		a.Events[id] = &Event{a: a, g: ge, ID: id}
+	}
+
+	for id, gm := range g.Media {
+		a.Media[id] = &Media{a: a, g: gm, ID: id}
 	}
 
 	for id, gp := range g.Persons {
-		a.Persons[id] = newPerson(id, gp)
+		a.Persons[id] = &Person{g: gp, ID: id}
 	}
 
 	for id, gp := range g.Places {
-		a.Places[id] = newPlace(id, gp, a)
+		a.Places[id] = &Place{a: a, g: gp, ID: id}
+	}
+
+	for id, gp := range g.Relationships {
+		a.Relationships[id] = &Relationship{a: a, g: gp, ID: id}
+	}
+
+	for id, gp := range g.Repositories {
+		a.Repositories[id] = &Repository{a: a, g: gp, ID: id}
+	}
+
+	for id, gp := range g.Sources {
+		a.Sources[id] = &Source{a: a, g: gp, ID: id}
 	}
 
 	return a
