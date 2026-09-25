@@ -40,6 +40,10 @@ func (p *Place) Path() string {
 	return path.Join(glx.EntityTypePlaces.Plural(), p.ID)
 }
 
+func (p *Place) String() string {
+	return p.Name()
+}
+
 func (p *Place) Type() string {
 	return p.g.Type
 }

@@ -12,6 +12,7 @@ import (
 )
 
 type Archive struct {
+	g             *glx.GLXFile
 	Assertions    map[string]*Assertion
 	Citations     map[string]*Citation
 	Events        map[string]*Event
@@ -45,6 +46,7 @@ func Load(path string) (*Archive, error) {
 
 func compile(g *glx.GLXFile) *Archive {
 	a := &Archive{
+		g:             g,
 		Assertions:    make(map[string]*Assertion),
 		Citations:     make(map[string]*Citation),
 		Events:        make(map[string]*Event),
@@ -61,11 +63,11 @@ func compile(g *glx.GLXFile) *Archive {
 	}
 
 	for id, gc := range g.Citations {
-		a.Citations[id] = &Citation{a: a, g: gc, ID: id}
+		a.Citations[id] = newCitation(id, gc, a)
 	}
 
 	for id, ge := range g.Events {
-		a.Events[id] = &Event{a: a, g: ge, ID: id}
+		a.Events[id] = newEvent(id, ge, a)
 	}
 
 	for id, gm := range g.Media {
@@ -73,23 +75,23 @@ func compile(g *glx.GLXFile) *Archive {
 	}
 
 	for id, gp := range g.Persons {
-		a.Persons[id] = &Person{g: gp, ID: id}
+		a.Persons[id] = newPerson(id, gp, a)
 	}
 
 	for id, gp := range g.Places {
 		a.Places[id] = &Place{a: a, g: gp, ID: id}
 	}
 
-	for id, gp := range g.Relationships {
-		a.Relationships[id] = &Relationship{a: a, g: gp, ID: id}
+	for id, gr := range g.Relationships {
+		a.Relationships[id] = &Relationship{a: a, g: gr, ID: id}
 	}
 
-	for id, gp := range g.Repositories {
-		a.Repositories[id] = &Repository{a: a, g: gp, ID: id}
+	for id, gr := range g.Repositories {
+		a.Repositories[id] = newRepository(id, gr, a)
 	}
 
-	for id, gp := range g.Sources {
-		a.Sources[id] = &Source{a: a, g: gp, ID: id}
+	for id, gs := range g.Sources {
+		a.Sources[id] = &Source{a: a, g: gs, ID: id}
 	}
 
 	return a

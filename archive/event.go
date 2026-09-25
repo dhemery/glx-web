@@ -7,9 +7,10 @@ import (
 )
 
 type Event struct {
-	a  *Archive
-	g  *glx.Event
-	ID string
+	a          *Archive
+	g          *glx.Event
+	ID         string
+	properties map[string]Property
 }
 
 func newEvent(id string, ge *glx.Event, a *Archive) *Event {
@@ -32,6 +33,12 @@ func (e *Event) Path() string {
 	return path.Join(glx.EntityTypeEvents.Plural(), e.ID)
 }
 
+func (e *Event) Properties() map[string]Property {
+	if e.properties == nil {
+		e.properties = newProperties(e.g.Properties, e.a.g.EventProperties, e.a)
+	}
+	return e.properties
+}
 func (e *Event) Place() *Place {
 	return e.a.Places[e.g.PlaceID]
 }

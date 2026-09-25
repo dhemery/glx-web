@@ -4,6 +4,13 @@
 
 {{ define "content" }}
 
+    {{- with .Properties -}}
+        <h2>Properties</h2>
+        {{- range . }}
+            <p>{{ . }}</p>
+        {{ end -}}
+    {{ end }}
+
     {{- with .Notes -}}
         <h2>Notes</h2>
         {{- range . }}
