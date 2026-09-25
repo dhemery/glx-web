@@ -1,4 +1,7 @@
 // Package web represents a GLX archive in a form suitable for Go templates to render as HTML.
+//
+// Every exported type in this package has a String method to make it easy to
+// render each value in a template.
 package web
 
 import (

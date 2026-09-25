@@ -7,59 +7,83 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
+// Property holds the values of a property of an entity. Each Property holds a
+// list of values even if the GLX entity has only a single value.
 type Property struct {
+	// The GLX definition of the property.
 	Definition *glx.PropertyDefinition
-	Values     []PropertyValue
+	// The values of the property.
+	Values []PropertyValue
 }
 
+// String returns the string representation of the first value of p.
 func (p Property) String() string {
 	return p.Value().String()
 }
 
+// Value returns the first value of p.
 func (p Property) Value() PropertyValue {
 	return p.Values[0]
 }
 
+// PropertyValue holds a single value of a property of an entity. Each
+// PropertyValue is represented with fields and a date even if the GLX property
+// does not have them.
 type PropertyValue struct {
-	Value  fmt.Stringer
-	Date   Date
+	// Value is the value of the property.
+	Value fmt.Stringer
+	// Date is the date of the property.
+	Date Date
+	// Fields holds the property's fields.
 	Fields map[string]PropertyField
 }
 
+// Field returns the named field of v.
 func (v PropertyValue) Field(name string) PropertyField {
 	return v.Fields[name]
 
 }
 
+// String returns the string representation of the value of v.
 func (v PropertyValue) String() string {
 	return v.Value.String()
 }
 
+// PropertyField represents a field in a property of an entity.
 type PropertyField struct {
 	Definition *glx.FieldDefinition
 	Value      fmt.Stringer
 }
 
+// Date represents a date value of a property or the date of a value of a
+// temporal property.
 type Date string
 
+// String returns the string representation of d.
 func (d Date) String() string {
 	return string(d)
 }
 
+// IntValue reprensents an integer value of a property or field.
 type IntValue int
 
+// String returns the string representation of i.
 func (i IntValue) String() string {
 	return strconv.Itoa((int(i)))
 }
 
+// BoolValue represents a boolean value of a property or field.
 type BoolValue bool
 
+// String returns the string representation of b.
 func (b BoolValue) String() string {
 	return strconv.FormatBool(bool(b))
 }
 
+// StringValue represents a string value of a property or field.
 type StringValue string
 
+// String returns the string value of s.
 func (s StringValue) String() string {
 	return string(s)
 }

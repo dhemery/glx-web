@@ -11,6 +11,7 @@ func newRepository(id string, gr *glx.Repository, a *Archive) *Repository {
 	}
 }
 
+// Repository represents a GLX repository entity.
 type Repository struct {
 	a          *Archive
 	g          *glx.Repository
