@@ -16,7 +16,29 @@ var buildCmd = &cobra.Command{
 	RunE:  runBuild,
 }
 
+var (
+	archivePath     = "."
+	overwriteOutput = false
+	includeLiving   = false
+	outputPath      = "./public"
+	staticPath      = "./static"
+	templatePath    = "./templates"
+)
+
 func init() {
+	buildCmd.Flags().StringVarP(&archivePath, "archive", "a", archivePath,
+		"Archive `dir`.")
+	buildCmd.Flags().BoolVarP(&overwriteOutput, "force", "f", overwriteOutput,
+		"Overwrite existing output directory.")
+	buildCmd.Flags().BoolVarP(&includeLiving, "living", "l", includeLiving,
+		"Include living people.")
+	buildCmd.Flags().StringVarP(&outputPath, "output", "o", outputPath,
+		"Output `dir`.")
+	buildCmd.Flags().StringVarP(&staticPath, "static", "s", staticPath,
+		"Static `dir` of files to copy verbatim into the output.")
+	buildCmd.Flags().StringVarP(&templatePath, "templates", "t", templatePath,
+		"Template `dir`.")
+
 	rootCmd.AddCommand(buildCmd)
 }
 
@@ -27,6 +49,9 @@ func runBuild(c *cobra.Command, args []string) error {
 	}
 
 	wa, err := archive.Load(archivePath)
+	if err != nil {
+		return err
+	}
 
 	templates, err := loadTemplates()
 	if err != nil {

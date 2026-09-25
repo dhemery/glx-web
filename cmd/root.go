@@ -18,11 +18,3 @@ func Execute() {
 		os.Exit(1)
 	}
 }
-
-func init() {
-	var archivePath string = "."
-	if p := os.Getenv("GLX_WEB_ARCHIVE"); p != "" {
-		archivePath = p
-	}
-	rootCmd.PersistentFlags().StringVarP(&archivePath, "archive", "a", archivePath, "the `dir` of the archive")
-}
