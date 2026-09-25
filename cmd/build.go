@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"html/template"
 	"path/filepath"
 
@@ -44,23 +45,42 @@ func init() {
 }
 
 func runBuild(_ *cobra.Command, _ []string) error {
-	templates, err := loadTemplates(templateDir)
+	absArchiveDir, err := filepath.Abs(archiveDir)
+	if err != nil {
+		return fmt.Errorf("archive directory: %w", err)
+	}
+
+	absOutputDir, err := filepath.Abs(outputDir)
+	if err != nil {
+		return fmt.Errorf("output directory: %w", err)
+	}
+
+	absStaticDir, err := filepath.Abs(staticDir)
+	if err != nil {
+		return fmt.Errorf("static directory: %w", err)
+	}
+
+	absTemplateDir, err := filepath.Abs(templateDir)
+	if err != nil {
+		return fmt.Errorf("template directory: %w", err)
+	}
+
+	templates, err := loadTemplates(absTemplateDir)
 	if err != nil {
 		return err
 	}
 
-	a, err := archive.Load(archiveDir)
+	a, err := archive.Load(absArchiveDir)
 	if err != nil {
 		return err
 	}
 
 	r := &site.Renderer{
 		Archive:   a,
-		OutputDir: outputDir,
+		OutputDir: absOutputDir,
 		Clean:     cleanOutput,
-		StaticDir: staticDir,
+		StaticDir: absStaticDir,
 		Templates: templates,
-		Err:       err,
 	}
 	return r.Render()
 }

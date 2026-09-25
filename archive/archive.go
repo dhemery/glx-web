@@ -24,8 +24,8 @@ type Archive struct {
 	Sources       map[string]*Source
 }
 
-func Load(path string) (*Archive, error) {
-	files, err := readGLXFiles(path)
+func Load(archiveDir string) (*Archive, error) {
+	files, err := readGLXFiles(archiveDir)
 	if err != nil {
 		return nil, err
 	}
@@ -97,10 +97,10 @@ func compile(g *glx.GLXFile) *Archive {
 	return a
 }
 
-func readGLXFiles(rootDir string) (map[string][]byte, error) {
+func readGLXFiles(archiveDir string) (map[string][]byte, error) {
 	files := make(map[string][]byte)
 
-	err := filepath.WalkDir(rootDir, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(archiveDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -130,7 +130,7 @@ func readGLXFiles(rootDir string) (map[string][]byte, error) {
 			return fmt.Errorf("reading %s: %w", cleanPath, err)
 		}
 
-		relPath, err := filepath.Rel(rootDir, cleanPath)
+		relPath, err := filepath.Rel(archiveDir, cleanPath)
 		if err != nil {
 			return fmt.Errorf("getting relative path: %w", err)
 		}
