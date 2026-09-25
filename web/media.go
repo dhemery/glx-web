@@ -1,9 +1,9 @@
-package archive
+package web
 
 import "github.com/genealogix/glx/go-glx"
 
-type Source struct {
+type Media struct {
 	a  *Archive
-	g  *glx.Source
+	g  *glx.Media
 	ID string
 }

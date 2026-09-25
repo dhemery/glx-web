@@ -1,13 +1,7 @@
-// Package archive represents a GLX archive in a form suitable for Go templates to consume.
-package archive
+// Package web represents a GLX archive in a form suitable for Go templates to render as HTML.
+package web
 
 import (
-	"fmt"
-	"io/fs"
-	"os"
-	"path/filepath"
-	"strings"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -24,27 +18,7 @@ type Archive struct {
 	Sources       map[string]*Source
 }
 
-func Load(archiveDir string) (*Archive, error) {
-	files, err := readGLXFiles(archiveDir)
-	if err != nil {
-		return nil, err
-	}
-
-	s := glx.NewSerializer(nil)
-
-	g, dups, err := s.DeserializeMultiFileFromMap(files)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(dups) > 0 {
-		return nil, fmt.Errorf("duplicates: %s", dups)
-	}
-
-	return compile(g), nil
-}
-
-func compile(g *glx.GLXFile) *Archive {
+func NewArchive(g *glx.GLXFile) *Archive {
 	a := &Archive{
 		g:             g,
 		Assertions:    make(map[string]*Assertion),
@@ -95,50 +69,5 @@ func compile(g *glx.GLXFile) *Archive {
 	}
 
 	return a
-}
 
-func readGLXFiles(archiveDir string) (map[string][]byte, error) {
-	files := make(map[string][]byte)
-
-	err := filepath.WalkDir(archiveDir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		// Skip hidden files and dirs.
-		if strings.HasPrefix(d.Name(), ".") {
-			if d.IsDir() {
-				return fs.SkipDir
-			}
-			return nil
-		}
-
-		// Nothing to do for dirs except walk into them.
-		if d.IsDir() {
-			return nil
-		}
-
-		// Ignore files other than .glx files.
-		if filepath.Ext(d.Name()) != glx.FileExtGLX {
-			return nil
-		}
-
-		cleanPath := filepath.Clean(path)
-
-		data, err := os.ReadFile(cleanPath)
-		if err != nil {
-			return fmt.Errorf("reading %s: %w", cleanPath, err)
-		}
-
-		relPath, err := filepath.Rel(archiveDir, cleanPath)
-		if err != nil {
-			return fmt.Errorf("getting relative path: %w", err)
-		}
-
-		files[relPath] = data
-
-		return nil
-	})
-
-	return files, err
 }

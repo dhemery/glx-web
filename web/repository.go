@@ -1,4 +1,4 @@
-package archive
+package web
 
 import "github.com/genealogix/glx/go-glx"
 

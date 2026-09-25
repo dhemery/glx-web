@@ -5,8 +5,9 @@ import (
 	"html/template"
 	"path/filepath"
 
-	"github.com/dhemery/glx-web/archive"
-	"github.com/dhemery/glx-web/site"
+	"github.com/dhemery/glx-web/internal/load"
+	"github.com/dhemery/glx-web/internal/site"
+	"github.com/dhemery/glx-web/web"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/spf13/cobra"
 )
@@ -70,13 +71,13 @@ func runBuild(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	a, err := archive.Load(absArchiveDir)
+	g, err := load.GLXFile(absArchiveDir)
 	if err != nil {
 		return err
 	}
 
 	r := &site.Renderer{
-		Archive:   a,
+		Archive:   web.NewArchive(g),
 		OutputDir: absOutputDir,
 		Clean:     cleanOutput,
 		StaticDir: absStaticDir,

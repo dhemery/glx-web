@@ -6,12 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dhemery/glx-web/archive"
+	"github.com/dhemery/glx-web/web"
 	"github.com/genealogix/glx/go-glx"
 )
 
 type Renderer struct {
-	Archive   *archive.Archive
+	Archive   *web.Archive
 	OutputDir string
 	Clean     bool
 	StaticDir string

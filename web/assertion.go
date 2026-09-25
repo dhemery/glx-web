@@ -1,9 +1,9 @@
-package archive
+package web
 
 import "github.com/genealogix/glx/go-glx"
 
-type Relationship struct {
+type Assertion struct {
 	a  *Archive
-	g  *glx.Relationship
+	g  *glx.Assertion
 	ID string
 }
