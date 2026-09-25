@@ -13,57 +13,60 @@ import (
 var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build a website from a GLX archive",
+	Args:  cobra.NoArgs,
 	RunE:  runBuild,
 }
 
 var (
-	archivePath     = "."
-	overwriteOutput = false
-	includeLiving   = false
-	outputPath      = "./public"
-	staticPath      = "./static"
-	templatePath    = "./templates"
+	archiveDir    = "."
+	cleanOutput   = false
+	includeLiving = false
+	outputDir     = "./public"
+	staticDir     = "./static"
+	templateDir   = "./templates"
 )
 
 func init() {
-	buildCmd.Flags().StringVarP(&archivePath, "archive", "a", archivePath,
-		"Archive `dir`.")
-	buildCmd.Flags().BoolVarP(&overwriteOutput, "force", "f", overwriteOutput,
-		"Overwrite existing output directory.")
+	buildCmd.Flags().StringVarP(&archiveDir, "archive", "a", archiveDir,
+		"archive `dir`")
+	buildCmd.Flags().BoolVarP(&cleanOutput, "clean", "c", cleanOutput,
+		"remove existing output directory before building")
 	buildCmd.Flags().BoolVarP(&includeLiving, "living", "l", includeLiving,
-		"Include living people.")
-	buildCmd.Flags().StringVarP(&outputPath, "output", "o", outputPath,
-		"Output `dir`.")
-	buildCmd.Flags().StringVarP(&staticPath, "static", "s", staticPath,
-		"Static `dir` of files to copy verbatim into the output.")
-	buildCmd.Flags().StringVarP(&templatePath, "templates", "t", templatePath,
-		"Template `dir`.")
+		"include living people")
+	buildCmd.Flags().StringVarP(&outputDir, "output", "o", outputDir,
+		"output `dir`")
+	buildCmd.Flags().StringVarP(&staticDir, "static", "s", staticDir,
+		"static `dir` of files to copy into the output dir")
+	buildCmd.Flags().StringVarP(&templateDir, "templates", "t", templateDir,
+		"template `dir`")
 
 	rootCmd.AddCommand(buildCmd)
 }
 
-func runBuild(c *cobra.Command, args []string) error {
-	archivePath, err := c.Flags().GetString("archive")
+func runBuild(_ *cobra.Command, _ []string) error {
+	templates, err := loadTemplates(templateDir)
 	if err != nil {
 		return err
 	}
 
-	wa, err := archive.Load(archivePath)
+	a, err := archive.Load(archiveDir)
 	if err != nil {
 		return err
 	}
 
-	templates, err := loadTemplates()
-	if err != nil {
-		return err
+	r := &site.Renderer{
+		Archive:   a,
+		OutputDir: outputDir,
+		Clean:     cleanOutput,
+		StaticDir: staticDir,
+		Templates: templates,
+		Err:       err,
 	}
-
-	return site.Render(wa, templates)
+	return r.Render()
 }
 
-func loadTemplates() (map[glx.EntityType]*template.Template, error) {
-	const tmplDir = "templates"
-	baseTemplate, err := template.ParseFiles(filepath.Join(tmplDir, "base.gotmpl"))
+func loadTemplates(templateDir string) (map[glx.EntityType]*template.Template, error) {
+	baseTemplate, err := template.ParseFiles(filepath.Join(templateDir, "base.gotmpl"))
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +74,7 @@ func loadTemplates() (map[glx.EntityType]*template.Template, error) {
 	entityTemplates := map[glx.EntityType]*template.Template{}
 
 	for _, t := range glx.AllEntityTypes {
-		glob := filepath.Join(tmplDir, t.Plural(), "*.gotmpl")
+		glob := filepath.Join(templateDir, t.Plural(), "*.gotmpl")
 
 		et, err := baseTemplate.Clone()
 		if err != nil {

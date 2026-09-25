@@ -10,52 +10,52 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-type renderer struct {
-	siteDir   string
-	templates map[glx.EntityType]*template.Template
-	err       error
+type Renderer struct {
+	Archive   *archive.Archive
+	OutputDir string
+	Clean     bool
+	StaticDir string
+	Templates map[glx.EntityType]*template.Template
+	Err       error
 }
 
-func Render(a *archive.Archive, templates map[glx.EntityType]*template.Template) error {
-	siteDir := "public"
-	if err := os.Mkdir(siteDir, 0755); err != nil {
+func (r *Renderer) Render() error {
+	if err := os.Mkdir(r.OutputDir, 0755); err != nil {
 		return err
 	}
 
-	r := renderer{siteDir: siteDir, templates: templates}
+	r.renderEntities(glx.EntityTypeAssertions, r.Archive.Assertions)
+	r.renderEntities(glx.EntityTypeCitations, r.Archive.Citations)
+	r.renderEntities(glx.EntityTypeEvents, r.Archive.Events)
+	r.renderEntities(glx.EntityTypeMedia, r.Archive.Media)
+	r.renderEntities(glx.EntityTypePersons, r.Archive.Persons)
+	r.renderEntities(glx.EntityTypePlaces, r.Archive.Places)
+	r.renderEntities(glx.EntityTypeRelationships, r.Archive.Relationships)
+	r.renderEntities(glx.EntityTypeRepositories, r.Archive.Repositories)
+	r.renderEntities(glx.EntityTypeSources, r.Archive.Sources)
 
-	r.renderEntities(glx.EntityTypeAssertions, a.Assertions)
-	r.renderEntities(glx.EntityTypeCitations, a.Citations)
-	r.renderEntities(glx.EntityTypeEvents, a.Events)
-	r.renderEntities(glx.EntityTypeMedia, a.Media)
-	r.renderEntities(glx.EntityTypePersons, a.Persons)
-	r.renderEntities(glx.EntityTypePlaces, a.Places)
-	r.renderEntities(glx.EntityTypeRelationships, a.Relationships)
-	r.renderEntities(glx.EntityTypeRepositories, a.Repositories)
-	r.renderEntities(glx.EntityTypeSources, a.Sources)
-
-	return r.err
+	return r.Err
 }
 
-func (r *renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T) {
-	if r.err != nil {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T) {
+	if r.Err != nil {
 		return
 	}
-	typeDir := filepath.Join(r.siteDir, t.Plural())
+	typeDir := filepath.Join(r.OutputDir, t.Plural())
 	if err := os.Mkdir(typeDir, 0755); err != nil {
-		r.err = err
+		r.Err = err
 		return
 	}
 
 	for id, e := range entities {
 		entityDir := filepath.Join(typeDir, id)
 		if err := os.Mkdir(entityDir, 0755); err != nil {
-			r.err = err
+			r.Err = err
 			return
 		}
 
-		if err := render(entityDir, e, r.templates[t]); err != nil {
-			r.err = err
+		if err := render(entityDir, e, r.Templates[t]); err != nil {
+			r.Err = err
 			return
 		}
 	}
