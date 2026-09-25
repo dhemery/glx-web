@@ -7,3 +7,11 @@ type Source struct {
 	g  *glx.Source
 	ID string
 }
+
+func newSource(id string, gs *glx.Source, a *Archive) *Source {
+	return &Source{
+		a:  a,
+		g:  gs,
+		ID: id,
+	}
+}

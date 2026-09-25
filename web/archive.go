@@ -36,7 +36,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, ga := range g.Assertions {
-		a.Assertions[id] = &Assertion{a: a, g: ga, ID: id}
+		a.Assertions[id] = newAssertion(id, ga, a)
 	}
 
 	for id, gc := range g.Citations {
@@ -48,7 +48,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, gm := range g.Media {
-		a.Media[id] = &Media{a: a, g: gm, ID: id}
+		a.Media[id] = newMedia(id, gm, a)
 	}
 
 	for id, gp := range g.Persons {
@@ -56,11 +56,11 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, gp := range g.Places {
-		a.Places[id] = &Place{a: a, g: gp, ID: id}
+		a.Places[id] = newPlace(id, gp, a)
 	}
 
 	for id, gr := range g.Relationships {
-		a.Relationships[id] = &Relationship{a: a, g: gr, ID: id}
+		a.Relationships[id] = newRelationship(id, gr, a)
 	}
 
 	for id, gr := range g.Repositories {
@@ -68,9 +68,8 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, gs := range g.Sources {
-		a.Sources[id] = &Source{a: a, g: gs, ID: id}
+		a.Sources[id] = newSource(id, gs, a)
 	}
 
 	return a
-
 }

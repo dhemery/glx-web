@@ -6,6 +6,14 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
+func newPlace(id string, gp *glx.Place, a *Archive) *Place {
+	return &Place{
+		a:  a,
+		g:  gp,
+		ID: id,
+	}
+}
+
 type Place struct {
 	a  *Archive
 	g  *glx.Place
