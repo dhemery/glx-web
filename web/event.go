@@ -32,10 +32,6 @@ func (e *Event) Notes() glx.NoteList {
 	return e.g.Notes
 }
 
-func (e *Event) Path() string {
-	return path.Join(glx.EntityTypeEvents.Plural(), e.ID)
-}
-
 func (e *Event) Place() *Place {
 	return e.a.Places[e.g.PlaceID]
 }
@@ -49,4 +45,16 @@ func (e *Event) Properties() map[string]Property {
 
 func (e *Event) Title() string {
 	return e.g.Title
+}
+
+func (e *Event) EntityType() glx.EntityType {
+	return glx.EntityTypeEvents
+}
+
+func (e *Event) Slug() string {
+	return path.Join(e.EntityType().Plural(), e.ID)
+}
+
+func (e *Event) String() string {
+	return e.Title()
 }

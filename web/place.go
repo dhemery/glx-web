@@ -8,9 +8,10 @@ import (
 
 func newPlace(id string, gp *glx.Place, a *Archive) *Place {
 	return &Place{
-		a:  a,
-		g:  gp,
-		ID: id,
+		a:    a,
+		g:    gp,
+		ID:   id,
+		Type: VocabularyValue{Value: gp.Type, Definition: a.g.PlaceTypes[gp.Type]},
 	}
 }
 
@@ -18,6 +19,7 @@ type Place struct {
 	a          *Archive
 	g          *glx.Place
 	ID         string
+	Type       VocabularyValue
 	properties map[string]Property
 }
 
@@ -56,10 +58,14 @@ func (p *Place) Properties() map[string]Property {
 	return p.properties
 }
 
-func (p *Place) String() string {
-	return p.Name()
+func (p *Place) EntityType() glx.EntityType {
+	return glx.EntityTypePlaces
 }
 
-func (p *Place) Type() string {
-	return p.g.Type
+func (p *Place) Slug() string {
+	return path.Join(p.EntityType().Plural(), p.ID)
+}
+
+func (p *Place) String() string {
+	return p.Name()
 }

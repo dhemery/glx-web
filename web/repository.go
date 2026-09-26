@@ -1,6 +1,10 @@
 package web
 
-import "github.com/genealogix/glx/go-glx"
+import (
+	"path"
+
+	"github.com/genealogix/glx/go-glx"
+)
 
 func newRepository(id string, gr *glx.Repository, a *Archive) *Repository {
 	return &Repository{
@@ -57,4 +61,16 @@ func (r Repository) State() string {
 
 func (r Repository) Website() string {
 	return r.g.Website
+}
+
+func (r *Repository) EntityType() glx.EntityType {
+	return glx.EntityTypeRepositories
+}
+
+func (r *Repository) Slug() string {
+	return path.Join(r.EntityType().Plural(), r.ID)
+}
+
+func (r *Repository) String() string {
+	return r.Name()
 }

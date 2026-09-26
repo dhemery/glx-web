@@ -1,6 +1,10 @@
 package web
 
-import "github.com/genealogix/glx/go-glx"
+import (
+	"path"
+
+	"github.com/genealogix/glx/go-glx"
+)
 
 // Person represents a GLX person entity.
 type Person struct {
@@ -34,6 +38,14 @@ func (p *Person) Properties() map[string]Property {
 		p.properties = newProperties(p.g.Properties, p.a.g.PersonProperties, p.a)
 	}
 	return p.properties
+}
+
+func (p *Person) EntityType() glx.EntityType {
+	return glx.EntityTypePersons
+}
+
+func (p *Person) Slug() string {
+	return path.Join(p.EntityType().Plural(), p.ID)
 }
 
 // String returns the display name of p.

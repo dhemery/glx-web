@@ -1,6 +1,8 @@
 package web
 
 import (
+	"path"
+
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -30,10 +32,6 @@ func (s *Source) Date() glxdate.Date {
 	return newDate(s.g.Date.String())
 }
 
-func (s *Source) String() string {
-	return s.Title()
-}
-
 func (s *Source) Language() string {
 	return s.g.Language
 }
@@ -59,4 +57,16 @@ func (s *Source) Repository() *Repository {
 
 func (s *Source) Title() string {
 	return s.g.Title
+}
+
+func (s *Source) EntityType() glx.EntityType {
+	return glx.EntityTypeSources
+}
+
+func (s *Source) Slug() string {
+	return path.Join(s.EntityType().Plural(), s.ID)
+}
+
+func (s *Source) String() string {
+	return s.Title()
 }

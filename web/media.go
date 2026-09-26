@@ -1,6 +1,8 @@
 package web
 
 import (
+	"path"
+
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -8,8 +10,8 @@ import (
 type Media struct {
 	a          *Archive
 	g          *glx.Media
-	ID         string
 	Type       VocabularyValue
+	ID         string
 	properties map[string]Property
 }
 
@@ -49,14 +51,22 @@ func (m *Media) Source() *Source {
 	return m.a.Sources[m.g.Source]
 }
 
-func (m *Media) String() string {
-	return m.Title()
-}
-
 func (m *Media) Title() string {
 	return m.g.Title
 }
 
 func (m *Media) URI() string {
 	return m.g.URI
+}
+
+func (m *Media) EntityType() glx.EntityType {
+	return glx.EntityTypeMedia
+}
+
+func (m *Media) Slug() string {
+	return path.Join(m.EntityType().Plural(), m.ID)
+}
+
+func (m *Media) String() string {
+	return m.Title()
 }

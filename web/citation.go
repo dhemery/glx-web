@@ -1,6 +1,7 @@
 package web
 
 import (
+	"path"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -44,6 +45,14 @@ func (c *Citation) Repository() *Repository {
 
 func (c *Citation) Source() *Source {
 	return c.a.Sources[c.g.SourceID]
+}
+
+func (c *Citation) EntityType() glx.EntityType {
+	return glx.EntityTypeCitations
+}
+
+func (c *Citation) Slug() string {
+	return path.Join(c.EntityType().Plural(), c.ID)
 }
 
 // String returns a string representation of c formed by concatenating its
