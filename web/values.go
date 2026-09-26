@@ -28,7 +28,7 @@ func (s StringValue) String() string {
 
 // VocabularyValue represents a value from a GLX vocabulary.
 type VocabularyValue struct {
-	Definition *glx.VocabularyEntry
+	Definition *glx.VocabularyEntry // The GLX vocabulary's definition of the value.
 	Value      string
 }
 

@@ -25,8 +25,8 @@ func (p Property) Value() PropertyValue {
 }
 
 // PropertyValue holds a single value of a property of an entity. Each
-// PropertyValue is represented with a date and fields even if the GLX property
-// does not have them.
+// PropertyValue has a date and fields even if the property's definition does
+// not specify them.
 type PropertyValue struct {
 	Value  fmt.Stringer
 	Date   glxdate.Date // The date when the value applied.
@@ -84,8 +84,8 @@ func newProperty(in any, def *glx.PropertyDefinition, a *Archive) Property {
 }
 
 func asPropertyMap(in any) map[string]any {
-	if alreadyAMap, ok := in.(map[string]any); ok {
-		return alreadyAMap
+	if inMap, ok := in.(map[string]any); ok {
+		return inMap
 	}
 
 	return map[string]any{"value": in}
