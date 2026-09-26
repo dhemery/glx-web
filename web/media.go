@@ -35,7 +35,7 @@ func (m *Media) Notes() glx.NoteList {
 
 func (m *Media) Properties() map[string]Property {
 	if m.properties == nil {
-		m.properties = newProperties(m.g.Properties, m.a.g.SourceProperties, m.a)
+		m.properties = newProperties(m.g.Properties, m.a.g.MediaProperties, m.a)
 	}
 	return m.properties
 }
