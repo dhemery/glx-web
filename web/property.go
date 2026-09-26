@@ -5,15 +5,14 @@ import (
 	"strconv"
 
 	"github.com/genealogix/glx/go-glx"
+	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 // Property holds the values of a property of an entity. Each Property holds a
 // list of values even if the GLX entity has only a single value.
 type Property struct {
-	// The GLX definition of the property.
-	Definition *glx.PropertyDefinition
-	// The values of the property.
-	Values []PropertyValue
+	Definition *glx.PropertyDefinition // The GLX definition of the property.
+	Values     []PropertyValue
 }
 
 // String returns the string representation of the first value of p.
@@ -30,11 +29,8 @@ func (p Property) Value() PropertyValue {
 // PropertyValue is represented with fields and a date even if the GLX property
 // does not have them.
 type PropertyValue struct {
-	// Value is the value of the property.
-	Value fmt.Stringer
-	// Date is the date of the property.
-	Date Date
-	// Fields holds the property's fields.
+	Value  fmt.Stringer
+	Date   glxdate.Date // The date when the value applied.
 	Fields map[string]PropertyField
 }
 
@@ -51,22 +47,13 @@ func (v PropertyValue) String() string {
 
 // PropertyField represents a field in a property of an entity.
 type PropertyField struct {
-	Definition *glx.FieldDefinition
+	Definition *glx.FieldDefinition // The GLX definition of the field.
 	Value      fmt.Stringer
 }
 
 // String returns the string representation of the value of f.
 func (f PropertyField) String() string {
 	return f.Value.String()
-}
-
-// Date represents a date value of a property or the date of a value of a
-// temporal property.
-type Date string
-
-// String returns the string representation of d.
-func (d Date) String() string {
-	return string(d)
 }
 
 // IntValue reprensents an integer value of a property or field.
@@ -131,7 +118,7 @@ func asPropertyMap(in any) map[string]any {
 
 func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Archive) PropertyValue {
 	var out PropertyValue
-	out.Date = newDate(in["date"])
+	out.Date = newDate(fmt.Sprint(in["date"]))
 	out.Fields = newPropertyFields(in["fields"], def)
 
 	inValue := in["value"]
@@ -187,7 +174,7 @@ func newPrimitiveValue(in any, valueType string) fmt.Stringer {
 	switch typedIn := in.(type) {
 	case string:
 		if valueType == "date" {
-			return Date(typedIn)
+			return newDate(typedIn)
 		}
 		return StringValue(typedIn)
 	case int:
@@ -199,6 +186,8 @@ func newPrimitiveValue(in any, valueType string) fmt.Stringer {
 	}
 }
 
-func newDate(in any) Date {
-	return Date(fmt.Sprint(in))
+// newDate parses the input as a [glxdate.Date], ignoring errors.
+func newDate(s string) glxdate.Date {
+	date, _ := glxdate.Parse(s)
+	return date
 }
