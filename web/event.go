@@ -4,6 +4,7 @@ import (
 	"path"
 
 	"github.com/genealogix/glx/go-glx"
+	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 type Event struct {
@@ -21,8 +22,8 @@ func newEvent(id string, ge *glx.Event, a *Archive) *Event {
 	}
 }
 
-func (e *Event) Date() glx.DateString {
-	return e.g.Date
+func (e *Event) Date() glxdate.Date {
+	return newDate(e.g.Date.String())
 }
 
 func (e *Event) Notes() glx.NoteList {

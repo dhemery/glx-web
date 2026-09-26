@@ -1,6 +1,9 @@
 package web
 
-import "github.com/genealogix/glx/go-glx"
+import (
+	"github.com/genealogix/glx/go-glx"
+	"github.com/genealogix/glx/go-glx/glxdate"
+)
 
 type Source struct {
 	a          *Archive
@@ -21,8 +24,8 @@ func (s *Source) Authors() []string {
 	return s.g.Authors
 }
 
-func (s *Source) Date() glx.DateString {
-	return s.g.Date
+func (s *Source) Date() glxdate.Date {
+	return newDate(s.g.Date.String())
 }
 
 func (s *Source) String() string {

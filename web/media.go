@@ -1,6 +1,9 @@
 package web
 
-import "github.com/genealogix/glx/go-glx"
+import (
+	"github.com/genealogix/glx/go-glx"
+	"github.com/genealogix/glx/go-glx/glxdate"
+)
 
 type Media struct {
 	a          *Archive
@@ -17,8 +20,8 @@ func newMedia(id string, gm *glx.Media, a *Archive) *Media {
 	}
 }
 
-func (m *Media) Date() glx.DateString {
-	return m.g.Date
+func (m *Media) Date() glxdate.Date {
+	return newDate(m.g.Date.String())
 }
 
 func (m *Media) Hash() string {
