@@ -55,6 +55,11 @@ type PropertyField struct {
 	Value      fmt.Stringer
 }
 
+// String returns the string representation of the value of f.
+func (f PropertyField) String() string {
+	return f.Value.String()
+}
+
 // Date represents a date value of a property or the date of a value of a
 // temporal property.
 type Date string
@@ -127,7 +132,7 @@ func asPropertyMap(in any) map[string]any {
 func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Archive) PropertyValue {
 	var out PropertyValue
 	out.Date = newDate(in["date"])
-	out.Fields = newPropertyFields(in["fields"], def, a)
+	out.Fields = newPropertyFields(in["fields"], def)
 
 	inValue := in["value"]
 	switch {
@@ -144,8 +149,21 @@ func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Archive
 	return out
 }
 
-func newPropertyFields(in any, def *glx.PropertyDefinition, a *Archive) map[string]PropertyField {
-	return nil
+func newPropertyFields(in any, def *glx.PropertyDefinition) map[string]PropertyField {
+	var out map[string]PropertyField
+	if in == nil {
+		return out
+	}
+
+	fieldMap, ok := in.(map[string]any)
+	if !ok {
+		panic(fmt.Sprintf("Fields has unexpected type %T", in))
+	}
+
+	for name, value := range fieldMap {
+		fieldMap[name] = newPrimitiveValue(value, def.Fields[name].ValueType)
+	}
+	return out
 }
 
 func newReferenceValue(id string, entityType string, a *Archive) fmt.Stringer {
@@ -156,8 +174,9 @@ func newReferenceValue(id string, entityType string, a *Archive) fmt.Stringer {
 		return a.Persons[id]
 	case "places":
 		return a.Places[id]
+	default:
+		panic("newReferenceValue unimplemented entity type: " + entityType)
 	}
-	panic("newReferenceValue unimplemented entity type: " + entityType)
 }
 
 func newVocabularyValue(key string, vocabularyType string, a *Archive) fmt.Stringer {
@@ -175,8 +194,9 @@ func newPrimitiveValue(in any, valueType string) fmt.Stringer {
 		return IntValue(typedIn)
 	case bool:
 		return BoolValue(typedIn)
+	default:
+		panic(fmt.Sprintf("newPrimitiveValue unknown type %T", in))
 	}
-	return nil
 }
 
 func newDate(in any) Date {
