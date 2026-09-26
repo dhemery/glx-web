@@ -56,7 +56,18 @@ func (f PropertyField) String() string {
 	return f.Value.String()
 }
 
-// IntValue reprensents an integer value of a property or field.
+// VocabularyValue represents a value from a GLX vocabulary.
+type VocabularyValue struct {
+	Definition *glx.VocabularyEntry
+	Value      string
+}
+
+// String returns v's label.
+func (v VocabularyValue) String() string {
+	return v.Definition.Label
+}
+
+// IntValue reprensents an integer value.
 type IntValue int
 
 // String returns the string representation of i.
@@ -64,7 +75,7 @@ func (i IntValue) String() string {
 	return strconv.Itoa((int(i)))
 }
 
-// BoolValue represents a boolean value of a property or field.
+// BoolValue represents a boolean value.
 type BoolValue bool
 
 // String returns the string representation of b.
@@ -72,7 +83,7 @@ func (b BoolValue) String() string {
 	return strconv.FormatBool(bool(b))
 }
 
-// StringValue represents a string value of a property or field.
+// StringValue represents a string value.
 type StringValue string
 
 // String returns the string value of s.
@@ -166,8 +177,9 @@ func newReferenceValue(id string, entityType string, a *Archive) fmt.Stringer {
 	}
 }
 
-func newVocabularyValue(key string, vocabularyType string, a *Archive) fmt.Stringer {
-	return StringValue(key)
+func newVocabularyValue(key string, vocabularyType string, a *Archive) VocabularyValue {
+	defs := a.vocabulary(vocabularyType)
+	return VocabularyValue{Value: key, Definition: defs[key]}
 }
 
 func newPrimitiveValue(in any, valueType string) fmt.Stringer {

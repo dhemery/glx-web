@@ -74,6 +74,48 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	return a
 }
 
+func (a *Archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
+	g := a.g
+	switch name {
+	case glx.VocabRelationshipTypes:
+		return g.RelationshipTypes
+	case glx.VocabEventTypes:
+		return g.EventTypes
+	case glx.VocabPlaceTypes:
+		return g.PlaceTypes
+	case glx.VocabRepositoryTypes:
+		return g.RepositoryTypes
+	case glx.VocabParticipantRoles:
+		return g.ParticipantRoles
+	case glx.VocabMediaTypes:
+		return g.MediaTypes
+	case glx.VocabConfidenceLevels:
+		return g.ConfidenceLevels
+	case glx.VocabSourceTypes:
+		return g.SourceTypes
+	case glx.VocabSexTypes:
+		return g.SexTypes
+	case glx.VocabGenderTypes:
+		return g.GenderTypes
+	case glx.VocabSearchResultTypes:
+		return g.SearchResultTypes
+	case glx.VocabResearchLogStatusTypes:
+		return g.ResearchLogStatusTypes
+	case glx.VocabStudyTypes:
+		return g.StudyTypes
+	case glx.VocabStudyStatuses:
+		return g.StudyStatuses
+	case glx.VocabLegalStatuses:
+		return g.LegalStatuses
+	case glx.VocabSourceNatures:
+		return g.SourceNatures
+	case glx.VocabInformationTypes:
+		return g.InformationTypes
+	default:
+		return make(map[string]*glx.VocabularyEntry)
+	}
+}
+
 func (a *Archive) mediaWithIDs(ids []string) []*Media {
 	var media []*Media
 	for _, mediaID := range ids {
