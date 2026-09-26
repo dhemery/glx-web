@@ -73,3 +73,11 @@ func NewArchive(g *glx.GLXFile) *Archive {
 
 	return a
 }
+
+func (a *Archive) mediaWithIDs(ids []string) []*Media {
+	var media []*Media
+	for _, mediaID := range ids {
+		media = append(media, a.Media[mediaID])
+	}
+	return media
+}
