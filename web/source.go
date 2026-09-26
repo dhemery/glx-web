@@ -9,14 +9,16 @@ type Source struct {
 	a          *Archive
 	g          *glx.Source
 	ID         string
+	Type       VocabularyValue
 	properties map[string]Property
 }
 
 func newSource(id string, gs *glx.Source, a *Archive) *Source {
 	return &Source{
-		a:  a,
-		g:  gs,
-		ID: id,
+		a:    a,
+		g:    gs,
+		ID:   id,
+		Type: VocabularyValue{Value: gs.Type, Definition: a.g.SourceTypes[gs.Type]},
 	}
 }
 
@@ -57,9 +59,4 @@ func (s *Source) Repository() *Repository {
 
 func (s *Source) Title() string {
 	return s.g.Title
-}
-
-func (s *Source) Type() string { // TODO: Type -> VocabularyValue
-	return s.g.Type
-
 }

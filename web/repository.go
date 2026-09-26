@@ -4,9 +4,10 @@ import "github.com/genealogix/glx/go-glx"
 
 func newRepository(id string, gr *glx.Repository, a *Archive) *Repository {
 	return &Repository{
-		a:  a,
-		g:  gr,
-		ID: id,
+		a:    a,
+		g:    gr,
+		ID:   id,
+		Type: VocabularyValue{Value: gr.Type, Definition: a.g.RepositoryTypes[gr.Type]},
 	}
 }
 
@@ -15,6 +16,7 @@ type Repository struct {
 	a          *Archive
 	g          *glx.Repository
 	ID         string
+	Type       VocabularyValue
 	properties map[string]Property
 }
 
@@ -51,10 +53,6 @@ func (r Repository) Properties() map[string]Property {
 
 func (r Repository) State() string {
 	return r.g.State
-}
-
-func (r Repository) Type() string { // TODO: Type -> VocabularyValue
-	return r.g.Type
 }
 
 func (r Repository) Website() string {

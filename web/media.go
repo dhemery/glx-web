@@ -9,14 +9,16 @@ type Media struct {
 	a          *Archive
 	g          *glx.Media
 	ID         string
+	Type       VocabularyValue
 	properties map[string]Property
 }
 
 func newMedia(id string, gm *glx.Media, a *Archive) *Media {
 	return &Media{
-		a:  a,
-		g:  gm,
-		ID: id,
+		a:    a,
+		g:    gm,
+		ID:   id,
+		Type: VocabularyValue{Value: gm.Type, Definition: a.g.MediaTypes[gm.Type]},
 	}
 }
 
@@ -53,10 +55,6 @@ func (m *Media) String() string {
 
 func (m *Media) Title() string {
 	return m.g.Title
-}
-
-func (m *Media) Type() string { // TODO: Type -> VocabularyValue
-	return m.g.Type
 }
 
 func (m *Media) URI() string {

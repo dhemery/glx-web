@@ -11,14 +11,16 @@ type Event struct {
 	a          *Archive
 	g          *glx.Event
 	ID         string
+	Type       VocabularyValue
 	properties map[string]Property
 }
 
 func newEvent(id string, ge *glx.Event, a *Archive) *Event {
 	return &Event{
-		a:  a,
-		g:  ge,
-		ID: id,
+		a:    a,
+		g:    ge,
+		ID:   id,
+		Type: VocabularyValue{Value: ge.Type, Definition: a.g.EventTypes[ge.Type]},
 	}
 }
 
@@ -47,8 +49,4 @@ func (e *Event) Properties() map[string]Property {
 
 func (e *Event) Title() string {
 	return e.g.Title
-}
-
-func (e *Event) Type() string { // TODO: Type -> VocabularyValue
-	return e.g.Type
 }
