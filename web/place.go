@@ -15,9 +15,10 @@ func newPlace(id string, gp *glx.Place, a *Archive) *Place {
 }
 
 type Place struct {
-	a  *Archive
-	g  *glx.Place
-	ID string
+	a          *Archive
+	g          *glx.Place
+	ID         string
+	properties map[string]Property
 }
 
 func (p *Place) FullName() string {
@@ -46,6 +47,13 @@ func (p *Place) Parent() *Place {
 
 func (p *Place) Path() string {
 	return path.Join(glx.EntityTypePlaces.Plural(), p.ID)
+}
+
+func (p *Place) Properties() map[string]Property {
+	if p.properties == nil {
+		p.properties = newProperties(p.g.Properties, p.a.g.PlaceProperties, p.a)
+	}
+	return p.properties
 }
 
 func (p *Place) String() string {
