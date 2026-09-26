@@ -5,6 +5,8 @@
 package web
 
 import (
+	"fmt"
+
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -74,6 +76,27 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	return a
 }
 
+func (a *Archive) entity(id string, entityType string) fmt.Stringer {
+	switch entityType {
+	case "citations":
+		return a.Citations[id]
+	case "persons":
+		return a.Persons[id]
+	case "places":
+		return a.Places[id]
+	default:
+		panic("newReferenceValue unimplemented entity type: " + entityType)
+	}
+}
+
+func (a *Archive) mediaWithIDs(ids []string) []*Media {
+	var media []*Media
+	for _, mediaID := range ids {
+		media = append(media, a.Media[mediaID])
+	}
+	return media
+}
+
 func (a *Archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
 	g := a.g
 	switch name {
@@ -114,12 +137,4 @@ func (a *Archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
 	default:
 		return make(map[string]*glx.VocabularyEntry)
 	}
-}
-
-func (a *Archive) mediaWithIDs(ids []string) []*Media {
-	var media []*Media
-	for _, mediaID := range ids {
-		media = append(media, a.Media[mediaID])
-	}
-	return media
 }

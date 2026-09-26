@@ -103,10 +103,10 @@ func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Archive
 		propertyValue.Value = newPrimitiveValue(inValue, def.ValueType)
 	case def.ReferenceType != "":
 		id := inValue.(string)
-		propertyValue.Value = newReferenceValue(id, def.ReferenceType, a)
+		propertyValue.Value = a.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
 		key := inValue.(string)
-		propertyValue.Value = newVocabularyValue(key, def.VocabularyType, a)
+		propertyValue.Value = newVocabularyValue(key, a.vocabulary(def.VocabularyType))
 	}
 
 	return propertyValue

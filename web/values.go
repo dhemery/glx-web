@@ -59,20 +59,6 @@ func newPrimitiveValue(in any, valueType string) fmt.Stringer {
 	}
 }
 
-func newReferenceValue(referentID string, referentType string, a *Archive) fmt.Stringer {
-	switch referentType {
-	case "citations":
-		return a.Citations[referentID]
-	case "persons":
-		return a.Persons[referentID]
-	case "places":
-		return a.Places[referentID]
-	default:
-		panic("newReferenceValue unimplemented entity type: " + referentType)
-	}
-}
-
-func newVocabularyValue(key string, vocabularyType string, a *Archive) VocabularyValue {
-	defs := a.vocabulary(vocabularyType)
-	return VocabularyValue{Value: key, Definition: defs[key]}
+func newVocabularyValue(key string, vocabulary map[string]*glx.VocabularyEntry) VocabularyValue {
+	return VocabularyValue{Value: key, Definition: vocabulary[key]}
 }

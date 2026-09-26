@@ -20,7 +20,7 @@ func newEvent(id string, ge *glx.Event, a *Archive) *Event {
 		a:    a,
 		g:    ge,
 		ID:   id,
-		Type: VocabularyValue{Value: ge.Type, Definition: a.g.EventTypes[ge.Type]},
+		Type: newVocabularyValue(ge.Type, a.g.EventTypes),
 	}
 }
 
