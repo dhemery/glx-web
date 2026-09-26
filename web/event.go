@@ -21,8 +21,8 @@ func newEvent(id string, ge *glx.Event, a *Archive) *Event {
 	}
 }
 
-func (e *Event) Date() string {
-	return string(e.g.Date)
+func (e *Event) Date() glx.DateString {
+	return e.g.Date
 }
 
 func (e *Event) Notes() glx.NoteList {
@@ -33,20 +33,21 @@ func (e *Event) Path() string {
 	return path.Join(glx.EntityTypeEvents.Plural(), e.ID)
 }
 
+func (e *Event) Place() *Place {
+	return e.a.Places[e.g.PlaceID]
+}
+
 func (e *Event) Properties() map[string]Property {
 	if e.properties == nil {
 		e.properties = newProperties(e.g.Properties, e.a.g.EventProperties, e.a)
 	}
 	return e.properties
 }
-func (e *Event) Place() *Place {
-	return e.a.Places[e.g.PlaceID]
-}
 
 func (e *Event) Title() string {
 	return e.g.Title
 }
 
-func (e *Event) Type() string {
+func (e *Event) Type() string { // TODO: Type -> VocabularyValue
 	return e.g.Type
 }

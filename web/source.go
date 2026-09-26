@@ -56,4 +56,7 @@ func (s *Source) Title() string {
 	return s.g.Title
 }
 
-// TODO: Type -> Vocabulary Value
+func (s *Source) Type() string { // TODO: Type -> VocabularyValue
+	return s.g.Type
+
+}
