@@ -1,7 +1,6 @@
 package web
 
 import (
-	"path"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -9,53 +8,37 @@ import (
 
 // Citation represents a GLX citation entity.
 type Citation struct {
+	entity
 	*glx.Citation
-	archive    *Archive
-	EntityType glx.EntityType
-	ID         string
-	Slug       string
-	properties map[string]Property
+	Media      []*Media
+	Properties map[string]Property
+	Repository *Repository
+	Source     *Source
 }
 
-func newCitation(id string, gc *glx.Citation, archive *Archive) *Citation {
+func newCitation(id string, gc *glx.Citation) *Citation {
 	entityType := glx.EntityTypeCitations
 	return &Citation{
-		Citation:   gc,
-		archive:    archive,
 		EntityType: entityType,
 		ID:         id,
-		Slug:       path.Join(entityType.Plural(), id),
+		Citation:   gc,
 	}
 }
 
-func (c *Citation) Media() []*Media {
-	return c.archive.mediaWithIDs(c.Citation.Media)
-}
+func (c *Citation) compile(archive *Archive) {
+	c.Media = archive.mediaWithIDs(c.Citation.Media)
+	c.Properties = newProperties(c.Citation.Properties, archive.g.CitationProperties, archive)
+	c.Repository = archive.Repositories[c.RepositoryID]
+	c.Source = archive.Sources[c.SourceID]
 
-// Properties returns a map of c's properties indexed by name.
-func (c *Citation) Properties() map[string]Property {
-	if c.properties == nil {
-		c.properties = newProperties(c.Citation.Properties, c.archive.g.CitationProperties, c.archive)
-	}
-	return c.properties
-}
-
-func (c *Citation) Repository() *Repository {
-	return c.archive.Repositories[c.RepositoryID]
-}
-
-func (c *Citation) Source() *Source {
-	return c.archive.Sources[c.SourceID]
 }
 
 // String returns a string representation of c formed by concatenating its
-// locator (if it has one) onto its source's Title.
+// locator (if it has one) onto its source's Title (if it has one).
 func (c *Citation) String() string {
-	parts := []string{
-		c.Source().Title,
-	}
+	parts := []string{c.Source.Title}
 
-	if locator, ok := c.Properties()["locator"]; ok {
+	if locator, ok := c.Properties["locator"]; ok {
 		parts = append(parts, locator.String())
 	}
 

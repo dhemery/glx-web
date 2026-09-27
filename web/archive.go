@@ -16,13 +16,6 @@ type entity struct {
 	ID         string
 }
 
-func newEntity(id string, entityType glx.EntityType, archive *Archive) entity {
-	return entity{
-		EntityType: entityType,
-		ID:         id,
-	}
-}
-
 func (e entity) Slug() string {
 	return path.Join(e.EntityType.Plural(), e.ID)
 }
@@ -59,7 +52,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, gc := range g.Citations {
-		a.Citations[id] = newCitation(id, gc, a)
+		a.Citations[id] = newCitation(id, gc)
 	}
 
 	for id, ge := range g.Events {
@@ -91,6 +84,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	a.compile(a.Assertions)
+	a.compile(a.Citations)
 	a.compile(a.Events)
 
 	return a
