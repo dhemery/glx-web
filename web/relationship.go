@@ -1,48 +1,35 @@
 package web
 
 import (
-	"path"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
 type Relationship struct {
+	entity
 	*glx.Relationship
-	archive    *Archive
-	EntityType glx.EntityType
-	ID         string
-	Slug       string
+	EndEvent   *Event
+	Properties map[string]Property
+	StartEvent *Event
 	Type       VocabularyValue
-	properties map[string]Property
 	// TODO: Participants
 }
 
-func newRelationship(id string, gr *glx.Relationship, archive *Archive) *Relationship {
+func newRelationship(id string, gr *glx.Relationship) *Relationship {
 	entityType := glx.EntityTypeRelationships
 	return &Relationship{
 		Relationship: gr,
-		archive:      archive,
 		EntityType:   entityType,
 		ID:           id,
-		Slug:         path.Join(entityType.Plural(), id),
-		Type:         newVocabularyValue(gr.Type, archive.g.RelationshipTypes),
 	}
 }
 
-func (r *Relationship) EndEvent() *Event {
-	return r.archive.Events[r.Relationship.EndEvent]
-}
+func (r *Relationship) compile(archive *Archive) {
+	inner := r.Relationship
+	r.EndEvent = archive.Events[inner.EndEvent]
+	r.Properties = newProperties(inner.Properties, archive.g.RelationshipProperties, archive)
+	r.StartEvent = archive.Events[inner.StartEvent]
+	r.Type = newVocabularyValue(inner.Type, archive.g.RelationshipTypes)
 
-func (r *Relationship) StartEvent() *Event {
-	return r.archive.Events[r.Relationship.StartEvent]
-}
-
-// Properties returns r's properties indexed by name.
-func (r *Relationship) Properties() map[string]Property {
-	if r.properties == nil {
-		r.properties = newProperties(r.Relationship.Properties, r.archive.g.RelationshipProperties, r.archive)
-	}
-	return r.properties
 }
 
 func (r *Relationship) String() string {
