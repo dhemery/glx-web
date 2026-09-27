@@ -15,6 +15,7 @@ type Assertion struct {
 	ID         string
 	Slug       string
 	Date       glxdate.Date
+	// TODO: Participants
 }
 
 func newAssertion(id string, ga *glx.Assertion, archive *Archive) *Assertion {

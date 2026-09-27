@@ -32,7 +32,7 @@ func (p *Person) Notes() glx.NoteList {
 	return p.g.Notes
 }
 
-// Properties returns the p's properties indexed by name.
+// Properties returns p's properties indexed by name.
 func (p *Person) Properties() map[string]Property {
 	if p.properties == nil {
 		p.properties = newProperties(p.g.Properties, p.a.g.PersonProperties, p.a)

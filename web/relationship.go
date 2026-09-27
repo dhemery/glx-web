@@ -7,28 +7,42 @@ import (
 )
 
 type Relationship struct {
-	a          *Archive
-	g          *glx.Relationship
-	Type       VocabularyValue
+	*glx.Relationship
+	archive    *Archive
+	EntityType glx.EntityType
 	ID         string
+	Slug       string
+	Type       VocabularyValue
 	properties map[string]Property
+	// TODO: Participants
 }
 
-func newRelationship(id string, gr *glx.Relationship, a *Archive) *Relationship {
+func newRelationship(id string, gr *glx.Relationship, archive *Archive) *Relationship {
+	entityType := glx.EntityTypeRelationships
 	return &Relationship{
-		a:    a,
-		g:    gr,
-		ID:   id,
-		Type: VocabularyValue{Value: gr.Type, Definition: a.g.RelationshipTypes[gr.Type]},
+		Relationship: gr,
+		archive:      archive,
+		Type:         newVocabularyValue(gr.Type, archive.g.RelationshipTypes),
+		EntityType:   entityType,
+		ID:           id,
+		Slug:         path.Join(entityType.Plural(), id),
 	}
 }
 
-func (r *Relationship) EntityType() glx.EntityType {
-	return glx.EntityTypeRelationships
+func (r *Relationship) EndEvent() *Event {
+	return r.archive.Events[r.Relationship.EndEvent]
 }
 
-func (r *Relationship) Slug() string {
-	return path.Join(r.EntityType().Plural(), r.ID)
+func (r *Relationship) StartEvent() *Event {
+	return r.archive.Events[r.Relationship.StartEvent]
+}
+
+// Properties returns r's properties indexed by name.
+func (r *Relationship) Properties() map[string]Property {
+	if r.properties == nil {
+		r.properties = newProperties(r.Relationship.Properties, r.archive.g.RelationshipProperties, r.archive)
+	}
+	return r.properties
 }
 
 func (r *Relationship) String() string {
