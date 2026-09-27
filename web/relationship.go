@@ -30,3 +30,8 @@ func (r *Relationship) EntityType() glx.EntityType {
 func (r *Relationship) Slug() string {
 	return path.Join(r.EntityType().Plural(), r.ID)
 }
+
+func (r *Relationship) String() string {
+	// TODO: Better String()
+	return "Relationship " + r.ID
+}

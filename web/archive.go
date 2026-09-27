@@ -89,12 +89,28 @@ func (a *Archive) entity(id string, entityType string) fmt.Stringer {
 	}
 }
 
+func (a *Archive) citationsWithIDs(ids []string) []*Citation {
+	var citations []*Citation
+	for _, id := range ids {
+		citations = append(citations, a.Citations[id])
+	}
+	return citations
+}
+
 func (a *Archive) mediaWithIDs(ids []string) []*Media {
 	var media []*Media
 	for _, mediaID := range ids {
 		media = append(media, a.Media[mediaID])
 	}
 	return media
+}
+
+func (a *Archive) sourcesWithIDs(ids []string) []*Source {
+	var sources []*Source
+	for _, id := range ids {
+		sources = append(sources, a.Sources[id])
+	}
+	return sources
 }
 
 func (a *Archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
