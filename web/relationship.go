@@ -5,8 +5,8 @@ import (
 )
 
 type Relationship struct {
-	entity
 	*glx.Relationship
+	entity
 	EndEvent   *Event
 	Properties map[string]Property
 	StartEvent *Event

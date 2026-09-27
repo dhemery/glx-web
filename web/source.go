@@ -6,8 +6,8 @@ import (
 )
 
 type Source struct {
-	entity
 	*glx.Source
+	entity
 	Date       glxdate.Date
 	Media      []*Media
 	Properties map[string]Property

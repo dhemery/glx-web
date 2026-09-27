@@ -8,8 +8,8 @@ import (
 )
 
 type Assertion struct {
-	entity
 	*glx.Assertion
+	entity
 	Citations []*Citation
 	Date      glxdate.Date
 	Media     []*Media
@@ -20,9 +20,9 @@ type Assertion struct {
 
 func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	return &Assertion{
-		ID:         id,
-		EntityType: glx.EntityTypeAssertions,
 		Assertion:  inner,
+		EntityType: glx.EntityTypeAssertions,
+		ID:         id,
 		Date:       newDate(inner.Date.String()),
 	}
 }

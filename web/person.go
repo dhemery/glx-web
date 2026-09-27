@@ -6,8 +6,8 @@ import (
 
 // Person represents a GLX person entity.
 type Person struct {
-	entity
 	*glx.Person
+	entity
 	Properties map[string]Property
 }
 

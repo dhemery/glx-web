@@ -6,8 +6,8 @@ import (
 
 // Repository represents a GLX repository entity.
 type Repository struct {
-	entity
 	*glx.Repository
+	entity
 	Properties map[string]Property
 	Type       VocabularyValue
 }

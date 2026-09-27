@@ -5,10 +5,8 @@ import (
 )
 
 type Place struct {
-	entity
 	*glx.Place
-	EntityType glx.EntityType
-	ID         string
+	entity
 	Parent     *Place
 	Properties map[string]Property
 	Type       VocabularyValue

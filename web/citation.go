@@ -8,8 +8,8 @@ import (
 
 // Citation represents a GLX citation entity.
 type Citation struct {
-	entity
 	*glx.Citation
+	entity
 	Media      []*Media
 	Properties map[string]Property
 	Repository *Repository
@@ -18,9 +18,9 @@ type Citation struct {
 
 func newCitation(id string, inner *glx.Citation) *Citation {
 	return &Citation{
+		Citation:   inner,
 		EntityType: glx.EntityTypeCitations,
 		ID:         id,
-		Citation:   inner,
 	}
 }
 

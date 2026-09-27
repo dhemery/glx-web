@@ -6,8 +6,8 @@ import (
 )
 
 type Event struct {
-	entity
 	*glx.Event
+	entity
 	Date       glxdate.Date
 	Place      *Place
 	Properties map[string]Property
@@ -17,8 +17,8 @@ type Event struct {
 func newEvent(id string, inner *glx.Event) *Event {
 	return &Event{
 		Event:      inner,
-		ID:         id,
 		EntityType: glx.EntityTypeEvents,
+		ID:         id,
 		Date:       newDate(inner.Date.String()),
 	}
 }
