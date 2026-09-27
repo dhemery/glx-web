@@ -60,7 +60,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, gm := range g.Media {
-		a.Media[id] = newMedia(id, gm, a)
+		a.Media[id] = newMedia(id, gm)
 	}
 
 	for id, gp := range g.Persons {
@@ -86,6 +86,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	a.compile(a.Assertions)
 	a.compile(a.Citations)
 	a.compile(a.Events)
+	a.compile(a.Media)
 
 	return a
 }

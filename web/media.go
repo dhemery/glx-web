@@ -1,45 +1,34 @@
 package web
 
 import (
-	"path"
-
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 type Media struct {
+	entity
 	*glx.Media
-	archive    *Archive
-	EntityType glx.EntityType
-	ID         string
-	Slug       string
 	Date       glxdate.Date
+	Source     *Source
 	Type       VocabularyValue
-	properties map[string]Property
+	Properties map[string]Property
 }
 
-func newMedia(id string, gm *glx.Media, archive *Archive) *Media {
+func newMedia(id string, gm *glx.Media) *Media {
 	entityType := glx.EntityTypeMedia
 	return &Media{
-		archive:    archive,
 		Media:      gm,
 		EntityType: entityType,
 		ID:         id,
-		Slug:       path.Join(entityType.Plural(), id),
 		Date:       newDate(gm.Date.String()),
-		Type:       VocabularyValue{Value: gm.Type, Definition: archive.g.MediaTypes[gm.Type]},
 	}
 }
 
-func (m *Media) Properties() map[string]Property {
-	if m.properties == nil {
-		m.properties = newProperties(m.Media.Properties, m.archive.g.MediaProperties, m.archive)
-	}
-	return m.properties
-}
-
-func (m *Media) Source() *Source {
-	return m.archive.Sources[m.Media.Source]
+func (m *Media) compile(archive *Archive) {
+	inner := m.Media
+	m.Type = VocabularyValue{Value: inner.Type, Definition: archive.g.MediaTypes[inner.Type]}
+	m.Properties = newProperties(inner.Properties, archive.g.MediaProperties, archive)
+	m.Source = archive.Sources[inner.Source]
 }
 
 func (m *Media) String() string {
