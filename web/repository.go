@@ -12,19 +12,18 @@ type Repository struct {
 	Type       VocabularyValue
 }
 
-func newRepository(id string, gr *glx.Repository) *Repository {
-	entityType := glx.EntityTypeRepositories
+func newRepository(id string, inner *glx.Repository) *Repository {
 	return &Repository{
-		Repository: gr,
-		EntityType: entityType,
+		Repository: inner,
+		EntityType: glx.EntityTypeRepositories,
 		ID:         id,
 	}
 }
 
-func (r *Repository) compile(archive *Archive) {
+func (r *Repository) compile(a *Archive, g *glx.GLXFile) {
 	inner := r.Repository
-	r.Type = VocabularyValue{Value: inner.Type, Definition: archive.g.RepositoryTypes[inner.Type]}
-	r.Properties = newProperties(inner.Properties, archive.g.RepositoryProperties, archive)
+	r.Type = VocabularyValue{Value: inner.Type, Definition: g.RepositoryTypes[inner.Type]}
+	r.Properties = newProperties(inner.Properties, g.RepositoryProperties, a, g)
 }
 
 func (r *Repository) String() string {

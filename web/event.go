@@ -14,20 +14,20 @@ type Event struct {
 	Type       VocabularyValue
 }
 
-func newEvent(id string, event *glx.Event) *Event {
+func newEvent(id string, inner *glx.Event) *Event {
 	return &Event{
-		Event:      event,
+		Event:      inner,
 		ID:         id,
 		EntityType: glx.EntityTypeEvents,
-		Date:       newDate(event.Date.String()),
+		Date:       newDate(inner.Date.String()),
 	}
 }
 
-func (e *Event) compile(archive *Archive) {
+func (e *Event) compile(a *Archive, g *glx.GLXFile) {
 	inner := e.Event
-	e.Place = archive.Places[e.PlaceID]
-	e.Properties = newProperties(inner.Properties, archive.g.EventProperties, archive)
-	e.Type = newVocabularyValue(inner.Type, archive.g.EventTypes)
+	e.Place = a.Places[e.PlaceID]
+	e.Properties = newProperties(inner.Properties, g.EventProperties, a, g)
+	e.Type = newVocabularyValue(inner.Type, g.EventTypes)
 }
 
 func (e *Event) String() string {

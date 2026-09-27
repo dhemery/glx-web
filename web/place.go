@@ -14,20 +14,19 @@ type Place struct {
 	Type       VocabularyValue
 }
 
-func newPlace(id string, gp *glx.Place) *Place {
-	entityType := glx.EntityTypePlaces
+func newPlace(id string, inner *glx.Place) *Place {
 	return &Place{
-		Place:      gp,
-		EntityType: entityType,
+		Place:      inner,
+		EntityType: glx.EntityTypePlaces,
 		ID:         id,
 	}
 }
 
-func (p *Place) compile(archive *Archive) {
+func (p *Place) compile(a *Archive, g *glx.GLXFile) {
 	inner := p.Place
-	p.Parent = archive.Places[p.ParentID]
-	p.Properties = newProperties(inner.Properties, archive.g.PlaceProperties, archive)
-	p.Type = VocabularyValue{Value: inner.Type, Definition: archive.g.PlaceTypes[inner.Type]}
+	p.Parent = a.Places[p.ParentID]
+	p.Properties = newProperties(inner.Properties, g.PlaceProperties, a, g)
+	p.Type = VocabularyValue{Value: inner.Type, Definition: g.PlaceTypes[inner.Type]}
 }
 
 func (p *Place) FullName() string {

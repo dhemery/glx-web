@@ -18,16 +18,16 @@ type Assertion struct {
 	// TODO: Participants
 }
 
-func newAssertion(id string, assertion *glx.Assertion) *Assertion {
+func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	return &Assertion{
 		ID:         id,
 		EntityType: glx.EntityTypeAssertions,
-		Assertion:  assertion,
-		Date:       newDate(assertion.Date.String()),
+		Assertion:  inner,
+		Date:       newDate(inner.Date.String()),
 	}
 }
 
-func (a *Assertion) compile(archive *Archive) {
+func (a *Assertion) compile(archive *Archive, _ *glx.GLXFile) {
 	inner := a.Assertion
 	a.Citations = archive.citationsWithIDs(inner.Citations)
 	a.Media = archive.mediaWithIDs(inner.Media)

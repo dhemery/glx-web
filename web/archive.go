@@ -21,7 +21,6 @@ func (e entity) Slug() string {
 }
 
 type Archive struct {
-	g             *glx.GLXFile
 	Assertions    map[string]*Assertion
 	Citations     map[string]*Citation
 	Events        map[string]*Event
@@ -35,7 +34,6 @@ type Archive struct {
 
 func NewArchive(g *glx.GLXFile) *Archive {
 	a := &Archive{
-		g:             g,
 		Assertions:    make(map[string]*Assertion),
 		Citations:     make(map[string]*Citation),
 		Events:        make(map[string]*Event),
@@ -83,15 +81,15 @@ func NewArchive(g *glx.GLXFile) *Archive {
 		a.Sources[id] = newSource(id, gs)
 	}
 
-	a.compile(a.Assertions)
-	a.compile(a.Citations)
-	a.compile(a.Events)
-	a.compile(a.Media)
-	a.compile(a.Persons)
-	a.compile(a.Places)
-	a.compile(a.Relationships)
-	a.compile(a.Repositories)
-	a.compile(a.Sources)
+	a.compile(a.Assertions, g)
+	a.compile(a.Citations, g)
+	a.compile(a.Events, g)
+	a.compile(a.Media, g)
+	a.compile(a.Persons, g)
+	a.compile(a.Places, g)
+	a.compile(a.Relationships, g)
+	a.compile(a.Repositories, g)
+	a.compile(a.Sources, g)
 
 	return a
 }
@@ -99,12 +97,12 @@ func NewArchive(g *glx.GLXFile) *Archive {
 type compiler interface {
 	// Compile initializes fields and properties that refer to entities and
 	// vocabularies in the archive.
-	compile(a *Archive)
+	compile(*Archive, *glx.GLXFile)
 }
 
-func (a *Archive) compile[C compiler](compilers map[string]C) {
+func (a *Archive) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
 	for _, compiler := range compilers {
-		compiler.compile(a)
+		compiler.compile(a, g)
 	}
 }
 
@@ -145,43 +143,42 @@ func (a *Archive) sourcesWithIDs(ids []string) []*Source {
 	return sources
 }
 
-func (a *Archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
-	g := a.g
+func vocabulary(glxFile *glx.GLXFile, name string) map[string]*glx.VocabularyEntry {
 	switch name {
 	case glx.VocabRelationshipTypes:
-		return g.RelationshipTypes
+		return glxFile.RelationshipTypes
 	case glx.VocabEventTypes:
-		return g.EventTypes
+		return glxFile.EventTypes
 	case glx.VocabPlaceTypes:
-		return g.PlaceTypes
+		return glxFile.PlaceTypes
 	case glx.VocabRepositoryTypes:
-		return g.RepositoryTypes
+		return glxFile.RepositoryTypes
 	case glx.VocabParticipantRoles:
-		return g.ParticipantRoles
+		return glxFile.ParticipantRoles
 	case glx.VocabMediaTypes:
-		return g.MediaTypes
+		return glxFile.MediaTypes
 	case glx.VocabConfidenceLevels:
-		return g.ConfidenceLevels
+		return glxFile.ConfidenceLevels
 	case glx.VocabSourceTypes:
-		return g.SourceTypes
+		return glxFile.SourceTypes
 	case glx.VocabSexTypes:
-		return g.SexTypes
+		return glxFile.SexTypes
 	case glx.VocabGenderTypes:
-		return g.GenderTypes
+		return glxFile.GenderTypes
 	case glx.VocabSearchResultTypes:
-		return g.SearchResultTypes
+		return glxFile.SearchResultTypes
 	case glx.VocabResearchLogStatusTypes:
-		return g.ResearchLogStatusTypes
+		return glxFile.ResearchLogStatusTypes
 	case glx.VocabStudyTypes:
-		return g.StudyTypes
+		return glxFile.StudyTypes
 	case glx.VocabStudyStatuses:
-		return g.StudyStatuses
+		return glxFile.StudyStatuses
 	case glx.VocabLegalStatuses:
-		return g.LegalStatuses
+		return glxFile.LegalStatuses
 	case glx.VocabSourceNatures:
-		return g.SourceNatures
+		return glxFile.SourceNatures
 	case glx.VocabInformationTypes:
-		return g.InformationTypes
+		return glxFile.InformationTypes
 	default:
 		return make(map[string]*glx.VocabularyEntry)
 	}

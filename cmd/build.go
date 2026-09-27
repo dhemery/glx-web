@@ -71,18 +71,19 @@ func runBuild(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	g, err := load.GLXFile(absArchiveDir)
+	glxFile, err := load.GLXFile(absArchiveDir)
 	if err != nil {
 		return err
 	}
 
 	r := &site.Renderer{
-		Archive:   web.NewArchive(g),
+		Archive:   web.NewArchive(glxFile),
 		OutputDir: absOutputDir,
 		Clean:     cleanOutput,
 		StaticDir: absStaticDir,
 		Templates: templates,
 	}
+
 	return r.Render()
 }
 

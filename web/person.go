@@ -11,18 +11,17 @@ type Person struct {
 	Properties map[string]Property
 }
 
-func newPerson(id string, gp *glx.Person) *Person {
-	entityType := glx.EntityTypePersons
+func newPerson(id string, inner *glx.Person) *Person {
 	return &Person{
-		Person:     gp,
-		EntityType: entityType,
+		Person:     inner,
+		EntityType: glx.EntityTypePersons,
 		ID:         id,
 	}
 }
 
-func (p *Person) compile(archive *Archive) {
+func (p *Person) compile(a *Archive, g *glx.GLXFile) {
 	inner := p.Person
-	p.Properties = newProperties(inner.Properties, archive.g.PersonProperties, archive)
+	p.Properties = newProperties(inner.Properties, g.PersonProperties, a, g)
 }
 
 // DisplayName returns a display name extracted from p's properties.

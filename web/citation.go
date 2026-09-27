@@ -16,21 +16,20 @@ type Citation struct {
 	Source     *Source
 }
 
-func newCitation(id string, gc *glx.Citation) *Citation {
-	entityType := glx.EntityTypeCitations
+func newCitation(id string, inner *glx.Citation) *Citation {
 	return &Citation{
-		EntityType: entityType,
+		EntityType: glx.EntityTypeCitations,
 		ID:         id,
-		Citation:   gc,
+		Citation:   inner,
 	}
 }
 
-func (c *Citation) compile(archive *Archive) {
+func (c *Citation) compile(a *Archive, g *glx.GLXFile) {
 	inner := c.Citation
-	c.Media = archive.mediaWithIDs(inner.Media)
-	c.Properties = newProperties(inner.Properties, archive.g.CitationProperties, archive)
-	c.Repository = archive.Repositories[c.RepositoryID]
-	c.Source = archive.Sources[c.SourceID]
+	c.Media = a.mediaWithIDs(inner.Media)
+	c.Properties = newProperties(inner.Properties, g.CitationProperties, a, g)
+	c.Repository = a.Repositories[c.RepositoryID]
+	c.Source = a.Sources[c.SourceID]
 }
 
 // String returns a string representation of c formed by concatenating its

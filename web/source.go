@@ -15,22 +15,21 @@ type Source struct {
 	Type       VocabularyValue
 }
 
-func newSource(id string, gs *glx.Source) *Source {
-	entityType := glx.EntityTypeSources
+func newSource(id string, inner *glx.Source) *Source {
 	return &Source{
-		Source:     gs,
-		EntityType: entityType,
+		Source:     inner,
+		EntityType: glx.EntityTypeSources,
 		ID:         id,
-		Date:       newDate(gs.Date.String()),
+		Date:       newDate(inner.Date.String()),
 	}
 }
 
-func (s *Source) compile(archive *Archive) {
+func (s *Source) compile(a *Archive, g *glx.GLXFile) {
 	inner := s.Source
-	s.Media = archive.mediaWithIDs(inner.Media)
-	s.Properties = newProperties(inner.Properties, archive.g.SourceProperties, archive)
-	s.Repository = archive.Repositories[s.RepositoryID]
-	s.Type = VocabularyValue{Value: inner.Type, Definition: archive.g.SourceTypes[inner.Type]}
+	s.Media = a.mediaWithIDs(inner.Media)
+	s.Properties = newProperties(inner.Properties, g.SourceProperties, a, g)
+	s.Repository = a.Repositories[s.RepositoryID]
+	s.Type = VocabularyValue{Value: inner.Type, Definition: g.SourceTypes[inner.Type]}
 }
 
 func (s *Source) String() string {

@@ -14,21 +14,20 @@ type Media struct {
 	Type       VocabularyValue
 }
 
-func newMedia(id string, gm *glx.Media) *Media {
-	entityType := glx.EntityTypeMedia
+func newMedia(id string, inner *glx.Media) *Media {
 	return &Media{
-		Media:      gm,
-		EntityType: entityType,
+		Media:      inner,
+		EntityType: glx.EntityTypeMedia,
 		ID:         id,
-		Date:       newDate(gm.Date.String()),
+		Date:       newDate(inner.Date.String()),
 	}
 }
 
-func (m *Media) compile(archive *Archive) {
+func (m *Media) compile(a *Archive, g *glx.GLXFile) {
 	inner := m.Media
-	m.Type = VocabularyValue{Value: inner.Type, Definition: archive.g.MediaTypes[inner.Type]}
-	m.Properties = newProperties(inner.Properties, archive.g.MediaProperties, archive)
-	m.Source = archive.Sources[inner.Source]
+	m.Type = VocabularyValue{Value: inner.Type, Definition: g.MediaTypes[inner.Type]}
+	m.Properties = newProperties(inner.Properties, g.MediaProperties, a, g)
+	m.Source = a.Sources[inner.Source]
 }
 
 func (m *Media) String() string {
