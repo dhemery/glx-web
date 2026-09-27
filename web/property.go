@@ -113,10 +113,10 @@ func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Archive
 }
 
 func newPropertyFields(in any, def *glx.PropertyDefinition) map[string]PropertyField {
-	var fields map[string]PropertyField
+	propertyFields := make(map[string]PropertyField)
 
 	if in == nil {
-		return fields
+		return propertyFields
 	}
 
 	inMap, ok := in.(map[string]any)
@@ -125,8 +125,11 @@ func newPropertyFields(in any, def *glx.PropertyDefinition) map[string]PropertyF
 	}
 
 	for name, value := range inMap {
-		inMap[name] = newPrimitiveValue(value, def.Fields[name].ValueType)
+		propertyFields[name] = PropertyField{
+			Definition: def.Fields[name],
+			Value:      newPrimitiveValue(value, def.Fields[name].ValueType),
+		}
 	}
 
-	return fields
+	return propertyFields
 }
