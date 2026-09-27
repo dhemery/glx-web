@@ -1,45 +1,32 @@
 package web
 
 import (
-	"path"
-
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 type Event struct {
+	entity
 	*glx.Event
-	archive    *Archive
-	EntityType glx.EntityType
-	ID         string
-	Slug       string
 	Date       glxdate.Date
+	Place      *Place
 	Type       VocabularyValue
-	properties map[string]Property
+	Properties map[string]Property
 }
 
-func newEvent(id string, ge *glx.Event, archive *Archive) *Event {
-	entityType := glx.EntityTypeEvents
+func newEvent(id string, event *glx.Event) *Event {
 	return &Event{
-		archive:    archive,
-		Event:      ge,
-		EntityType: entityType,
+		Event:      event,
 		ID:         id,
-		Slug:       path.Join(entityType.Plural(), id),
-		Date:       newDate(ge.Date.String()),
-		Type:       newVocabularyValue(ge.Type, archive.g.EventTypes),
+		EntityType: glx.EntityTypeEvents,
+		Date:       newDate(event.Date.String()),
 	}
 }
 
-func (e *Event) Place() *Place {
-	return e.archive.Places[e.PlaceID]
-}
-
-func (e *Event) Properties() map[string]Property {
-	if e.properties == nil {
-		e.properties = newProperties(e.Event.Properties, e.archive.g.EventProperties, e.archive)
-	}
-	return e.properties
+func (e *Event) compile(archive *Archive) {
+	e.Place = archive.Places[e.PlaceID]
+	e.Properties = newProperties(e.Event.Properties, archive.g.EventProperties, archive)
+	e.Type = newVocabularyValue(e.Event.Type, archive.g.EventTypes)
 }
 
 func (e *Event) String() string {

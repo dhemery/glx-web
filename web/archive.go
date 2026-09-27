@@ -6,9 +6,26 @@ package web
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/genealogix/glx/go-glx"
 )
+
+type entity struct {
+	EntityType glx.EntityType
+	ID         string
+}
+
+func newEntity(id string, entityType glx.EntityType, archive *Archive) entity {
+	return entity{
+		EntityType: entityType,
+		ID:         id,
+	}
+}
+
+func (e entity) Slug() string {
+	return path.Join(e.EntityType.Plural(), e.ID)
+}
 
 type Archive struct {
 	g             *glx.GLXFile
@@ -38,7 +55,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, ga := range g.Assertions {
-		a.Assertions[id] = newAssertion(id, ga, a)
+		a.Assertions[id] = newAssertion(id, ga)
 	}
 
 	for id, gc := range g.Citations {
@@ -46,7 +63,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, ge := range g.Events {
-		a.Events[id] = newEvent(id, ge, a)
+		a.Events[id] = newEvent(id, ge)
 	}
 
 	for id, gm := range g.Media {
@@ -73,7 +90,22 @@ func NewArchive(g *glx.GLXFile) *Archive {
 		a.Sources[id] = newSource(id, gs, a)
 	}
 
+	a.compile(a.Assertions)
+	a.compile(a.Events)
+
 	return a
+}
+
+type compiler interface {
+	// Compile initializes fields and properties that refer to entities and
+	// vocabularies in the archive.
+	compile(a *Archive)
+}
+
+func (a *Archive) compile[C compiler](compilers map[string]C) {
+	for _, compiler := range compilers {
+		compiler.compile(a)
+	}
 }
 
 func (a *Archive) entity(id string, entityType string) fmt.Stringer {
