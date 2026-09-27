@@ -28,11 +28,12 @@ func newAssertion(id string, assertion *glx.Assertion) *Assertion {
 }
 
 func (a *Assertion) compile(archive *Archive) {
-	a.Citations = archive.citationsWithIDs(a.Assertion.Citations)
-	a.Media = archive.mediaWithIDs(a.Assertion.Media)
-	a.Sources = archive.sourcesWithIDs(a.Assertion.Sources)
+	inner := a.Assertion
+	a.Citations = archive.citationsWithIDs(inner.Citations)
+	a.Media = archive.mediaWithIDs(inner.Media)
+	a.Sources = archive.sourcesWithIDs(inner.Sources)
 
-	s := a.Assertion.Subject
+	s := inner.Subject
 	switch {
 	case s.Person != "":
 		a.Subject = archive.Persons[s.Person]

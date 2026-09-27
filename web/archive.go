@@ -68,7 +68,7 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	}
 
 	for id, gp := range g.Places {
-		a.Places[id] = newPlace(id, gp, a)
+		a.Places[id] = newPlace(id, gp)
 	}
 
 	for id, gr := range g.Relationships {
@@ -88,6 +88,10 @@ func NewArchive(g *glx.GLXFile) *Archive {
 	a.compile(a.Events)
 	a.compile(a.Media)
 	a.compile(a.Persons)
+
+	for _, entity := range a.Places {
+		entity.compile(a)
+	}
 
 	return a
 }

@@ -24,9 +24,10 @@ func newEvent(id string, event *glx.Event) *Event {
 }
 
 func (e *Event) compile(archive *Archive) {
+	inner := e.Event
 	e.Place = archive.Places[e.PlaceID]
-	e.Properties = newProperties(e.Event.Properties, archive.g.EventProperties, archive)
-	e.Type = newVocabularyValue(e.Event.Type, archive.g.EventTypes)
+	e.Properties = newProperties(inner.Properties, archive.g.EventProperties, archive)
+	e.Type = newVocabularyValue(inner.Type, archive.g.EventTypes)
 }
 
 func (e *Event) String() string {

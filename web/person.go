@@ -21,7 +21,8 @@ func newPerson(id string, gp *glx.Person) *Person {
 }
 
 func (p *Person) compile(archive *Archive) {
-	p.Properties = newProperties(p.Person.Properties, archive.g.PersonProperties, archive)
+	inner := p.Person
+	p.Properties = newProperties(inner.Properties, archive.g.PersonProperties, archive)
 }
 
 // DisplayName returns a display name extracted from p's properties.

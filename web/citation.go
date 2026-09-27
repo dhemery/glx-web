@@ -26,11 +26,11 @@ func newCitation(id string, gc *glx.Citation) *Citation {
 }
 
 func (c *Citation) compile(archive *Archive) {
-	c.Media = archive.mediaWithIDs(c.Citation.Media)
-	c.Properties = newProperties(c.Citation.Properties, archive.g.CitationProperties, archive)
+	inner := c.Citation
+	c.Media = archive.mediaWithIDs(inner.Media)
+	c.Properties = newProperties(inner.Properties, archive.g.CitationProperties, archive)
 	c.Repository = archive.Repositories[c.RepositoryID]
 	c.Source = archive.Sources[c.SourceID]
-
 }
 
 // String returns a string representation of c formed by concatenating its
