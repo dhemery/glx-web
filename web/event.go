@@ -8,53 +8,40 @@ import (
 )
 
 type Event struct {
-	a          *Archive
-	g          *glx.Event
+	*glx.Event
+	archive    *Archive
+	EntityType glx.EntityType
 	ID         string
+	Slug       string
+	Date       glxdate.Date
 	Type       VocabularyValue
 	properties map[string]Property
 }
 
-func newEvent(id string, ge *glx.Event, a *Archive) *Event {
+func newEvent(id string, ge *glx.Event, archive *Archive) *Event {
+	entityType := glx.EntityTypeEvents
 	return &Event{
-		a:    a,
-		g:    ge,
-		ID:   id,
-		Type: newVocabularyValue(ge.Type, a.g.EventTypes),
+		archive:    archive,
+		Event:      ge,
+		EntityType: entityType,
+		ID:         id,
+		Slug:       path.Join(entityType.Plural(), id),
+		Date:       newDate(ge.Date.String()),
+		Type:       newVocabularyValue(ge.Type, archive.g.EventTypes),
 	}
 }
 
-func (e *Event) Date() glxdate.Date {
-	return newDate(e.g.Date.String())
-}
-
-func (e *Event) Notes() glx.NoteList {
-	return e.g.Notes
-}
-
 func (e *Event) Place() *Place {
-	return e.a.Places[e.g.PlaceID]
+	return e.archive.Places[e.PlaceID]
 }
 
 func (e *Event) Properties() map[string]Property {
 	if e.properties == nil {
-		e.properties = newProperties(e.g.Properties, e.a.g.EventProperties, e.a)
+		e.properties = newProperties(e.Event.Properties, e.archive.g.EventProperties, e.archive)
 	}
 	return e.properties
 }
 
-func (e *Event) Title() string {
-	return e.g.Title
-}
-
-func (e *Event) EntityType() glx.EntityType {
-	return glx.EntityTypeEvents
-}
-
-func (e *Event) Slug() string {
-	return path.Join(e.EntityType().Plural(), e.ID)
-}
-
 func (e *Event) String() string {
-	return e.Title()
+	return e.Title
 }

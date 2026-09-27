@@ -22,10 +22,10 @@ func newRelationship(id string, gr *glx.Relationship, archive *Archive) *Relatio
 	return &Relationship{
 		Relationship: gr,
 		archive:      archive,
-		Type:         newVocabularyValue(gr.Type, archive.g.RelationshipTypes),
 		EntityType:   entityType,
 		ID:           id,
 		Slug:         path.Join(entityType.Plural(), id),
+		Type:         newVocabularyValue(gr.Type, archive.g.RelationshipTypes),
 	}
 }
 

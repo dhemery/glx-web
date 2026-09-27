@@ -8,65 +8,40 @@ import (
 )
 
 type Media struct {
-	a          *Archive
-	g          *glx.Media
-	Type       VocabularyValue
+	*glx.Media
+	archive    *Archive
+	EntityType glx.EntityType
 	ID         string
+	Slug       string
+	Date       glxdate.Date
+	Type       VocabularyValue
 	properties map[string]Property
 }
 
-func newMedia(id string, gm *glx.Media, a *Archive) *Media {
+func newMedia(id string, gm *glx.Media, archive *Archive) *Media {
+	entityType := glx.EntityTypeMedia
 	return &Media{
-		a:    a,
-		g:    gm,
-		ID:   id,
-		Type: VocabularyValue{Value: gm.Type, Definition: a.g.MediaTypes[gm.Type]},
+		archive:    archive,
+		Media:      gm,
+		EntityType: entityType,
+		ID:         id,
+		Slug:       path.Join(entityType.Plural(), id),
+		Date:       newDate(gm.Date.String()),
+		Type:       VocabularyValue{Value: gm.Type, Definition: archive.g.MediaTypes[gm.Type]},
 	}
-}
-
-func (m *Media) Date() glxdate.Date {
-	return newDate(m.g.Date.String())
-}
-
-func (m *Media) Hash() string {
-	return m.g.Hash
-}
-
-func (m *Media) MimeType() string {
-	return m.g.MimeType
-}
-
-func (m *Media) Notes() glx.NoteList {
-	return m.g.Notes
 }
 
 func (m *Media) Properties() map[string]Property {
 	if m.properties == nil {
-		m.properties = newProperties(m.g.Properties, m.a.g.MediaProperties, m.a)
+		m.properties = newProperties(m.Media.Properties, m.archive.g.MediaProperties, m.archive)
 	}
 	return m.properties
 }
 
 func (m *Media) Source() *Source {
-	return m.a.Sources[m.g.Source]
-}
-
-func (m *Media) Title() string {
-	return m.g.Title
-}
-
-func (m *Media) URI() string {
-	return m.g.URI
-}
-
-func (m *Media) EntityType() glx.EntityType {
-	return glx.EntityTypeMedia
-}
-
-func (m *Media) Slug() string {
-	return path.Join(m.EntityType().Plural(), m.ID)
+	return m.archive.Sources[m.Media.Source]
 }
 
 func (m *Media) String() string {
-	return m.Title()
+	return m.Title
 }

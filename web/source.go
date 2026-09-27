@@ -8,65 +8,44 @@ import (
 )
 
 type Source struct {
-	a          *Archive
-	g          *glx.Source
+	*glx.Source
+	archive    *Archive
+	EntityType glx.EntityType
 	ID         string
+	Slug       string
+	Date       glxdate.Date
 	Type       VocabularyValue
 	properties map[string]Property
 }
 
-func newSource(id string, gs *glx.Source, a *Archive) *Source {
+func newSource(id string, gs *glx.Source, archive *Archive) *Source {
+	entityType := glx.EntityTypeSources
 	return &Source{
-		a:    a,
-		g:    gs,
-		ID:   id,
-		Type: VocabularyValue{Value: gs.Type, Definition: a.g.SourceTypes[gs.Type]},
+		archive:    archive,
+		Source:     gs,
+		EntityType: entityType,
+		ID:         id,
+		Slug:       path.Join(entityType.Plural(), id),
+		Date:       newDate(gs.Date.String()),
+		Type:       VocabularyValue{Value: gs.Type, Definition: archive.g.SourceTypes[gs.Type]},
 	}
 }
 
-func (s *Source) Authors() []string {
-	return s.g.Authors
-}
-
-func (s *Source) Date() glxdate.Date {
-	return newDate(s.g.Date.String())
-}
-
-func (s *Source) Language() string {
-	return s.g.Language
-}
-
 func (s *Source) Media() []*Media {
-	return s.a.mediaWithIDs(s.g.Media)
-}
-
-func (s *Source) Notes() glx.NoteList {
-	return s.g.Notes
+	return s.archive.mediaWithIDs(s.Source.Media)
 }
 
 func (s *Source) Properties() map[string]Property {
 	if s.properties == nil {
-		s.properties = newProperties(s.g.Properties, s.a.g.SourceProperties, s.a)
+		s.properties = newProperties(s.Source.Properties, s.archive.g.SourceProperties, s.archive)
 	}
 	return s.properties
 }
 
 func (s *Source) Repository() *Repository {
-	return s.a.Repositories[s.g.RepositoryID]
-}
-
-func (s *Source) Title() string {
-	return s.g.Title
-}
-
-func (s *Source) EntityType() glx.EntityType {
-	return glx.EntityTypeSources
-}
-
-func (s *Source) Slug() string {
-	return path.Join(s.EntityType().Plural(), s.ID)
+	return s.archive.Repositories[s.RepositoryID]
 }
 
 func (s *Source) String() string {
-	return s.Title()
+	return s.Title
 }

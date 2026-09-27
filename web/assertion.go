@@ -23,10 +23,10 @@ func newAssertion(id string, ga *glx.Assertion, archive *Archive) *Assertion {
 	return &Assertion{
 		Assertion:  ga,
 		archive:    archive,
-		Date:       newDate(ga.Date.String()),
 		EntityType: entityType,
 		ID:         id,
 		Slug:       path.Join(entityType.Plural(), id),
+		Date:       newDate(ga.Date.String()),
 	}
 }
 

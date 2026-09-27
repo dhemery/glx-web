@@ -52,7 +52,7 @@ func (c *Citation) Source() *Source {
 // locator (if it has one) onto its source's Title.
 func (c *Citation) String() string {
 	parts := []string{
-		c.Source().Title(),
+		c.Source().Title,
 	}
 
 	if locator, ok := c.Properties()["locator"]; ok {

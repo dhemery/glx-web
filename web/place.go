@@ -6,45 +6,34 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-func newPlace(id string, gp *glx.Place, a *Archive) *Place {
-	return &Place{
-		a:    a,
-		g:    gp,
-		ID:   id,
-		Type: VocabularyValue{Value: gp.Type, Definition: a.g.PlaceTypes[gp.Type]},
-	}
-}
-
 type Place struct {
+	*glx.Place
 	a          *Archive
-	g          *glx.Place
+	EntityType glx.EntityType
 	ID         string
+	Slug       string
 	Type       VocabularyValue
 	properties map[string]Property
 }
 
+func newPlace(id string, gp *glx.Place, a *Archive) *Place {
+	entityType := glx.EntityTypePlaces
+	return &Place{
+		Place:      gp,
+		a:          a,
+		EntityType: entityType,
+		ID:         id,
+		Slug:       path.Join(entityType.Plural(), id),
+		Type:       VocabularyValue{Value: gp.Type, Definition: a.g.PlaceTypes[gp.Type]},
+	}
+}
+
 func (p *Place) FullName() string {
-	return p.Name()
-}
-
-func (p *Place) Latitude() *float64 {
-	return p.g.Latitude
-}
-
-func (p *Place) Longitude() *float64 {
-	return p.g.Longitude
-}
-
-func (p *Place) Name() string {
-	return p.g.Name
-}
-
-func (p *Place) Notes() glx.NoteList {
-	return p.g.Notes
+	return p.Name
 }
 
 func (p *Place) Parent() *Place {
-	return p.a.Places[p.g.ParentID]
+	return p.a.Places[p.ParentID]
 }
 
 func (p *Place) Path() string {
@@ -53,19 +42,11 @@ func (p *Place) Path() string {
 
 func (p *Place) Properties() map[string]Property {
 	if p.properties == nil {
-		p.properties = newProperties(p.g.Properties, p.a.g.PlaceProperties, p.a)
+		p.properties = newProperties(p.Place.Properties, p.a.g.PlaceProperties, p.a)
 	}
 	return p.properties
 }
 
-func (p *Place) EntityType() glx.EntityType {
-	return glx.EntityTypePlaces
-}
-
-func (p *Place) Slug() string {
-	return path.Join(p.EntityType().Plural(), p.ID)
-}
-
 func (p *Place) String() string {
-	return p.Name()
+	return p.FullName()
 }
