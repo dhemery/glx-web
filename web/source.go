@@ -1,49 +1,36 @@
 package web
 
 import (
-	"path"
-
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 type Source struct {
+	entity
 	*glx.Source
-	archive    *Archive
-	EntityType glx.EntityType
-	ID         string
-	Slug       string
 	Date       glxdate.Date
+	Media      []*Media
+	Properties map[string]Property
+	Repository *Repository
 	Type       VocabularyValue
-	properties map[string]Property
 }
 
-func newSource(id string, gs *glx.Source, archive *Archive) *Source {
+func newSource(id string, gs *glx.Source) *Source {
 	entityType := glx.EntityTypeSources
 	return &Source{
-		archive:    archive,
 		Source:     gs,
 		EntityType: entityType,
 		ID:         id,
-		Slug:       path.Join(entityType.Plural(), id),
 		Date:       newDate(gs.Date.String()),
-		Type:       VocabularyValue{Value: gs.Type, Definition: archive.g.SourceTypes[gs.Type]},
 	}
 }
 
-func (s *Source) Media() []*Media {
-	return s.archive.mediaWithIDs(s.Source.Media)
-}
-
-func (s *Source) Properties() map[string]Property {
-	if s.properties == nil {
-		s.properties = newProperties(s.Source.Properties, s.archive.g.SourceProperties, s.archive)
-	}
-	return s.properties
-}
-
-func (s *Source) Repository() *Repository {
-	return s.archive.Repositories[s.RepositoryID]
+func (s *Source) compile(archive *Archive) {
+	inner := s.Source
+	s.Media = archive.mediaWithIDs(inner.Media)
+	s.Properties = newProperties(inner.Properties, archive.g.SourceProperties, archive)
+	s.Repository = archive.Repositories[s.RepositoryID]
+	s.Type = VocabularyValue{Value: inner.Type, Definition: archive.g.SourceTypes[inner.Type]}
 }
 
 func (s *Source) String() string {

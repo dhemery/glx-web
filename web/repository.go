@@ -1,38 +1,30 @@
 package web
 
 import (
-	"path"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
 // Repository represents a GLX repository entity.
 type Repository struct {
+	entity
 	*glx.Repository
-	archive    *Archive
-	EntityType glx.EntityType
-	ID         string
-	Slug       string
+	Properties map[string]Property
 	Type       VocabularyValue
-	properties map[string]Property
 }
 
-func newRepository(id string, gr *glx.Repository, archive *Archive) *Repository {
+func newRepository(id string, gr *glx.Repository) *Repository {
 	entityType := glx.EntityTypeRepositories
 	return &Repository{
-		archive:    archive,
 		Repository: gr,
 		EntityType: entityType,
 		ID:         id,
-		Slug:       path.Join(entityType.Plural(), id),
-		Type:       VocabularyValue{Value: gr.Type, Definition: archive.g.RepositoryTypes[gr.Type]},
 	}
 }
-func (r Repository) Properties() map[string]Property {
-	if r.properties == nil {
-		r.properties = newProperties(r.Repository.Properties, r.archive.g.RepositoryProperties, r.archive)
-	}
-	return r.properties
+
+func (r *Repository) compile(archive *Archive) {
+	inner := r.Repository
+	r.Type = VocabularyValue{Value: inner.Type, Definition: archive.g.RepositoryTypes[inner.Type]}
+	r.Properties = newProperties(inner.Properties, archive.g.RepositoryProperties, archive)
 }
 
 func (r *Repository) String() string {

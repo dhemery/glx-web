@@ -11,7 +11,7 @@ type Relationship struct {
 	Properties map[string]Property
 	StartEvent *Event
 	Type       VocabularyValue
-	// TODO: Participants
+	// TODO: Participantas
 }
 
 func newRelationship(id string, gr *glx.Relationship) *Relationship {

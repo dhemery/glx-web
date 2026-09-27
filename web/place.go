@@ -23,11 +23,11 @@ func newPlace(id string, gp *glx.Place) *Place {
 	}
 }
 
-func (p *Place) compile(a *Archive) {
+func (p *Place) compile(archive *Archive) {
 	inner := p.Place
-	p.Parent = a.Places[p.ParentID]
-	p.Properties = newProperties(inner.Properties, a.g.PlaceProperties, a)
-	p.Type = VocabularyValue{Value: inner.Type, Definition: a.g.PlaceTypes[inner.Type]}
+	p.Parent = archive.Places[p.ParentID]
+	p.Properties = newProperties(inner.Properties, archive.g.PlaceProperties, archive)
+	p.Type = VocabularyValue{Value: inner.Type, Definition: archive.g.PlaceTypes[inner.Type]}
 }
 
 func (p *Place) FullName() string {
