@@ -9,9 +9,9 @@ type Media struct {
 	entity
 	*glx.Media
 	Date       glxdate.Date
+	Properties map[string]Property
 	Source     *Source
 	Type       VocabularyValue
-	Properties map[string]Property
 }
 
 func newMedia(id string, gm *glx.Media) *Media {

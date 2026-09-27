@@ -10,8 +10,8 @@ type Event struct {
 	*glx.Event
 	Date       glxdate.Date
 	Place      *Place
-	Type       VocabularyValue
 	Properties map[string]Property
+	Type       VocabularyValue
 }
 
 func newEvent(id string, event *glx.Event) *Event {
