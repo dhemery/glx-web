@@ -9,50 +9,43 @@ import (
 
 // Citation represents a GLX citation entity.
 type Citation struct {
-	a          *Archive
-	g          *glx.Citation
+	*glx.Citation
+	archive    *Archive
+	EntityType glx.EntityType
 	ID         string
+	Slug       string
 	properties map[string]Property
 }
 
-func newCitation(id string, gc *glx.Citation, a *Archive) *Citation {
+func newCitation(id string, gc *glx.Citation, archive *Archive) *Citation {
+	entityType := glx.EntityTypeCitations
 	return &Citation{
-		a:  a,
-		g:  gc,
-		ID: id,
+		Citation:   gc,
+		archive:    archive,
+		EntityType: entityType,
+		ID:         id,
+		Slug:       path.Join(entityType.Plural(), id),
 	}
 }
 
 func (c *Citation) Media() []*Media {
-	return c.a.mediaWithIDs(c.g.Media)
-}
-
-func (c *Citation) Notes() glx.NoteList {
-	return c.g.Notes
+	return c.archive.mediaWithIDs(c.Citation.Media)
 }
 
 // Properties returns a map of c's properties indexed by name.
 func (c *Citation) Properties() map[string]Property {
 	if c.properties == nil {
-		c.properties = newProperties(c.g.Properties, c.a.g.CitationProperties, c.a)
+		c.properties = newProperties(c.Citation.Properties, c.archive.g.CitationProperties, c.archive)
 	}
 	return c.properties
 }
 
 func (c *Citation) Repository() *Repository {
-	return c.a.Repositories[c.g.RepositoryID]
+	return c.archive.Repositories[c.RepositoryID]
 }
 
 func (c *Citation) Source() *Source {
-	return c.a.Sources[c.g.SourceID]
-}
-
-func (c *Citation) EntityType() glx.EntityType {
-	return glx.EntityTypeCitations
-}
-
-func (c *Citation) Slug() string {
-	return path.Join(c.EntityType().Plural(), c.ID)
+	return c.archive.Sources[c.SourceID]
 }
 
 // String returns a string representation of c formed by concatenating its
