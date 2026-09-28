@@ -1,8 +1,6 @@
 package web
 
 import (
-	"fmt"
-
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -15,7 +13,7 @@ type Assertion struct {
 	Media       []*Media
 	Participant *Participant
 	Sources     []*Source
-	Subject     fmt.Stringer
+	Subject     entityReference
 	// TODO: Resolve value if the property has a reference type or vocabulary type
 }
 

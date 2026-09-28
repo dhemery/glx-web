@@ -121,7 +121,9 @@ func newPropertyFields(in any, def *glx.PropertyDefinition) map[string]PropertyF
 
 	inMap, ok := in.(map[string]any)
 	if !ok {
-		panic(fmt.Sprintf("Fields has unexpected type %T", in))
+		propertyFields["ERROR"] = PropertyField{
+			Value: StringValue(fmt.Sprintf("property fields has unexpected type %T", in)),
+		}
 	}
 
 	for name, value := range inMap {

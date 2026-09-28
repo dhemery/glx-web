@@ -1,11 +1,15 @@
-// Package web represents a GLX archive in a form suitable for Go templates to render as HTML.
-//
-// Every exported type in this package has a String method to make it easy to
-// render each value in a template.
+// Package web decorates a GLX archive and its entities to make the entities
+// easier to render as HTML. Each entity has a Slug method that returns the
+// path to the directory where it is rendered relative to the output directory.
+// Entity references are resolved to pointers to the referenced entities.
+// Properties and vocabulary values are presented along with their definitions.
+// Most entities, properties, and vocabulary values have String methods for
+// convenience. The String methods of some entities (Assertion, Citation, and
+// Relationship) return strings that, though useful for debugging templates,
+// may not be especially useful for display.
 package web
 
 import (
-	"fmt"
 	"path"
 
 	"github.com/genealogix/glx/go-glx"
@@ -16,6 +20,8 @@ type entity struct {
 	ID         string
 }
 
+// Slug returns the path to the directory where glx-web renders the entity,
+// relative to the site's output directory.
 func (e entity) Slug() string {
 	return path.Join(e.EntityType.Plural(), e.ID)
 }
@@ -106,7 +112,12 @@ func (a *Archive) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
 	}
 }
 
-func (a *Archive) entity(id string, entityType string) fmt.Stringer {
+type entityReference interface {
+	Slug() string
+	String() string
+}
+
+func (a *Archive) entity(id string, entityType string) entityReference {
 	switch entityType {
 	case "citations":
 		return a.Citations[id]
@@ -115,7 +126,7 @@ func (a *Archive) entity(id string, entityType string) fmt.Stringer {
 	case "places":
 		return a.Places[id]
 	default:
-		panic("newReferenceValue unimplemented entity type: " + entityType)
+		return nil
 	}
 }
 

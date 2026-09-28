@@ -55,7 +55,7 @@ func newPrimitiveValue(in any, valueType string) fmt.Stringer {
 	case bool:
 		return BoolValue(typedIn)
 	default:
-		panic(fmt.Sprintf("newPrimitiveValue unknown type %T", in))
+		return StringValue(fmt.Sprintf("primitive value has unknown type %T", in))
 	}
 }
 
