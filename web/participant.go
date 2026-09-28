@@ -29,6 +29,6 @@ func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyE
 		Participant: inner,
 		Person:      a.Persons[inner.Person],
 		Properties:  newProperties(inner.Properties, propertyDefs, a, g),
-		Role:        newVocabularyValue("role", roleDefs),
+		Role:        newVocabularyValue(inner.Role, roleDefs),
 	}
 }
