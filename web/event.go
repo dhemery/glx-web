@@ -8,10 +8,11 @@ import (
 type Event struct {
 	*glx.Event
 	entity
-	Date       glxdate.Date
-	Place      *Place
-	Properties map[string]Property
-	Type       VocabularyValue
+	Date         glxdate.Date
+	Participants []*Participant
+	Place        *Place
+	Properties   map[string]Property
+	Type         VocabularyValue
 }
 
 func newEvent(id string, inner *glx.Event) *Event {
@@ -25,6 +26,7 @@ func newEvent(id string, inner *glx.Event) *Event {
 
 func (e *Event) compile(a *Archive, g *glx.GLXFile) {
 	inner := e.Event
+	e.Participants = newParticipants(inner.Participants, g.EventProperties, a, g)
 	e.Place = a.Places[e.PlaceID]
 	e.Properties = newProperties(inner.Properties, g.EventProperties, a, g)
 	e.Type = newVocabularyValue(inner.Type, g.EventTypes)

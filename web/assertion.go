@@ -10,12 +10,13 @@ import (
 type Assertion struct {
 	*glx.Assertion
 	entity
-	Citations []*Citation
-	Date      glxdate.Date
-	Media     []*Media
-	Sources   []*Source
-	Subject   fmt.Stringer
-	// TODO: Participants
+	Citations   []*Citation
+	Date        glxdate.Date
+	Media       []*Media
+	Participant *Participant
+	Sources     []*Source
+	Subject     fmt.Stringer
+	// TODO: Resolve value if the property has a reference type or vocabulary type
 }
 
 func newAssertion(id string, inner *glx.Assertion) *Assertion {
@@ -27,7 +28,7 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	}
 }
 
-func (a *Assertion) compile(archive *Archive, _ *glx.GLXFile) {
+func (a *Assertion) compile(archive *Archive, g *glx.GLXFile) {
 	inner := a.Assertion
 	a.Citations = archive.citationsWithIDs(inner.Citations)
 	a.Media = archive.mediaWithIDs(inner.Media)
@@ -39,8 +40,10 @@ func (a *Assertion) compile(archive *Archive, _ *glx.GLXFile) {
 		a.Subject = archive.Persons[s.Person]
 	case s.Event != "":
 		a.Subject = archive.Events[s.Event]
+		a.Participant = newParticipant(inner.Participant, g.ParticipantRoles, g.EventProperties, archive, g)
 	case s.Relationship != "":
 		a.Subject = archive.Relationships[s.Relationship]
+		a.Participant = newParticipant(inner.Participant, g.ParticipantRoles, g.RelationshipProperties, archive, g)
 	case s.Place != "":
 		a.Subject = archive.Places[s.Place]
 	}
