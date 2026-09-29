@@ -15,12 +15,17 @@ var serveCmd = &cobra.Command{
 	RunE:  runServe,
 }
 
+var port uint16
+
 func init() {
+
+	serveCmd.Flags().Uint16VarP(&port, "port", "p", port, "the port number to bind to")
 	rootCmd.AddCommand(serveCmd)
 }
 
 func runServe(_ *cobra.Command, args []string) error {
-	listener, err := net.Listen("tcp", "localhost:0")
+	addr := fmt.Sprintf("localhost:%d", port)
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
