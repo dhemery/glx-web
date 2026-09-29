@@ -2,6 +2,7 @@
 package site
 
 import (
+	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -50,12 +51,12 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 	for id, e := range entities {
 		entityDir := filepath.Join(typeDir, id)
 		if err := os.Mkdir(entityDir, 0755); err != nil {
-			r.Err = err
+			r.Err = fmt.Errorf("creating dir for %s[%s]: %w", t, id, err)
 			return
 		}
 
 		if err := render(entityDir, e, r.Templates[t]); err != nil {
-			r.Err = err
+			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)
 			return
 		}
 	}
