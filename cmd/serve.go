@@ -1,0 +1,34 @@
+package cmd
+
+import (
+	"fmt"
+	"net"
+	"net/http"
+
+	"github.com/spf13/cobra"
+)
+
+var serveCmd = &cobra.Command{
+	Use:   "serve dir",
+	Short: "Serve a website from static files",
+	Args:  cobra.ExactArgs(1),
+	RunE:  runServe,
+}
+
+func init() {
+	rootCmd.AddCommand(serveCmd)
+}
+
+func runServe(_ *cobra.Command, args []string) error {
+	listener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+
+	http.Handle("/", http.FileServer(http.Dir(args[0])))
+
+	fmt.Println("Server is running on http://" + listener.Addr().String())
+
+	return http.Serve(listener, nil)
+}
