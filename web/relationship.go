@@ -30,6 +30,9 @@ func (r *Relationship) compile(a *Archive, g *glx.GLXFile) {
 	r.StartEvent = a.Events[inner.StartEvent]
 	r.Type = newVocabularyValue(inner.Type, g.RelationshipTypes)
 
+	for _, p := range r.Participants {
+		p.Person.addRelationship(r)
+	}
 }
 
 func (r *Relationship) String() string {

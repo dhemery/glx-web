@@ -8,9 +8,10 @@ import (
 type Person struct {
 	*glx.Person
 	entity
-	// The events this person participated in.
-	Events     []*Event
-	Properties map[string]Property
+	Assertions    []*Assertion // Assertions about this person.
+	Events        []*Event     // The events this person participated in.
+	Properties    map[string]Property
+	Relationships []*Relationship // The relationships this person participated in.
 }
 
 // DisplayName returns a display name extracted from p's properties.
@@ -21,9 +22,6 @@ func (p *Person) DisplayName() string {
 // String returns the display name of p.
 func (p *Person) String() string {
 	return p.DisplayName()
-}
-func (p *Person) addEvent(e *Event) {
-	p.Events = append(p.Events, e)
 }
 
 func newPerson(id string, inner *glx.Person) *Person {
@@ -37,4 +35,16 @@ func newPerson(id string, inner *glx.Person) *Person {
 func (p *Person) compile(a *Archive, g *glx.GLXFile) {
 	inner := p.Person
 	p.Properties = newProperties(inner.Properties, g.PersonProperties, a, g)
+}
+
+func (p *Person) addAssertion(a *Assertion) {
+	p.Assertions = append(p.Assertions, a)
+}
+
+func (p *Person) addEvent(e *Event) {
+	p.Events = append(p.Events, e)
+}
+
+func (p *Person) addRelationship(e *Relationship) {
+	p.Relationships = append(p.Relationships, e)
 }

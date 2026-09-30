@@ -45,6 +45,14 @@ func (a *Assertion) compile(archive *Archive, g *glx.GLXFile) {
 	case s.Place != "":
 		a.Subject = archive.Places[s.Place]
 	}
+
+	if s, ok := a.Subject.(subject); ok {
+		s.addAssertion(a)
+	}
+}
+
+type subject interface {
+	addAssertion(*Assertion)
 }
 
 func (a *Assertion) String() string {
