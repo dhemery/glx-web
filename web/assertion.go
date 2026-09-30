@@ -49,6 +49,18 @@ func (a *Assertion) compile(archive *Archive, g *glx.GLXFile) {
 	if s, ok := a.Subject.(subject); ok {
 		s.addAssertion(a)
 	}
+
+	for _, c := range a.Citations {
+		c.addAssertion(a)
+	}
+
+	for _, m := range a.Media {
+		m.addAssertion(a)
+	}
+
+	for _, s := range a.Sources {
+		s.addAssertion(a)
+	}
 }
 
 type subject interface {

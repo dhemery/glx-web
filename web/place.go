@@ -8,8 +8,6 @@ type Place struct {
 	*glx.Place
 	entity
 
-	// Whatever is this
-
 	Parent     *Place
 	Properties map[string]Property
 	Type       VocabularyValue

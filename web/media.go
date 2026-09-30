@@ -6,12 +6,20 @@ import (
 )
 
 type Media struct {
-	*glx.Media
 	entity
+	*glx.Media
+
 	Date       glxdate.Date
 	Properties map[string]Property
 	Source     *Source
 	Type       VocabularyValue
+
+	// Assertions directly citing this media entity as evidence.
+	Assertions []*Assertion
+}
+
+func (m *Media) String() string {
+	return m.Title
 }
 
 func newMedia(id string, inner *glx.Media) *Media {
@@ -30,6 +38,6 @@ func (m *Media) compile(a *Archive, g *glx.GLXFile) {
 	m.Source = a.Sources[inner.Source]
 }
 
-func (m *Media) String() string {
-	return m.Title
+func (m *Media) addAssertion(a *Assertion) {
+	m.Assertions = append(m.Assertions, a)
 }

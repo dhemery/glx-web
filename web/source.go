@@ -8,11 +8,20 @@ import (
 type Source struct {
 	*glx.Source
 	entity
+
 	Date       glxdate.Date
 	Media      []*Media
 	Properties map[string]Property
 	Repository *Repository
 	Type       VocabularyValue
+
+	// Assertions directly citing this source as evidence. Note that this
+	// does not include assertions of this source made via citations.
+	Assertions []*Assertion
+}
+
+func (s *Source) String() string {
+	return s.Title
 }
 
 func newSource(id string, inner *glx.Source) *Source {
@@ -32,6 +41,6 @@ func (s *Source) compile(a *Archive, g *glx.GLXFile) {
 	s.Type = VocabularyValue{Value: inner.Type, Definition: g.SourceTypes[inner.Type]}
 }
 
-func (s *Source) String() string {
-	return s.Title
+func (s *Source) addAssertion(a *Assertion) {
+	s.Assertions = append(s.Assertions, a)
 }
