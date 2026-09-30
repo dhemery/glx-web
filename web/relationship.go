@@ -12,6 +12,14 @@ type Relationship struct {
 	Properties   map[string]Property
 	StartEvent   *Event
 	Type         VocabularyValue
+
+	// Assertions about this relationship.
+	Assertions []*Assertion
+}
+
+func (r *Relationship) String() string {
+	// TODO: Better String()
+	return "Relationship " + r.ID
 }
 
 func newRelationship(id string, inner *glx.Relationship) *Relationship {
@@ -41,7 +49,6 @@ func (r *Relationship) compile(a *Archive, g *glx.GLXFile) {
 	}
 }
 
-func (r *Relationship) String() string {
-	// TODO: Better String()
-	return "Relationship " + r.ID
+func (r *Relationship) addAssertion(a *Assertion) {
+	r.Assertions = append(r.Assertions, a)
 }
