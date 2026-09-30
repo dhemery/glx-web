@@ -16,6 +16,8 @@ type Repository struct {
 	// reference this repository only indirectly through sources are not
 	// included.
 	Citations []*Citation
+	// Sources in this repository.
+	Sources []*Source
 }
 
 func (r *Repository) String() string {
@@ -38,4 +40,8 @@ func (r *Repository) compile(a *Archive, g *glx.GLXFile) {
 
 func (r *Repository) addCitation(c *Citation) {
 	r.Citations = append(r.Citations, c)
+}
+
+func (r *Repository) addSource(s *Source) {
+	r.Sources = append(r.Sources, s)
 }

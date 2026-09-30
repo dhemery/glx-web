@@ -48,6 +48,9 @@ func (s *Source) compile(a *Archive, g *glx.GLXFile) {
 	for _, m := range s.Media {
 		m.addSource(s)
 	}
+	if s.Repository != nil {
+		s.Repository.addSource(s)
+	}
 }
 
 func (s *Source) addAssertion(a *Assertion) {
