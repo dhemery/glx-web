@@ -16,8 +16,9 @@ type Place struct {
 	Assertions []*Assertion
 	// The places that identify this place as their parent.
 	ChildPlaces []*Place
-	// Tne events specified as happening in this place. Note that this does
-	// not include Events that in "child" places of this place.
+	// Tne events identified as happening specifically in this place. Note
+	// that this does not include Events that in "child" places of this
+	// place.
 	Events []*Event
 }
 

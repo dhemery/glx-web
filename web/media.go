@@ -14,8 +14,10 @@ type Media struct {
 	Source     *Source
 	Type       VocabularyValue
 
-	// Assertions directly citing this media entity as evidence.
+	// Assertions directly citing this media as evidence.
 	Assertions []*Assertion
+	// Citations of this media.
+	Citations []*Citation
 }
 
 func (m *Media) String() string {
@@ -40,4 +42,8 @@ func (m *Media) compile(a *Archive, g *glx.GLXFile) {
 
 func (m *Media) addAssertion(a *Assertion) {
 	m.Assertions = append(m.Assertions, a)
+}
+
+func (m *Media) addCitation(c *Citation) {
+	m.Citations = append(m.Citations, c)
 }

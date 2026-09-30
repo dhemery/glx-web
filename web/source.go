@@ -16,8 +16,12 @@ type Source struct {
 	Type       VocabularyValue
 
 	// Assertions directly citing this source as evidence. Note that this
-	// does not include assertions of this source made via citations.
+	// does not include assertions that cite this source indirectly via
+	// citations.
 	Assertions []*Assertion
+
+	// Citations of this source.
+	Citations []*Citation
 }
 
 func (s *Source) String() string {
@@ -43,4 +47,8 @@ func (s *Source) compile(a *Archive, g *glx.GLXFile) {
 
 func (s *Source) addAssertion(a *Assertion) {
 	s.Assertions = append(s.Assertions, a)
+}
+
+func (s *Source) addCitation(c *Citation) {
+	s.Citations = append(s.Citations, c)
 }

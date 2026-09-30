@@ -46,6 +46,16 @@ func (c *Citation) compile(a *Archive, g *glx.GLXFile) {
 	c.Properties = newProperties(inner.Properties, g.CitationProperties, a, g)
 	c.Repository = a.Repositories[c.RepositoryID]
 	c.Source = a.Sources[c.SourceID]
+
+	for _, m := range c.Media {
+		m.addCitation(c)
+	}
+	if c.Repository != nil {
+		c.Repository.addCitation(c)
+	}
+	if c.Source != nil {
+		c.Source.addCitation(c)
+	}
 }
 
 func (c *Citation) addAssertion(a *Assertion) {

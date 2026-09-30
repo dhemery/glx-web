@@ -6,10 +6,20 @@ import (
 
 // Repository represents a GLX repository entity.
 type Repository struct {
-	*glx.Repository
 	entity
+	*glx.Repository
+
 	Properties map[string]Property
 	Type       VocabularyValue
+
+	// Citations that directly reference this repository. Note that this
+	// does not include citations that indirectly reference this repository
+	// via sources.
+	Citations []*Citation
+}
+
+func (r *Repository) String() string {
+	return r.Name
 }
 
 func newRepository(id string, inner *glx.Repository) *Repository {
@@ -26,6 +36,6 @@ func (r *Repository) compile(a *Archive, g *glx.GLXFile) {
 	r.Properties = newProperties(inner.Properties, g.RepositoryProperties, a, g)
 }
 
-func (r *Repository) String() string {
-	return r.Name
+func (r *Repository) addCitation(c *Citation) {
+	r.Citations = append(r.Citations, c)
 }
