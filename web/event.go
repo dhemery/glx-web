@@ -30,6 +30,10 @@ func (e *Event) compile(a *Archive, g *glx.GLXFile) {
 	e.Place = a.Places[e.PlaceID]
 	e.Properties = newProperties(inner.Properties, g.EventProperties, a, g)
 	e.Type = newVocabularyValue(inner.Type, g.EventTypes)
+
+	for _, p := range e.Participants {
+		p.Person.addEvent(e)
+	}
 }
 
 func (e *Event) String() string {
