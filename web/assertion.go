@@ -6,14 +6,16 @@ import (
 )
 
 type Assertion struct {
-	*glx.Assertion
 	entity
+	*glx.Assertion
+
 	Citations   []*Citation
 	Date        glxdate.Date
 	Media       []*Media
 	Participant *Participant
 	Sources     []*Source
 	Subject     entityReference
+
 	// TODO: Resolve value if the property has a reference type or vocabulary type
 }
 

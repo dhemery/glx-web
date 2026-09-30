@@ -12,9 +12,9 @@ type Repository struct {
 	Properties map[string]Property
 	Type       VocabularyValue
 
-	// Citations that directly reference this repository. Note that this
-	// does not include citations that indirectly reference this repository
-	// via sources.
+	// Citations that directly reference this repository. Citations that
+	// reference this repository only indirectly through sources are not
+	// included.
 	Citations []*Citation
 }
 

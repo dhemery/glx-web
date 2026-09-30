@@ -11,13 +11,18 @@ type Media struct {
 
 	Date       glxdate.Date
 	Properties map[string]Property
-	Source     *Source
-	Type       VocabularyValue
+	// The source documented by this media.
+	Source *Source
+	Type   VocabularyValue
 
-	// Assertions directly citing this media as evidence.
+	// Assertions that directly cite this media as evidence. Assertions
+	// that reference this media only indirectly through citations or
+	// sources are not included.
 	Assertions []*Assertion
 	// Citations of this media.
 	Citations []*Citation
+	// Sources that reference this media.
+	ReferencingSources []*Source
 }
 
 func (m *Media) String() string {
@@ -38,6 +43,10 @@ func (m *Media) compile(a *Archive, g *glx.GLXFile) {
 	m.Type = VocabularyValue{Value: inner.Type, Definition: g.MediaTypes[inner.Type]}
 	m.Properties = newProperties(inner.Properties, g.MediaProperties, a, g)
 	m.Source = a.Sources[inner.Source]
+
+	if m.Source != nil {
+		m.Source.addMedia(m)
+	}
 }
 
 func (m *Media) addAssertion(a *Assertion) {
@@ -46,4 +55,8 @@ func (m *Media) addAssertion(a *Assertion) {
 
 func (m *Media) addCitation(c *Citation) {
 	m.Citations = append(m.Citations, c)
+}
+
+func (m *Media) addSource(s *Source) {
+	m.ReferencingSources = append(m.ReferencingSources, s)
 }

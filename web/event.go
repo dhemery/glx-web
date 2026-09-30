@@ -8,13 +8,17 @@ import (
 type Event struct {
 	entity
 	*glx.Event
-	Assertions    []*Assertion // Assertions about this event.
-	Date          glxdate.Date
-	Participants  []*Participant
-	Place         *Place
-	Properties    map[string]Property
-	Relationships []*Relationship // Relationships started or ended by this event.
-	Type          VocabularyValue
+
+	Date         glxdate.Date
+	Participants []*Participant
+	Place        *Place
+	Properties   map[string]Property
+	Type         VocabularyValue
+
+	// Assertions about this event.
+	Assertions []*Assertion
+	// Relationships started or ended by this event.
+	Relationships []*Relationship
 }
 
 func (e *Event) String() string {

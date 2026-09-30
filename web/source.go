@@ -6,8 +6,8 @@ import (
 )
 
 type Source struct {
-	*glx.Source
 	entity
+	*glx.Source
 
 	Date       glxdate.Date
 	Media      []*Media
@@ -15,13 +15,14 @@ type Source struct {
 	Repository *Repository
 	Type       VocabularyValue
 
-	// Assertions directly citing this source as evidence. Note that this
-	// does not include assertions that cite this source indirectly via
-	// citations.
+	// Assertions that directly cite this source as evidence. Assertions
+	// that cite this source only indirectly via citations or media are not
+	// included.
 	Assertions []*Assertion
-
 	// Citations of this source.
 	Citations []*Citation
+	// Media that reference this source.
+	ReferencingMedia []*Media
 }
 
 func (s *Source) String() string {
@@ -43,6 +44,10 @@ func (s *Source) compile(a *Archive, g *glx.GLXFile) {
 	s.Properties = newProperties(inner.Properties, g.SourceProperties, a, g)
 	s.Repository = a.Repositories[s.RepositoryID]
 	s.Type = VocabularyValue{Value: inner.Type, Definition: g.SourceTypes[inner.Type]}
+
+	for _, m := range s.Media {
+		m.addSource(s)
+	}
 }
 
 func (s *Source) addAssertion(a *Assertion) {
@@ -51,4 +56,8 @@ func (s *Source) addAssertion(a *Assertion) {
 
 func (s *Source) addCitation(c *Citation) {
 	s.Citations = append(s.Citations, c)
+}
+
+func (s *Source) addMedia(m *Media) {
+	s.ReferencingMedia = append(s.ReferencingMedia, m)
 }

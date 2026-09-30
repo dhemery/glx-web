@@ -5,20 +5,19 @@ import (
 )
 
 type Place struct {
-	*glx.Place
 	entity
+	*glx.Place
 
 	Parent     *Place
 	Properties map[string]Property
 	Type       VocabularyValue
 
-	// The assertions about this place.
+	// Assertions about this place.
 	Assertions []*Assertion
-	// The places that identify this place as their parent.
+	// Places that identify this place as their parent.
 	ChildPlaces []*Place
-	// Tne events identified as happening specifically in this place. Note
-	// that this does not include Events that in "child" places of this
-	// place.
+	// Events identified as happening specifically in this place. This does
+	// not include events in the "child" places of this place.
 	Events []*Event
 }
 
