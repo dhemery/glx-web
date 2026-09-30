@@ -77,14 +77,13 @@ func runBuild(_ *cobra.Command, _ []string) error {
 	}
 
 	r := &site.Renderer{
-		Archive:   web.NewArchive(glxFile),
 		OutputDir: absOutputDir,
 		Clean:     cleanOutput,
 		StaticDir: absStaticDir,
 		Templates: templates,
 	}
 
-	return r.Render()
+	return r.Render(web.NewArchive(glxFile), glxFile)
 }
 
 func loadTemplates(templateDir string) (map[glx.EntityType]*template.Template, error) {

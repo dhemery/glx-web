@@ -12,7 +12,6 @@ import (
 )
 
 type Renderer struct {
-	Archive   *web.Archive
 	OutputDir string
 	Clean     bool
 	StaticDir string
@@ -20,54 +19,61 @@ type Renderer struct {
 	Err       error
 }
 
-func (r *Renderer) Render() error {
+func (r *Renderer) Render(archive *web.Archive, glxfile *glx.GLXFile) error {
 	if err := os.Mkdir(r.OutputDir, 0755); err != nil {
 		return err
 	}
 
-	r.renderEntities(glx.EntityTypeAssertions, r.Archive.Assertions)
-	r.renderEntities(glx.EntityTypeCitations, r.Archive.Citations)
-	r.renderEntities(glx.EntityTypeEvents, r.Archive.Events)
-	r.renderEntities(glx.EntityTypeMedia, r.Archive.Media)
-	r.renderEntities(glx.EntityTypePersons, r.Archive.Persons)
-	r.renderEntities(glx.EntityTypePlaces, r.Archive.Places)
-	r.renderEntities(glx.EntityTypeRelationships, r.Archive.Relationships)
-	r.renderEntities(glx.EntityTypeRepositories, r.Archive.Repositories)
-	r.renderEntities(glx.EntityTypeSources, r.Archive.Sources)
+	data := web.Data{
+		Archive: archive,
+		GLX:     glxfile,
+		Content: nil,
+	}
+
+	r.renderEntities(glx.EntityTypeAssertions, archive.Assertions, data)
+	r.renderEntities(glx.EntityTypeCitations, archive.Citations, data)
+	r.renderEntities(glx.EntityTypeEvents, archive.Events, data)
+	r.renderEntities(glx.EntityTypeMedia, archive.Media, data)
+	r.renderEntities(glx.EntityTypePersons, archive.Persons, data)
+	r.renderEntities(glx.EntityTypePlaces, archive.Places, data)
+	r.renderEntities(glx.EntityTypeRelationships, archive.Relationships, data)
+	r.renderEntities(glx.EntityTypeRepositories, archive.Repositories, data)
+	r.renderEntities(glx.EntityTypeSources, archive.Sources, data)
 
 	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T) {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, data web.Data) {
 	if r.Err != nil {
 		return
 	}
+
 	typeDir := filepath.Join(r.OutputDir, t.Plural())
 	if err := os.Mkdir(typeDir, 0755); err != nil {
 		r.Err = err
 		return
 	}
 
-	for id, e := range entities {
+	entityTemplate := r.Templates[t]
+
+	for id, entity := range entities {
 		entityDir := filepath.Join(typeDir, id)
 		if err := os.Mkdir(entityDir, 0755); err != nil {
 			r.Err = fmt.Errorf("creating dir for %s[%s]: %w", t, id, err)
 			return
 		}
 
-		if err := render(entityDir, e, r.Templates[t]); err != nil {
+		data.Content = entity
+		fname := filepath.Join(entityDir, "index.html")
+
+		if err := render(fname, data, entityTemplate); err != nil {
 			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)
 			return
 		}
 	}
 }
 
-func render(dir string, data any, tmpl *template.Template) error {
-	if data == nil {
-		return nil
-	}
-
-	fname := filepath.Join(dir, "index.html")
+func render(fname string, data any, tmpl *template.Template) error {
 	f, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return err

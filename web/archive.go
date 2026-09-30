@@ -26,6 +26,8 @@ func (e entity) Slug() string {
 	return path.Join(e.EntityType.Plural(), e.ID)
 }
 
+// Archive represents the entities of a GLX archive, enhanced with convenience
+// methods useful for rendering via templates.
 type Archive struct {
 	Assertions    map[string]*Assertion
 	Citations     map[string]*Citation
