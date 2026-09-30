@@ -5,8 +5,8 @@ import (
 )
 
 type Relationship struct {
-	*glx.Relationship
 	entity
+	*glx.Relationship
 	EndEvent     *Event
 	Participants []*Participant
 	Properties   map[string]Property
@@ -32,6 +32,12 @@ func (r *Relationship) compile(a *Archive, g *glx.GLXFile) {
 
 	for _, p := range r.Participants {
 		p.Person.addRelationship(r)
+	}
+	if r.StartEvent != nil {
+		r.StartEvent.addRelationship(r)
+	}
+	if r.EndEvent != nil {
+		r.EndEvent.addRelationship(r)
 	}
 }
 

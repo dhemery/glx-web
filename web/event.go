@@ -6,13 +6,19 @@ import (
 )
 
 type Event struct {
-	*glx.Event
 	entity
-	Date         glxdate.Date
-	Participants []*Participant
-	Place        *Place
-	Properties   map[string]Property
-	Type         VocabularyValue
+	*glx.Event
+	Assertions    []*Assertion // Assertions about this event.
+	Date          glxdate.Date
+	Participants  []*Participant
+	Place         *Place
+	Properties    map[string]Property
+	Relationships []*Relationship // Relationships started or ended by this event.
+	Type          VocabularyValue
+}
+
+func (e *Event) String() string {
+	return e.Title
 }
 
 func newEvent(id string, inner *glx.Event) *Event {
@@ -36,6 +42,10 @@ func (e *Event) compile(a *Archive, g *glx.GLXFile) {
 	}
 }
 
-func (e *Event) String() string {
-	return e.Title
+func (e *Event) addAssertion(a *Assertion) {
+	e.Assertions = append(e.Assertions, a)
+}
+
+func (e *Event) addRelationship(r *Relationship) {
+	e.Relationships = append(e.Relationships, r)
 }
