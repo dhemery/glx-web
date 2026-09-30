@@ -40,6 +40,10 @@ func (e *Event) compile(a *Archive, g *glx.GLXFile) {
 	for _, p := range e.Participants {
 		p.Person.addEvent(e)
 	}
+
+	if e.Place != nil {
+		e.Place.addEvent(e)
+	}
 }
 
 func (e *Event) addAssertion(a *Assertion) {
