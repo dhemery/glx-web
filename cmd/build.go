@@ -87,29 +87,41 @@ func runBuild(_ *cobra.Command, _ []string) error {
 }
 
 func loadTemplates(templateDir string) (map[glx.EntityType]*template.Template, error) {
-	baseTemplate, err := template.ParseFiles(filepath.Join(templateDir, "base.gotmpl"))
+	baseFileName := filepath.Join(templateDir, "base.gotmpl")
+	baseTemplate, err := template.ParseFiles(baseFileName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parsing %s: %w", baseFileName, err)
 	}
 
-	entityTemplates := map[glx.EntityType]*template.Template{}
+	tmpl := map[glx.EntityType]*template.Template{}
 
 	for _, t := range glx.AllEntityTypes {
 		glob := filepath.Join(templateDir, t.Plural(), "*.gotmpl")
 
 		et, err := baseTemplate.Clone()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("cloning base template: %w", err)
 		}
 
 		et, err = et.ParseGlob(glob)
 		if err != nil {
-			// Ignore failures for now
-			continue
+			continue // TODO: Load each type explicitly and handle error
+			// return nil, fmt.Errorf("parsing %s templates: %w", t, err)
 		}
 
-		entityTemplates[t] = et
+		tmpl[t] = et
 	}
 
-	return entityTemplates, nil
+	it, err := baseTemplate.Clone()
+	if err != nil {
+		return nil, fmt.Errorf("cloning base template: %w", err)
+	}
+	indexFileName := filepath.Join(templateDir, "index.gotmpl")
+	it, err = it.ParseFiles(indexFileName)
+	if err != nil {
+		return nil, fmt.Errorf("parsing index template %s: %w", indexFileName, err)
+	}
+	tmpl["index"] = it
+
+	return tmpl, nil
 }

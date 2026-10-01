@@ -2,13 +2,18 @@
 package site
 
 import (
+	"cmp"
 	"fmt"
 	"html/template"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Renderer struct {
@@ -52,8 +57,20 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 		Catalog: catalog,
 		GLX:     glxfile,
 	}
-	entityTemplate := r.Templates[t]
+	indexTemplate := r.Templates["index"]
+	cmpEntities := func(a, b *T) int {
+		return cmp.Compare(fmt.Sprint(a), fmt.Sprint(b))
 
+	}
+	indexTitle := cases.Title(language.English).String(t.Plural())
+	entitiesByTitle := slices.SortedFunc(maps.Values(entities), cmpEntities)
+	data.Content = entity.Index{Title: indexTitle, Entities: entitiesByTitle}
+	r.Err = render(filepath.Join(typeDir, "index.html"), data, indexTemplate)
+	if r.Err != nil {
+		return
+	}
+
+	entityTemplate := r.Templates[t]
 	for id, entity := range entities {
 		entityDir := filepath.Join(typeDir, id)
 		if err := os.Mkdir(entityDir, 0755); err != nil {

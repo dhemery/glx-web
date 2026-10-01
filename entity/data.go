@@ -2,7 +2,12 @@ package entity
 
 import "github.com/genealogix/glx/go-glx"
 
-// TODO: This struct doesn't fit in this package.
+// TODO: These struct dosn't fit in this package.
+
+type Index struct {
+	Title    string
+	Entities any
+}
 
 // Data is the package of data sent to a template to render.
 type Data struct {
