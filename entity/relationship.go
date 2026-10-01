@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"strings"
+
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -19,8 +21,23 @@ type Relationship struct {
 }
 
 func (r *Relationship) String() string {
-	// TODO: Better String()
-	return "Relationship " + r.ID
+	var parts []string
+	for _, p := range r.Participants {
+		role := p.Role.Definition.Label
+		name := p.Person.DisplayName()
+		parts = append(parts, role+" "+name)
+	}
+	switch len(parts) {
+	case 0:
+		return r.Type.Definition.Label + r.ID
+	case 1:
+		return r.Type.Definition.Label + " of " + parts[0]
+	case 2:
+		return strings.Join(parts, " and ")
+	default:
+		parts[len(parts)-1] = "and " + parts[len(parts)-1]
+		return strings.Join(parts, ", ")
+	}
 }
 
 func newRelationship(id string, inner *glx.Relationship) *Relationship {
