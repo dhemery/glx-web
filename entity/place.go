@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"github.com/genealogix/glx/go-glx"
@@ -43,7 +43,7 @@ func newPlace(id string, inner *glx.Place) *Place {
 	}
 }
 
-func (p *Place) compile(a *Archive, g *glx.GLXFile) {
+func (p *Place) compile(a *Catalog, g *glx.GLXFile) {
 	inner := p.Place
 	p.Parent = a.Places[p.ParentID]
 	p.Properties = newProperties(inner.Properties, g.PlaceProperties, a, g)

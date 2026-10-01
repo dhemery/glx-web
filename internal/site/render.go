@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dhemery/glx-web/web"
+	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -19,12 +19,12 @@ type Renderer struct {
 	Err       error
 }
 
-func (r *Renderer) Render(archive *web.Archive, glxfile *glx.GLXFile) error {
+func (r *Renderer) Render(archive *entity.Catalog, glxfile *glx.GLXFile) error {
 	if err := os.Mkdir(r.OutputDir, 0755); err != nil {
 		return err
 	}
 
-	data := web.Data{
+	data := entity.Data{
 		Archive: archive,
 		GLX:     glxfile,
 		Content: nil,
@@ -43,7 +43,7 @@ func (r *Renderer) Render(archive *web.Archive, glxfile *glx.GLXFile) error {
 	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, data web.Data) {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, data entity.Data) {
 	if r.Err != nil {
 		return
 	}

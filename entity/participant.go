@@ -1,4 +1,4 @@
-package web
+package entity
 
 import "github.com/genealogix/glx/go-glx"
 
@@ -9,7 +9,7 @@ type Participant struct {
 	Role       VocabularyValue
 }
 
-func newParticipants(inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition, a *Archive, g *glx.GLXFile) []*Participant {
+func newParticipants(inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition, a *Catalog, g *glx.GLXFile) []*Participant {
 	roleDefs := g.ParticipantRoles
 	var participants []*Participant
 
@@ -20,7 +20,7 @@ func newParticipants(inner []glx.Participant, propertyDefs map[string]*glx.Prope
 	return participants
 }
 
-func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition, a *Archive, g *glx.GLXFile) *Participant {
+func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition, a *Catalog, g *glx.GLXFile) *Participant {
 	if inner == nil {
 		return nil
 

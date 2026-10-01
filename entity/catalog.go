@@ -1,13 +1,13 @@
-// Package web decorates a GLX archive and its entities to make the entities
-// easier to render as HTML. Each entity has a Slug method that returns the
-// path to the directory where it is rendered relative to the output directory.
-// Entity references are resolved to pointers to the referenced entities.
-// Properties and vocabulary values are presented along with their definitions.
-// Most entities, properties, and vocabulary values have String methods for
+// Package entity wraps the entities of a GLX archive to make them easier to
+// render via templates. Each entity has a Slug method that returns the path to
+// the directory where it is rendered relative to the output directory. Entity
+// references are resolved to pointers to the referenced entities. Properties
+// and vocabulary values are presented along with their definitions. Most
+// entities, properties, and vocabulary values have String methods for
 // convenience. The String methods of some entities (Assertion, Citation, and
 // Relationship) return strings that, though useful for debugging templates,
 // may not be especially useful for display.
-package web
+package entity
 
 import (
 	"path"
@@ -26,9 +26,8 @@ func (e entity) Slug() string {
 	return path.Join(e.EntityType.Plural(), e.ID)
 }
 
-// Archive represents the entities of a GLX archive, enhanced with convenience
-// methods useful for rendering via templates.
-type Archive struct {
+// Catalog collects all entities.
+type Catalog struct {
 	Assertions    map[string]*Assertion
 	Citations     map[string]*Citation
 	Events        map[string]*Event
@@ -40,8 +39,8 @@ type Archive struct {
 	Sources       map[string]*Source
 }
 
-func NewArchive(g *glx.GLXFile) *Archive {
-	a := &Archive{
+func NewArchive(g *glx.GLXFile) *Catalog {
+	a := &Catalog{
 		Assertions:    make(map[string]*Assertion),
 		Citations:     make(map[string]*Citation),
 		Events:        make(map[string]*Event),
@@ -105,10 +104,10 @@ func NewArchive(g *glx.GLXFile) *Archive {
 type compiler interface {
 	// Compile initializes fields and properties that refer to entities and
 	// vocabularies in the archive.
-	compile(*Archive, *glx.GLXFile)
+	compile(*Catalog, *glx.GLXFile)
 }
 
-func (a *Archive) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
+func (a *Catalog) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
 	for _, compiler := range compilers {
 		compiler.compile(a, g)
 	}
@@ -119,7 +118,7 @@ type entityReference interface {
 	String() string
 }
 
-func (a *Archive) entity(id string, entityType string) entityReference {
+func (a *Catalog) entity(id string, entityType string) entityReference {
 	switch entityType {
 	case "citations":
 		return a.Citations[id]
@@ -132,7 +131,7 @@ func (a *Archive) entity(id string, entityType string) entityReference {
 	}
 }
 
-func (a *Archive) citationsWithIDs(ids []string) []*Citation {
+func (a *Catalog) citationsWithIDs(ids []string) []*Citation {
 	var citations []*Citation
 	for _, id := range ids {
 		citations = append(citations, a.Citations[id])
@@ -140,7 +139,7 @@ func (a *Archive) citationsWithIDs(ids []string) []*Citation {
 	return citations
 }
 
-func (a *Archive) mediaWithIDs(ids []string) []*Media {
+func (a *Catalog) mediaWithIDs(ids []string) []*Media {
 	var media []*Media
 	for _, mediaID := range ids {
 		media = append(media, a.Media[mediaID])
@@ -148,7 +147,7 @@ func (a *Archive) mediaWithIDs(ids []string) []*Media {
 	return media
 }
 
-func (a *Archive) sourcesWithIDs(ids []string) []*Source {
+func (a *Catalog) sourcesWithIDs(ids []string) []*Source {
 	var sources []*Source
 	for _, id := range ids {
 		sources = append(sources, a.Sources[id])

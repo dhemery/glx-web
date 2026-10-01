@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"github.com/genealogix/glx/go-glx"
@@ -32,7 +32,7 @@ func newRepository(id string, inner *glx.Repository) *Repository {
 	}
 }
 
-func (r *Repository) compile(a *Archive, g *glx.GLXFile) {
+func (r *Repository) compile(a *Catalog, g *glx.GLXFile) {
 	inner := r.Repository
 	r.Type = VocabularyValue{Value: inner.Type, Definition: g.RepositoryTypes[inner.Type]}
 	r.Properties = newProperties(inner.Properties, g.RepositoryProperties, a, g)

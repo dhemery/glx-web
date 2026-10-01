@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"github.com/genealogix/glx/go-glx"
@@ -34,7 +34,7 @@ func newEvent(id string, inner *glx.Event) *Event {
 	}
 }
 
-func (e *Event) compile(a *Archive, g *glx.GLXFile) {
+func (e *Event) compile(a *Catalog, g *glx.GLXFile) {
 	inner := e.Event
 	e.Participants = newParticipants(inner.Participants, g.EventProperties, a, g)
 	e.Place = a.Places[e.PlaceID]

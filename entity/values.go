@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"fmt"
@@ -55,7 +55,7 @@ func (f PropertyField) String() string {
 	return f.Value.String()
 }
 
-func newProperties(in map[string]any, defs map[string]*glx.PropertyDefinition, a *Archive, g *glx.GLXFile) map[string]Property {
+func newProperties(in map[string]any, defs map[string]*glx.PropertyDefinition, a *Catalog, g *glx.GLXFile) map[string]Property {
 	properties := make(map[string]Property)
 
 	for name, value := range in {
@@ -65,7 +65,7 @@ func newProperties(in map[string]any, defs map[string]*glx.PropertyDefinition, a
 	return properties
 }
 
-func newProperty(in any, def *glx.PropertyDefinition, a *Archive, g *glx.GLXFile) Property {
+func newProperty(in any, def *glx.PropertyDefinition, a *Catalog, g *glx.GLXFile) Property {
 	property := Property{Definition: def}
 
 	switch typedIn := in.(type) {
@@ -91,7 +91,7 @@ func asPropertyMap(in any) map[string]any {
 	return map[string]any{"value": in}
 }
 
-func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Archive, glxFile *glx.GLXFile) PropertyValue {
+func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Catalog, glxFile *glx.GLXFile) PropertyValue {
 	propertyValue := PropertyValue{
 		Date:   newDate(fmt.Sprint(in["date"])),
 		Fields: newPropertyFields(in["fields"], def),

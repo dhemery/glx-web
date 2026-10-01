@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"github.com/genealogix/glx/go-glx"
@@ -37,7 +37,7 @@ func newPerson(id string, inner *glx.Person) *Person {
 	}
 }
 
-func (p *Person) compile(a *Archive, g *glx.GLXFile) {
+func (p *Person) compile(a *Catalog, g *glx.GLXFile) {
 	inner := p.Person
 	p.Properties = newProperties(inner.Properties, g.PersonProperties, a, g)
 }

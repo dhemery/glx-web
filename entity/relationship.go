@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"github.com/genealogix/glx/go-glx"
@@ -31,7 +31,7 @@ func newRelationship(id string, inner *glx.Relationship) *Relationship {
 	}
 }
 
-func (r *Relationship) compile(a *Archive, g *glx.GLXFile) {
+func (r *Relationship) compile(a *Catalog, g *glx.GLXFile) {
 	inner := r.Relationship
 	r.EndEvent = a.Events[inner.EndEvent]
 	r.Participants = newParticipants(inner.Participants, g.RelationshipProperties, a, g)

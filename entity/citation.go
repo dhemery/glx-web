@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"strings"
@@ -40,7 +40,7 @@ func newCitation(id string, inner *glx.Citation) *Citation {
 	}
 }
 
-func (c *Citation) compile(a *Archive, g *glx.GLXFile) {
+func (c *Citation) compile(a *Catalog, g *glx.GLXFile) {
 	inner := c.Citation
 	c.Media = a.mediaWithIDs(inner.Media)
 	c.Properties = newProperties(inner.Properties, g.CitationProperties, a, g)

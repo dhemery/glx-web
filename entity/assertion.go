@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"github.com/genealogix/glx/go-glx"
@@ -28,7 +28,7 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	}
 }
 
-func (a *Assertion) compile(archive *Archive, g *glx.GLXFile) {
+func (a *Assertion) compile(archive *Catalog, g *glx.GLXFile) {
 	inner := a.Assertion
 	a.Citations = archive.citationsWithIDs(inner.Citations)
 	a.Media = archive.mediaWithIDs(inner.Media)

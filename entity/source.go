@@ -1,4 +1,4 @@
-package web
+package entity
 
 import (
 	"github.com/genealogix/glx/go-glx"
@@ -38,7 +38,7 @@ func newSource(id string, inner *glx.Source) *Source {
 	}
 }
 
-func (s *Source) compile(a *Archive, g *glx.GLXFile) {
+func (s *Source) compile(a *Catalog, g *glx.GLXFile) {
 	inner := s.Source
 	s.Media = a.mediaWithIDs(inner.Media)
 	s.Properties = newProperties(inner.Properties, g.SourceProperties, a, g)

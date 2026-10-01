@@ -1,4 +1,4 @@
-package web
+package entity
 
 import "github.com/genealogix/glx/go-glx"
 
@@ -9,7 +9,7 @@ type Data struct {
 	Content any
 
 	// The archive being rendered.
-	Archive *Archive
+	Archive *Catalog
 
 	// The underlying [glx.GLXFile] of the archive.
 	GLX *glx.GLXFile
