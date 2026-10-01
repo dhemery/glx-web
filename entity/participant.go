@@ -9,26 +9,28 @@ type Participant struct {
 	Role       VocabularyValue
 }
 
-func newParticipants(inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition, a *Catalog, g *glx.GLXFile) []*Participant {
-	roleDefs := g.ParticipantRoles
+func newParticipants(inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition,
+	catalog *Catalog, glxfile *glx.GLXFile) []*Participant {
+	roleDefs := glxfile.ParticipantRoles
 	var participants []*Participant
 
 	for _, p := range inner {
-		participants = append(participants, newParticipant(&p, roleDefs, propertyDefs, a, g))
+		participants = append(participants, newParticipant(&p, roleDefs, propertyDefs, catalog, glxfile))
 	}
 
 	return participants
 }
 
-func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition, a *Catalog, g *glx.GLXFile) *Participant {
+func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry,
+	propertyDefs map[string]*glx.PropertyDefinition, catalog *Catalog, glxfile *glx.GLXFile) *Participant {
 	if inner == nil {
 		return nil
 
 	}
 	return &Participant{
 		Participant: inner,
-		Person:      a.Persons[inner.Person],
-		Properties:  newProperties(inner.Properties, propertyDefs, a, g),
+		Person:      catalog.Persons[inner.Person],
+		Properties:  newProperties(inner.Properties, propertyDefs, catalog, glxfile),
 		Role:        newVocabularyValue(inner.Role, roleDefs),
 	}
 }

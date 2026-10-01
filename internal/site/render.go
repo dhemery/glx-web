@@ -19,31 +19,25 @@ type Renderer struct {
 	Err       error
 }
 
-func (r *Renderer) Render(archive *entity.Catalog, glxfile *glx.GLXFile) error {
+func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 	if err := os.Mkdir(r.OutputDir, 0755); err != nil {
 		return err
 	}
 
-	data := entity.Data{
-		Archive: archive,
-		GLX:     glxfile,
-		Content: nil,
-	}
-
-	r.renderEntities(glx.EntityTypeAssertions, archive.Assertions, data)
-	r.renderEntities(glx.EntityTypeCitations, archive.Citations, data)
-	r.renderEntities(glx.EntityTypeEvents, archive.Events, data)
-	r.renderEntities(glx.EntityTypeMedia, archive.Media, data)
-	r.renderEntities(glx.EntityTypePersons, archive.Persons, data)
-	r.renderEntities(glx.EntityTypePlaces, archive.Places, data)
-	r.renderEntities(glx.EntityTypeRelationships, archive.Relationships, data)
-	r.renderEntities(glx.EntityTypeRepositories, archive.Repositories, data)
-	r.renderEntities(glx.EntityTypeSources, archive.Sources, data)
+	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions, catalog, glxfile)
+	r.renderEntities(glx.EntityTypeCitations, catalog.Citations, catalog, glxfile)
+	r.renderEntities(glx.EntityTypeEvents, catalog.Events, catalog, glxfile)
+	r.renderEntities(glx.EntityTypeMedia, catalog.Media, catalog, glxfile)
+	r.renderEntities(glx.EntityTypePersons, catalog.Persons, catalog, glxfile)
+	r.renderEntities(glx.EntityTypePlaces, catalog.Places, catalog, glxfile)
+	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships, catalog, glxfile)
+	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories, catalog, glxfile)
+	r.renderEntities(glx.EntityTypeSources, catalog.Sources, catalog, glxfile)
 
 	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, data entity.Data) {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, catalog *entity.Catalog, glxfile *glx.GLXFile) {
 	if r.Err != nil {
 		return
 	}
@@ -54,6 +48,10 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 		return
 	}
 
+	data := entity.Data{
+		Catalog: catalog,
+		GLX:     glxfile,
+	}
 	entityTemplate := r.Templates[t]
 
 	for id, entity := range entities {

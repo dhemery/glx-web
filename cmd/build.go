@@ -83,7 +83,7 @@ func runBuild(_ *cobra.Command, _ []string) error {
 		Templates: templates,
 	}
 
-	return r.Render(entity.NewArchive(glxFile), glxFile)
+	return r.Render(entity.NewCatalog(glxFile), glxFile)
 }
 
 func loadTemplates(templateDir string) (map[glx.EntityType]*template.Template, error) {

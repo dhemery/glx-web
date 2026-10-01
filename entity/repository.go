@@ -32,10 +32,10 @@ func newRepository(id string, inner *glx.Repository) *Repository {
 	}
 }
 
-func (r *Repository) compile(a *Catalog, g *glx.GLXFile) {
+func (r *Repository) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := r.Repository
-	r.Type = VocabularyValue{Value: inner.Type, Definition: g.RepositoryTypes[inner.Type]}
-	r.Properties = newProperties(inner.Properties, g.RepositoryProperties, a, g)
+	r.Type = VocabularyValue{Value: inner.Type, Definition: glxfile.RepositoryTypes[inner.Type]}
+	r.Properties = newProperties(inner.Properties, glxfile.RepositoryProperties, catalog, glxfile)
 }
 
 func (r *Repository) addCitation(c *Citation) {

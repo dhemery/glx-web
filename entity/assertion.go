@@ -28,24 +28,28 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	}
 }
 
-func (a *Assertion) compile(archive *Catalog, g *glx.GLXFile) {
+func (a *Assertion) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := a.Assertion
-	a.Citations = archive.citationsWithIDs(inner.Citations)
-	a.Media = archive.mediaWithIDs(inner.Media)
-	a.Sources = archive.sourcesWithIDs(inner.Sources)
+	a.Citations = catalog.citationsWithIDs(inner.Citations)
+	a.Media = catalog.mediaWithIDs(inner.Media)
+	a.Sources = catalog.sourcesWithIDs(inner.Sources)
 
 	s := inner.Subject
 	switch {
 	case s.Person != "":
-		a.Subject = archive.Persons[s.Person]
+		a.Subject = catalog.Persons[s.Person]
 	case s.Event != "":
-		a.Subject = archive.Events[s.Event]
-		a.Participant = newParticipant(inner.Participant, g.ParticipantRoles, g.EventProperties, archive, g)
+		a.Subject = catalog.Events[s.Event]
+		roles := glxfile.ParticipantRoles
+		props := glxfile.EventProperties
+		a.Participant = newParticipant(inner.Participant, roles, props, catalog, glxfile)
 	case s.Relationship != "":
-		a.Subject = archive.Relationships[s.Relationship]
-		a.Participant = newParticipant(inner.Participant, g.ParticipantRoles, g.RelationshipProperties, archive, g)
+		a.Subject = catalog.Relationships[s.Relationship]
+		roles := glxfile.ParticipantRoles
+		props := glxfile.RelationshipProperties
+		a.Participant = newParticipant(inner.Participant, roles, props, catalog, glxfile)
 	case s.Place != "":
-		a.Subject = archive.Places[s.Place]
+		a.Subject = catalog.Places[s.Place]
 	}
 
 	if s, ok := a.Subject.(subject); ok {

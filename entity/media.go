@@ -38,11 +38,11 @@ func newMedia(id string, inner *glx.Media) *Media {
 	}
 }
 
-func (m *Media) compile(a *Catalog, g *glx.GLXFile) {
+func (m *Media) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := m.Media
-	m.Type = VocabularyValue{Value: inner.Type, Definition: g.MediaTypes[inner.Type]}
-	m.Properties = newProperties(inner.Properties, g.MediaProperties, a, g)
-	m.Source = a.Sources[inner.Source]
+	m.Type = VocabularyValue{Value: inner.Type, Definition: glxfile.MediaTypes[inner.Type]}
+	m.Properties = newProperties(inner.Properties, glxfile.MediaProperties, catalog, glxfile)
+	m.Source = catalog.Sources[inner.Source]
 
 	if m.Source != nil {
 		m.Source.addMedia(m)

@@ -31,13 +31,13 @@ func newRelationship(id string, inner *glx.Relationship) *Relationship {
 	}
 }
 
-func (r *Relationship) compile(a *Catalog, g *glx.GLXFile) {
+func (r *Relationship) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := r.Relationship
-	r.EndEvent = a.Events[inner.EndEvent]
-	r.Participants = newParticipants(inner.Participants, g.RelationshipProperties, a, g)
-	r.Properties = newProperties(inner.Properties, g.RelationshipProperties, a, g)
-	r.StartEvent = a.Events[inner.StartEvent]
-	r.Type = newVocabularyValue(inner.Type, g.RelationshipTypes)
+	r.EndEvent = catalog.Events[inner.EndEvent]
+	r.Participants = newParticipants(inner.Participants, glxfile.RelationshipProperties, catalog, glxfile)
+	r.Properties = newProperties(inner.Properties, glxfile.RelationshipProperties, catalog, glxfile)
+	r.StartEvent = catalog.Events[inner.StartEvent]
+	r.Type = newVocabularyValue(inner.Type, glxfile.RelationshipTypes)
 
 	for _, p := range r.Participants {
 		p.Person.addRelationship(r)

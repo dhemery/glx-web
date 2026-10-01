@@ -39,7 +39,7 @@ type Catalog struct {
 	Sources       map[string]*Source
 }
 
-func NewArchive(g *glx.GLXFile) *Catalog {
+func NewCatalog(g *glx.GLXFile) *Catalog {
 	a := &Catalog{
 		Assertions:    make(map[string]*Assertion),
 		Citations:     make(map[string]*Citation),
@@ -107,9 +107,9 @@ type compiler interface {
 	compile(*Catalog, *glx.GLXFile)
 }
 
-func (a *Catalog) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
+func (c *Catalog) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
 	for _, compiler := range compilers {
-		compiler.compile(a, g)
+		compiler.compile(c, g)
 	}
 }
 
@@ -118,39 +118,39 @@ type entityReference interface {
 	String() string
 }
 
-func (a *Catalog) entity(id string, entityType string) entityReference {
+func (c *Catalog) entity(id string, entityType string) entityReference {
 	switch entityType {
 	case "citations":
-		return a.Citations[id]
+		return c.Citations[id]
 	case "persons":
-		return a.Persons[id]
+		return c.Persons[id]
 	case "places":
-		return a.Places[id]
+		return c.Places[id]
 	default:
 		return nil
 	}
 }
 
-func (a *Catalog) citationsWithIDs(ids []string) []*Citation {
+func (c *Catalog) citationsWithIDs(ids []string) []*Citation {
 	var citations []*Citation
 	for _, id := range ids {
-		citations = append(citations, a.Citations[id])
+		citations = append(citations, c.Citations[id])
 	}
 	return citations
 }
 
-func (a *Catalog) mediaWithIDs(ids []string) []*Media {
+func (c *Catalog) mediaWithIDs(ids []string) []*Media {
 	var media []*Media
 	for _, mediaID := range ids {
-		media = append(media, a.Media[mediaID])
+		media = append(media, c.Media[mediaID])
 	}
 	return media
 }
 
-func (a *Catalog) sourcesWithIDs(ids []string) []*Source {
+func (c *Catalog) sourcesWithIDs(ids []string) []*Source {
 	var sources []*Source
 	for _, id := range ids {
-		sources = append(sources, a.Sources[id])
+		sources = append(sources, c.Sources[id])
 	}
 	return sources
 }

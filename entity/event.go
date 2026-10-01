@@ -34,12 +34,12 @@ func newEvent(id string, inner *glx.Event) *Event {
 	}
 }
 
-func (e *Event) compile(a *Catalog, g *glx.GLXFile) {
+func (e *Event) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := e.Event
-	e.Participants = newParticipants(inner.Participants, g.EventProperties, a, g)
-	e.Place = a.Places[e.PlaceID]
-	e.Properties = newProperties(inner.Properties, g.EventProperties, a, g)
-	e.Type = newVocabularyValue(inner.Type, g.EventTypes)
+	e.Participants = newParticipants(inner.Participants, glxfile.EventProperties, catalog, glxfile)
+	e.Place = catalog.Places[e.PlaceID]
+	e.Properties = newProperties(inner.Properties, glxfile.EventProperties, catalog, glxfile)
+	e.Type = newVocabularyValue(inner.Type, glxfile.EventTypes)
 
 	for _, p := range e.Participants {
 		p.Person.addEvent(e)

@@ -55,29 +55,30 @@ func (f PropertyField) String() string {
 	return f.Value.String()
 }
 
-func newProperties(in map[string]any, defs map[string]*glx.PropertyDefinition, a *Catalog, g *glx.GLXFile) map[string]Property {
+func newProperties(in map[string]any, defs map[string]*glx.PropertyDefinition,
+	catalog *Catalog, glxfile *glx.GLXFile) map[string]Property {
 	properties := make(map[string]Property)
 
 	for name, value := range in {
-		properties[name] = newProperty(value, defs[name], a, g)
+		properties[name] = newProperty(value, defs[name], catalog, glxfile)
 	}
 
 	return properties
 }
 
-func newProperty(in any, def *glx.PropertyDefinition, a *Catalog, g *glx.GLXFile) Property {
+func newProperty(in any, def *glx.PropertyDefinition, catalog *Catalog, glxfile *glx.GLXFile) Property {
 	property := Property{Definition: def}
 
 	switch typedIn := in.(type) {
 	case []any: // In is multi-valued.
 		for _, v := range typedIn {
-			property.Values = append(property.Values, newPropertyValue(asPropertyMap(v), def, a, g))
+			property.Values = append(property.Values, newPropertyValue(asPropertyMap(v), def, catalog, glxfile))
 		}
 	case map[string]any: // In is an object.
-		property.Values = append(property.Values, newPropertyValue(typedIn, def, a, g))
+		property.Values = append(property.Values, newPropertyValue(typedIn, def, catalog, glxfile))
 	default: // In is a single non-object value.
 		inMap := map[string]any{"value": typedIn}
-		property.Values = append(property.Values, newPropertyValue(inMap, def, a, g))
+		property.Values = append(property.Values, newPropertyValue(inMap, def, catalog, glxfile))
 	}
 
 	return property
@@ -91,7 +92,7 @@ func asPropertyMap(in any) map[string]any {
 	return map[string]any{"value": in}
 }
 
-func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Catalog, glxFile *glx.GLXFile) PropertyValue {
+func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, catalog *Catalog, glxFile *glx.GLXFile) PropertyValue {
 	propertyValue := PropertyValue{
 		Date:   newDate(fmt.Sprint(in["date"])),
 		Fields: newPropertyFields(in["fields"], def),
@@ -103,7 +104,7 @@ func newPropertyValue(in map[string]any, def *glx.PropertyDefinition, a *Catalog
 		propertyValue.Value = newPrimitiveValue(inValue, def.ValueType)
 	case def.ReferenceType != "":
 		id := inValue.(string)
-		propertyValue.Value = a.entity(id, def.ReferenceType)
+		propertyValue.Value = catalog.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
 		key := inValue.(string)
 		propertyValue.Value = newVocabularyValue(key, vocabulary(glxFile, def.VocabularyType))
