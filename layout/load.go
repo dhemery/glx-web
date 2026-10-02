@@ -1,17 +1,12 @@
-// Package template loads and supplies templates.
-package template
+// Package layout loads and supplies templates for entity and index pages.
+package layout
 
 import (
-	"encoding/json/jsontext"
-	"encoding/json/v2"
-	"errors"
 	"fmt"
 	"html/template"
 	"io/fs"
-	"maps"
 	"os"
 	"path/filepath"
-	"slices"
 
 	"github.com/genealogix/glx/go-glx"
 	"gopkg.in/yaml.v3"
@@ -94,7 +89,7 @@ type loader struct {
 	baseTemplates map[string]*template.Template
 }
 
-func newSiteTemplates(fsys fs.FS, spec SiteTemplateSpec) (SiteTemplates, error) {
+func newSiteTemplates(fsys fs.FS, siteSpec SiteTemplateSpec) (SiteTemplates, error) {
 	st := SiteTemplates{
 		Entities: map[glx.EntityType]EntityTemplates{},
 		Indexes:  map[string]*template.Template{},
@@ -102,11 +97,11 @@ func newSiteTemplates(fsys fs.FS, spec SiteTemplateSpec) (SiteTemplates, error) 
 
 	l := loader{
 		fsys:          fsys,
-		baseSpecs:     spec.Bases,
+		baseSpecs:     siteSpec.Bases,
 		baseTemplates: make(map[string]*template.Template),
 	}
 
-	for name, indexSpec := range spec.Indexes {
+	for name, indexSpec := range siteSpec.Indexes {
 		t, err := l.load(indexSpec)
 		if err != nil {
 			return st, fmt.Errorf("loading top-level template %q: %w", name, err)
@@ -114,16 +109,11 @@ func newSiteTemplates(fsys fs.FS, spec SiteTemplateSpec) (SiteTemplates, error) 
 		st.Indexes[name] = t
 	}
 
-	err := json.MarshalWrite(os.Stdout, slices.Collect(maps.Keys(st.Indexes)), jsontext.WithIndent("  "))
-	if err != nil {
-		return st, err
-	}
-	fmt.Println()
-	return st, errors.New("testing template loader")
+	return st, nil
 }
 
 func (l *loader) load(spec TemplateSpec) (*template.Template, error) {
-	base, err := l.clonedBase(spec.Base)
+	base, err := l.cloneBase(spec.Base)
 	if err != nil {
 		return nil, err
 	}
@@ -139,18 +129,20 @@ func (l *loader) load(spec TemplateSpec) (*template.Template, error) {
 	return base.ParseFS(l.fsys, spec.Patterns...)
 }
 
-func (l *loader) clonedBase(name string) (*template.Template, error) {
+func (l *loader) cloneBase(name string) (*template.Template, error) {
 	if name == "" {
 		return nil, nil
 	}
 
+	var base *template.Template
+	var err error
 	base, ok := l.baseTemplates[name]
 	if !ok {
 		spec, ok := l.baseSpecs[name]
 		if !ok {
 			return nil, fmt.Errorf("no spec for base template %q", name)
 		}
-		base, err := l.load(spec)
+		base, err = l.load(spec)
 		if err != nil {
 			return nil, fmt.Errorf("loading base template %q: %w", name, err)
 		}
