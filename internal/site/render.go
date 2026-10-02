@@ -68,7 +68,7 @@ func (r *Renderer) renderEntities[T any](_ glx.EntityType, _ map[string]*T, _ *e
 }
 
 func render(fname string, data any, tmpl *template.Template) error {
-	f, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	f, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0644)
 	if err != nil {
 		return err
 	}

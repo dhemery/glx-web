@@ -163,7 +163,11 @@ func loadSpec(dir string) (SiteTemplateSpec, error) {
 	defer configFile.Close()
 
 	dec := yaml.NewDecoder(configFile)
+	dec.KnownFields(true)
 
 	err = dec.Decode(&spec)
+	if err != nil {
+		return spec, fmt.Errorf("%s: %w", "config.yaml", err)
+	}
 	return spec, err
 }
