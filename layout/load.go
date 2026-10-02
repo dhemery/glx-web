@@ -117,6 +117,11 @@ func (l loader) loadEntityTypeTemplates(spec EntityTypeTemplateSpec) (EntityTemp
 		}
 		et.Indexes[name] = t
 	}
+	entityTemplate, err := l.load(spec.Entity)
+	if err != nil {
+		return et, fmt.Errorf("entity template: %w", err)
+	}
+	et.Entity = entityTemplate
 	return et, nil
 
 }

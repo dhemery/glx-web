@@ -65,25 +65,51 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 		return
 	}
 
-	data := entity.EntityListData[T]{
+	entityTypeData := entity.EntityListData[T]{
 		ArchiveData: archiveData,
 		EntityType:  t,
 		Entities:    entities,
 	}
 
-	entityDir := filepath.Join(r.OutputDir, t.Plural())
+	entityTypeDir := filepath.Join(r.OutputDir, t.Plural())
 
-	if err := os.Mkdir(entityDir, 0755); err != nil {
+	if err := os.Mkdir(entityTypeDir, 0755); err != nil {
 		r.Err = fmt.Errorf("rendering %s: %w", t, err)
 		return
 	}
 
 	templates := r.Templates.Entities[t]
 	for name, tmpl := range templates.Indexes {
-		fname := filepath.Join(entityDir, name+".html")
-		err := render(fname, data, tmpl)
+		fname := filepath.Join(entityTypeDir, name+".html")
+		err := render(fname, entityTypeData, tmpl)
 		if err != nil {
 			r.Err = fmt.Errorf("rendering %s with index template %q: %w", t, name, err)
+			return
+		}
+	}
+
+	entityData := entity.EntityData{
+		ArchiveData: archiveData,
+	}
+	entityTemplate := templates.Entity
+	if entityTemplate == nil {
+		r.Err = fmt.Errorf("no entity template for %s", t)
+		return
+	}
+
+	for id, entity := range entities {
+		entityDir := filepath.Join(entityTypeDir, id)
+		if err := os.Mkdir(entityDir, 0755); err != nil {
+			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)
+			return
+		}
+
+		fname := filepath.Join(entityDir, "index.html")
+		entityData.Entity = entity
+
+		err := render(fname, entityData, entityTemplate)
+		if err != nil {
+			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)
 			return
 		}
 	}
