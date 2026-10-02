@@ -22,48 +22,70 @@ type Renderer struct {
 
 func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 	if err := os.Mkdir(r.OutputDir, 0755); err != nil {
-		return err
+		return fmt.Errorf("creating output directory: %w", err)
 	}
 
-	err := r.renderTopLevelIndexes(catalog, glxfile)
+	data := entity.ArchiveData{
+		GLX:     glxfile,
+		Catalog: catalog,
+	}
+
+	err := r.renderTopLevelIndexes(data)
 	if err != nil {
 		return err
 	}
 
-	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions, catalog, glxfile)
-	r.renderEntities(glx.EntityTypeCitations, catalog.Citations, catalog, glxfile)
-	r.renderEntities(glx.EntityTypeEvents, catalog.Events, catalog, glxfile)
-	r.renderEntities(glx.EntityTypeMedia, catalog.Media, catalog, glxfile)
-	r.renderEntities(glx.EntityTypePersons, catalog.Persons, catalog, glxfile)
-	r.renderEntities(glx.EntityTypePlaces, catalog.Places, catalog, glxfile)
-	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships, catalog, glxfile)
-	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories, catalog, glxfile)
-	r.renderEntities(glx.EntityTypeSources, catalog.Sources, catalog, glxfile)
+	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions, data)
+	r.renderEntities(glx.EntityTypeCitations, catalog.Citations, data)
+	r.renderEntities(glx.EntityTypeEvents, catalog.Events, data)
+	r.renderEntities(glx.EntityTypeMedia, catalog.Media, data)
+	r.renderEntities(glx.EntityTypePersons, catalog.Persons, data)
+	r.renderEntities(glx.EntityTypePlaces, catalog.Places, data)
+	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships, data)
+	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories, data)
+	r.renderEntities(glx.EntityTypeSources, catalog.Sources, data)
 
 	return r.Err
 }
 
-func (r *Renderer) renderTopLevelIndexes(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
-	data := entity.Data{
-		GLX:     glxfile,
-		Catalog: catalog,
-		Content: nil,
-	}
-
+func (r *Renderer) renderTopLevelIndexes(data entity.ArchiveData) error {
 	for name, tmpl := range r.Templates.Indexes {
 		fname := filepath.Join(r.OutputDir, name+".html")
 		err := render(fname, data, tmpl)
 		if err != nil {
-			return fmt.Errorf("rendering top-level template %q: %w", name, err)
+			return fmt.Errorf("rendering top-level index with template %q: %w", name, err)
 		}
 	}
 
-	return nil
+	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](_ glx.EntityType, _ map[string]*T, _ *entity.Catalog, _ *glx.GLXFile) {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, archiveData entity.ArchiveData) {
 	if r.Err != nil {
 		return
+	}
+
+	data := entity.EntityListData[T]{
+		ArchiveData: archiveData,
+		EntityType:  t,
+		Entities:    entities,
+	}
+
+	entityDir := filepath.Join(r.OutputDir, t.Plural())
+
+	if err := os.Mkdir(entityDir, 0755); err != nil {
+		r.Err = fmt.Errorf("rendering %s: %w", t, err)
+		return
+	}
+
+	templates := r.Templates.Entities[t]
+	for name, tmpl := range templates.Indexes {
+		fname := filepath.Join(entityDir, name+".html")
+		err := render(fname, data, tmpl)
+		if err != nil {
+			r.Err = fmt.Errorf("rendering %s with index template %q: %w", t, name, err)
+			return
+		}
 	}
 }
 

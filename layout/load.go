@@ -59,21 +59,6 @@ type SiteTemplateSpec struct {
 	Entities map[glx.EntityType]EntityTypeTemplateSpec `json:"entities"`
 }
 
-const (
-	templateExtensionDefault    = "gotmpl"
-	templatePatternDefaultRoot  = "base/root." + templateExtensionDefault
-	templatePatternDefaultList  = "base/list." + templateExtensionDefault
-	templatePatternDefaultIndex = "base/index." + templateExtensionDefault
-)
-
-func newSpec() SiteTemplateSpec {
-	return SiteTemplateSpec{
-		Bases:    map[string]TemplateSpec{},
-		Indexes:  map[string]TemplateSpec{},
-		Entities: map[glx.EntityType]EntityTypeTemplateSpec{},
-	}
-}
-
 func Load(templateDir string) (SiteTemplates, error) {
 	spec, err := loadSpec(templateDir)
 	if err != nil {
@@ -109,7 +94,31 @@ func newSiteTemplates(fsys fs.FS, siteSpec SiteTemplateSpec) (SiteTemplates, err
 		st.Indexes[name] = t
 	}
 
+	for et, entityTypeSpec := range siteSpec.Entities {
+		templates, err := l.loadEntityTypeTemplates(entityTypeSpec)
+		if err != nil {
+			return st, fmt.Errorf("loading %s templates: %w", et, err)
+		}
+		st.Entities[et] = templates
+	}
+
 	return st, nil
+}
+
+func (l loader) loadEntityTypeTemplates(spec EntityTypeTemplateSpec) (EntityTemplates, error) {
+	et := EntityTemplates{
+		Indexes: make(map[string]*template.Template),
+	}
+
+	for name, indexSpec := range spec.Indexes {
+		t, err := l.load(indexSpec)
+		if err != nil {
+			return et, fmt.Errorf("index template %q: %w", name, err)
+		}
+		et.Indexes[name] = t
+	}
+	return et, nil
+
 }
 
 func (l *loader) load(spec TemplateSpec) (*template.Template, error) {
