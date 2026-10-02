@@ -2,25 +2,19 @@
 package site
 
 import (
-	"cmp"
-	"fmt"
-	"html/template"
-	"maps"
+	"io"
 	"os"
-	"path/filepath"
-	"slices"
 
 	"github.com/dhemery/glx-web/entity"
+	"github.com/dhemery/glx-web/template"
 	"github.com/genealogix/glx/go-glx"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type Renderer struct {
 	OutputDir string
 	Clean     bool
 	StaticDir string
-	Templates map[glx.EntityType]*template.Template
+	Templates template.SiteTemplates
 	Err       error
 }
 
@@ -43,52 +37,13 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 }
 
 func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, catalog *entity.Catalog, glxfile *glx.GLXFile) {
-	if r.Err != nil {
-		return
-	}
-
-	typeDir := filepath.Join(r.OutputDir, t.Plural())
-	if err := os.Mkdir(typeDir, 0755); err != nil {
-		r.Err = err
-		return
-	}
-
-	data := entity.Data{
-		Catalog: catalog,
-		GLX:     glxfile,
-	}
-	indexTemplate := r.Templates["index"]
-	cmpEntities := func(a, b *T) int {
-		return cmp.Compare(fmt.Sprint(a), fmt.Sprint(b))
-
-	}
-	indexTitle := cases.Title(language.English).String(t.Plural())
-	entitiesByTitle := slices.SortedFunc(maps.Values(entities), cmpEntities)
-	data.Content = entity.Index{Title: indexTitle, Entities: entitiesByTitle}
-	r.Err = render(filepath.Join(typeDir, "index.html"), data, indexTemplate)
-	if r.Err != nil {
-		return
-	}
-
-	entityTemplate := r.Templates[t]
-	for id, entity := range entities {
-		entityDir := filepath.Join(typeDir, id)
-		if err := os.Mkdir(entityDir, 0755); err != nil {
-			r.Err = fmt.Errorf("creating dir for %s[%s]: %w", t, id, err)
-			return
-		}
-
-		data.Content = entity
-		fname := filepath.Join(entityDir, "index.html")
-
-		if err := render(fname, data, entityTemplate); err != nil {
-			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)
-			return
-		}
-	}
 }
 
-func render(fname string, data any, tmpl *template.Template) error {
+type exec interface {
+	Execute(w io.Writer, data any) error
+}
+
+func render(fname string, data any, tmpl exec) error {
 	f, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
