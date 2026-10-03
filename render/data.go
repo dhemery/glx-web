@@ -1,20 +1,19 @@
-package entity
+package render
 
-import "github.com/genealogix/glx/go-glx"
+import (
+	"github.com/dhemery/glx-web/entity"
+	"github.com/genealogix/glx/go-glx"
+)
 
-// TODO: These struct dosn't fit in this package.
-
-type Index struct {
-	Title    string
-	Entities any
-}
-
-// ArchiveData is the data sent to each template.
+// ArchiveData is data sent to each template to describe the archive being
+// published.
 type ArchiveData struct {
 	// The underlying GLX archive.
 	GLX *glx.GLXFile
 	// The catalog of entities being rendered.
-	Catalog *Catalog
+	Catalog *entity.Catalog
+
+	// TODO(dale): Add user-specified data gathered from some YAML file.
 }
 
 // EntityListData is the data sent to each index template for an entity type.
@@ -32,5 +31,3 @@ type EntityData struct {
 	// The entity being rendered.
 	Entity any
 }
-
-// TODO: Add UserData gathered from some YAML file.

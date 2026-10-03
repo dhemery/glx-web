@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 
 	"github.com/dhemery/glx-web/entity"
-	"github.com/dhemery/glx-web/internal/load"
-	"github.com/dhemery/glx-web/internal/site"
 	"github.com/dhemery/glx-web/layout"
+	"github.com/dhemery/glx-web/load"
+	"github.com/dhemery/glx-web/render"
 	"github.com/spf13/cobra"
 )
 
@@ -75,7 +75,7 @@ func runBuild(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	r := &site.Renderer{
+	r := &render.Renderer{
 		OutputDir: absOutputDir,
 		Clean:     cleanOutput,
 		StaticDir: absStaticDir,

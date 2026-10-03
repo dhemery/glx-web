@@ -1,5 +1,5 @@
-// Package site renders a website from a compiled GLX archive.
-package site
+// Package render renders a website from a compiled GLX archive.
+package render
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 		return fmt.Errorf("creating output directory: %w", err)
 	}
 
-	data := entity.ArchiveData{
+	data := ArchiveData{
 		GLX:     glxfile,
 		Catalog: catalog,
 	}
@@ -48,7 +48,7 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 	return r.Err
 }
 
-func (r *Renderer) renderTopLevelIndexes(data entity.ArchiveData) error {
+func (r *Renderer) renderTopLevelIndexes(data ArchiveData) error {
 	for name, tmpl := range r.Templates.Indexes {
 		fname := filepath.Join(r.OutputDir, name+".html")
 		err := render(fname, data, tmpl)
@@ -60,12 +60,12 @@ func (r *Renderer) renderTopLevelIndexes(data entity.ArchiveData) error {
 	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, archiveData entity.ArchiveData) {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, archiveData ArchiveData) {
 	if r.Err != nil {
 		return
 	}
 
-	entityTypeData := entity.EntityListData[T]{
+	entityTypeData := EntityListData[T]{
 		ArchiveData: archiveData,
 		EntityType:  t,
 		Entities:    entities,
@@ -88,7 +88,7 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 		}
 	}
 
-	entityData := entity.EntityData{
+	entityData := EntityData{
 		ArchiveData: archiveData,
 	}
 	entityTemplate := templates.Entity
