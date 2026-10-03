@@ -5,9 +5,8 @@ import (
 	"path/filepath"
 
 	"github.com/dhemery/glx-web/entity"
-	"github.com/dhemery/glx-web/layout"
-	"github.com/dhemery/glx-web/load"
-	"github.com/dhemery/glx-web/render"
+	"github.com/dhemery/glx-web/internal/load"
+	"github.com/dhemery/glx-web/internal/render"
 	"github.com/spf13/cobra"
 )
 
@@ -65,12 +64,12 @@ func runBuild(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("template directory: %w", err)
 	}
 
-	templates, err := layout.Load(absTemplateDir)
+	templates, err := load.Templates(absTemplateDir)
 	if err != nil {
 		return err
 	}
 
-	glxFile, err := load.GLXFile(absArchiveDir)
+	glxFile, err := load.Archive(absArchiveDir)
 	if err != nil {
 		return err
 	}

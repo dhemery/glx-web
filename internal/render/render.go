@@ -8,15 +8,28 @@ import (
 	"path/filepath"
 
 	"github.com/dhemery/glx-web/entity"
-	"github.com/dhemery/glx-web/layout"
 	"github.com/genealogix/glx/go-glx"
 )
+
+type SiteTemplates struct {
+	// Templates for each entity type.
+	Entities map[glx.EntityType]EntityTemplates
+	// Templates for top-level files.
+	Indexes map[string]*template.Template
+}
+
+type EntityTemplates struct {
+	// The template for entities of the ssociated type.
+	Entity *template.Template
+	// Templates for indexes for each entity type.
+	Indexes map[string]*template.Template
+}
 
 type Renderer struct {
 	OutputDir string
 	Clean     bool
 	StaticDir string
-	Templates layout.SiteTemplates
+	Templates SiteTemplates
 	Err       error
 }
 
@@ -25,7 +38,7 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 		return fmt.Errorf("creating output directory: %w", err)
 	}
 
-	data := ArchiveData{
+	data := entity.SitePageData{
 		GLX:     glxfile,
 		Catalog: catalog,
 	}
@@ -48,7 +61,7 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 	return r.Err
 }
 
-func (r *Renderer) renderTopLevelIndexes(data ArchiveData) error {
+func (r *Renderer) renderTopLevelIndexes(data entity.SitePageData) error {
 	for name, tmpl := range r.Templates.Indexes {
 		fname := filepath.Join(r.OutputDir, name+".html")
 		err := render(fname, data, tmpl)
@@ -60,15 +73,15 @@ func (r *Renderer) renderTopLevelIndexes(data ArchiveData) error {
 	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, archiveData ArchiveData) {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, archiveData entity.SitePageData) {
 	if r.Err != nil {
 		return
 	}
 
-	entityTypeData := EntityListData[T]{
-		ArchiveData: archiveData,
-		EntityType:  t,
-		Entities:    entities,
+	entityTypeData := entity.EntityTypePageData[T]{
+		SitePageData: archiveData,
+		EntityType:   t,
+		Entities:     entities,
 	}
 
 	entityTypeDir := filepath.Join(r.OutputDir, t.Plural())
@@ -88,8 +101,8 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 		}
 	}
 
-	entityData := EntityData{
-		ArchiveData: archiveData,
+	entityData := entity.EntityPageData{
+		SitePageData: archiveData,
 	}
 	entityTemplate := templates.Entity
 	if entityTemplate == nil {

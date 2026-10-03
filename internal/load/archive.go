@@ -1,4 +1,4 @@
-// Package load loads a glx.GLXFile from a GLX archive.
+// Package load loads archives and templates for glx-web.
 package load
 
 import (
@@ -11,7 +11,7 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-func GLXFile(archiveDir string) (*glx.GLXFile, error) {
+func Archive(archiveDir string) (*glx.GLXFile, error) {
 	files, err := readGLXFiles(archiveDir)
 	if err != nil {
 		return nil, err
