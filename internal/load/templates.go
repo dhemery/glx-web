@@ -16,7 +16,7 @@ import (
 func Templates(templateDir string) (render.SiteTemplates, error) {
 	spec, err := loadSpec(templateDir)
 	if err != nil {
-		return render.SiteTemplates{}, err
+		return render.SiteTemplates{}, fmt.Errorf("loading template configuration: %w", err)
 	}
 
 	return newSiteTemplates(os.DirFS(templateDir), spec)

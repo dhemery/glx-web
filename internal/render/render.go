@@ -35,10 +35,6 @@ type Renderer struct {
 }
 
 func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
-	if err := os.Mkdir(r.OutputDir, 0755); err != nil {
-		return fmt.Errorf("creating output directory: %w", err)
-	}
-
 	data := data.Site{
 		GLX:     glxfile,
 		Catalog: catalog,

@@ -17,11 +17,17 @@
 // mentioned here and in the following sections
 // is under consideration.
 //
-// glx-web refuses
-// to use an existing output directory.
-// Before running glx-web
-// you must ensure that the output directory
-// does not exist.
+// glx-web does not render research logs or studies.
+// It renders only:
+//   - Assertions
+//   - Citations
+//   - Events
+//   - Media
+//   - Persons
+//   - Places
+//   - Relationships
+//   - Repositories
+//   - Sources
 //
 // gls-web generally expects each entity's properties to be well-formed,
 // even beyond the guarantees enforced by GLX deserialization.
@@ -54,6 +60,8 @@
 // glx-web uses only HTML templates
 // to render files.
 // There is no way to use text templates instead.
+//
+// glx-web does not privatize living persons.
 //
 // # Entities
 //
