@@ -28,7 +28,7 @@ type templateLoader struct {
 	baseTemplates map[string]*template.Template
 }
 
-func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplateSpec) (render.SiteTemplates, error) {
+func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplates) (render.SiteTemplates, error) {
 	st := render.SiteTemplates{
 		Entities: map[glx.EntityType]render.EntityTemplates{},
 		Indexes:  map[string]*template.Template{},
@@ -40,7 +40,7 @@ func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplateSpec) (render.Site
 		baseTemplates: make(map[string]*template.Template),
 	}
 
-	for name, indexSpec := range siteSpec.SitePageTemplates {
+	for name, indexSpec := range siteSpec.Pages {
 		t, err := l.load(indexSpec)
 		if err != nil {
 			return st, fmt.Errorf("loading top-level template %q: %w", name, err)
@@ -59,19 +59,19 @@ func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplateSpec) (render.Site
 	return st, nil
 }
 
-func (l templateLoader) loadEntityTypeTemplates(spec config.EntityTypeTemplateSpec) (render.EntityTemplates, error) {
+func (l templateLoader) loadEntityTypeTemplates(spec config.EntityTypeTemplates) (render.EntityTemplates, error) {
 	et := render.EntityTemplates{
 		Indexes: make(map[string]*template.Template),
 	}
 
-	for name, indexSpec := range spec.EntityTypePageTemplates {
+	for name, indexSpec := range spec.Pages {
 		t, err := l.load(indexSpec)
 		if err != nil {
 			return et, fmt.Errorf("index template %q: %w", name, err)
 		}
 		et.Indexes[name] = t
 	}
-	entityTemplate, err := l.load(spec.EntityTemplate)
+	entityTemplate, err := l.load(spec.Entity)
 	if err != nil {
 		return et, fmt.Errorf("entity template: %w", err)
 	}
@@ -120,8 +120,8 @@ func (l *templateLoader) cloneBase(name string) (*template.Template, error) {
 	return base.Clone()
 }
 
-func loadSpec(dir string) (config.SiteTemplateSpec, error) {
-	var spec config.SiteTemplateSpec
+func loadSpec(dir string) (config.SiteTemplates, error) {
+	var spec config.SiteTemplates
 
 	configFileName := filepath.Join(dir, "config.yaml")
 	configFile, err := os.Open(configFileName)

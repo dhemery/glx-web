@@ -24,7 +24,7 @@ func (p *Person) DisplayName() string {
 	return glx.PersonDisplayName(p.Person)
 }
 
-// String returns the display name of p.
+// String returns p's display name.
 func (p *Person) String() string {
 	return p.DisplayName()
 }

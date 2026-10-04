@@ -21,6 +21,7 @@ type Event struct {
 	Relationships []*Relationship
 }
 
+// String returns e's Title.
 func (e *Event) String() string {
 	return e.Title
 }

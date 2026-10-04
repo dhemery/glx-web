@@ -20,8 +20,11 @@ type Citation struct {
 	Assertions []*Assertion
 }
 
-// String returns a string representation of c formed by concatenating its
-// locator (if it has one) onto its source's Title (if it has one).
+// String returns a string formed by concatenating
+// the string value of c's locator property
+// (if it has one)
+// onto the string value of C's source,
+// separated by a comma.
 func (c *Citation) String() string {
 	parts := []string{c.Source.Title}
 

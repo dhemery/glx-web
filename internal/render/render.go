@@ -38,7 +38,7 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 		return fmt.Errorf("creating output directory: %w", err)
 	}
 
-	data := entity.SitePageData{
+	data := entity.SiteData{
 		GLX:     glxfile,
 		Catalog: catalog,
 	}
@@ -61,7 +61,7 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 	return r.Err
 }
 
-func (r *Renderer) renderTopLevelIndexes(data entity.SitePageData) error {
+func (r *Renderer) renderTopLevelIndexes(data entity.SiteData) error {
 	for name, tmpl := range r.Templates.Indexes {
 		fname := filepath.Join(r.OutputDir, name+".html")
 		err := render(fname, data, tmpl)
@@ -73,15 +73,15 @@ func (r *Renderer) renderTopLevelIndexes(data entity.SitePageData) error {
 	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, archiveData entity.SitePageData) {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, archiveData entity.SiteData) {
 	if r.Err != nil {
 		return
 	}
 
-	entityTypeData := entity.EntityTypePageData[T]{
-		SitePageData: archiveData,
-		EntityType:   t,
-		Entities:     entities,
+	entityTypeData := entity.EntityTypeData[T]{
+		SiteData:   archiveData,
+		EntityType: t,
+		Entities:   entities,
 	}
 
 	entityTypeDir := filepath.Join(r.OutputDir, t.Plural())
@@ -101,8 +101,8 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 		}
 	}
 
-	entityData := entity.EntityPageData{
-		SitePageData: archiveData,
+	entityData := entity.EntityData{
+		SiteData: archiveData,
 	}
 	entityTemplate := templates.Entity
 	if entityTemplate == nil {

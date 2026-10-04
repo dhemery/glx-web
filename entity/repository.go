@@ -20,6 +20,7 @@ type Repository struct {
 	Sources []*Source
 }
 
+// String returns r's Name.
 func (r *Repository) String() string {
 	return r.Name
 }

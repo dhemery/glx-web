@@ -18,25 +18,22 @@ var buildCmd = &cobra.Command{
 }
 
 var (
-	archiveDir    = "."
-	cleanOutput   = false
-	includeLiving = false
-	outputDir     = "./public"
-	staticDir     = "./static"
-	templateDir   = "./templates"
+	archiveDir  = "."
+	outputDir   = "./public"
+	templateDir = "./templates"
 )
 
 func init() {
 	buildCmd.Flags().StringVarP(&archiveDir, "archive", "a", archiveDir,
 		"archive `dir`")
-	buildCmd.Flags().BoolVarP(&cleanOutput, "clean", "c", cleanOutput,
-		"remove existing output directory before building")
-	buildCmd.Flags().BoolVarP(&includeLiving, "living", "l", includeLiving,
-		"include living people")
+	// buildCmd.Flags().BoolVarP(&cleanOutput, "clean", "c", cleanOutput,
+	// 	"remove existing output directory before building")
+	// buildCmd.Flags().BoolVarP(&includeLiving, "living", "l", includeLiving,
+	// 	"include living people")
 	buildCmd.Flags().StringVarP(&outputDir, "output", "o", outputDir,
 		"output `dir`")
-	buildCmd.Flags().StringVarP(&staticDir, "static", "s", staticDir,
-		"static `dir` of files to copy into the output dir")
+	// buildCmd.Flags().StringVarP(&staticDir, "static", "s", staticDir,
+	// 	"static `dir` of files to copy into the output dir")
 	buildCmd.Flags().StringVarP(&templateDir, "templates", "t", templateDir,
 		"template `dir`")
 
@@ -52,11 +49,6 @@ func runBuild(_ *cobra.Command, _ []string) error {
 	absOutputDir, err := filepath.Abs(outputDir)
 	if err != nil {
 		return fmt.Errorf("output directory: %w", err)
-	}
-
-	absStaticDir, err := filepath.Abs(staticDir)
-	if err != nil {
-		return fmt.Errorf("static directory: %w", err)
 	}
 
 	absTemplateDir, err := filepath.Abs(templateDir)
@@ -76,8 +68,6 @@ func runBuild(_ *cobra.Command, _ []string) error {
 
 	r := &render.Renderer{
 		OutputDir: absOutputDir,
-		Clean:     cleanOutput,
-		StaticDir: absStaticDir,
 		Templates: templates,
 	}
 

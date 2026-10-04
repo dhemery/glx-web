@@ -20,6 +20,10 @@ type Relationship struct {
 	Assertions []*Assertion
 }
 
+// String resturns a descrition of r
+// composed by concatinating
+// the role and name of each participant,
+// separated by commas and conjunctions as appropriate.
 func (r *Relationship) String() string {
 	var parts []string
 	for _, p := range r.Participants {

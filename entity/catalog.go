@@ -1,12 +1,3 @@
-// Package entity wraps the entities of a GLX archive to make them easier to
-// render via templates. Each entity has a Slug method that returns the path to
-// the directory where it is rendered relative to the output directory. Entity
-// references are resolved to pointers to the referenced entities. Properties
-// and vocabulary values are presented along with their definitions. Most
-// entities, properties, and vocabulary values have String methods for
-// convenience. The String methods of some entities (Assertion, Citation, and
-// Relationship) return strings that, though useful for debugging templates,
-// may not be especially useful for display.
 package entity
 
 import (
@@ -20,13 +11,13 @@ type entity struct {
 	ID         string
 }
 
-// Slug returns the path to the directory where glx-web renders the entity,
+// PagePath returns the path to the directory where glx-web renders the entity,
 // relative to the site's output directory.
-func (e entity) Slug() string {
+func (e entity) PagePath() string {
 	return path.Join(e.EntityType.Plural(), e.ID)
 }
 
-// Catalog collects all entities.
+// Catalog is a collection of entities compiled from a GLX archive.
 type Catalog struct {
 	Assertions    map[string]*Assertion
 	Citations     map[string]*Citation
@@ -39,6 +30,7 @@ type Catalog struct {
 	Sources       map[string]*Source
 }
 
+// NewCatalog compiles a catalog of entities from a GLX archive.
 func NewCatalog(g *glx.GLXFile) *Catalog {
 	a := &Catalog{
 		Assertions:    make(map[string]*Assertion),
@@ -114,7 +106,7 @@ func (c *Catalog) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
 }
 
 type entityReference interface {
-	Slug() string
+	PagePath() string
 	String() string
 }
 

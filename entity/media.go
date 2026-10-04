@@ -25,6 +25,7 @@ type Media struct {
 	ReferencingSources []*Source
 }
 
+// String returns m's Title.
 func (m *Media) String() string {
 	return m.Title
 }

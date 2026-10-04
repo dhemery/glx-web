@@ -30,7 +30,7 @@ func (p *Place) FullName() string {
 	return p.Name + ", " + p.Parent.FullName()
 }
 
-// String returns p's FullName.
+// String returns p's full name.
 func (p *Place) String() string {
 	return p.FullName()
 }
