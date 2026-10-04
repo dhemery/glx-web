@@ -1,59 +1,8 @@
-// Package config defines types to configure glx-web. Currently the
-// configuration specifies only the templates to apply to render the output.
-//
-// To configure the templates, write a config.yaml file in the template
-// directory. See [SiteTemplates] for the fields.
-//
-// The configuration defines four kinds of templates:
-//
-//   - Base templates,
-//     declared in [SiteTemplates.Bases].
-//     A base template is never invoked directly,
-//     but can be extended by other templates,
-//     including by other base templates.
-//
-//   - Site page templates,
-//     declared in [SiteTemplates.Pages].
-//     A site page template renders a page
-//     about the site.
-//     It is applied to an [entity.SiteData],
-//     and its output is written to
-//     <output-dir>/<index-name>.html.
-//     You can render multiple top-level pages
-//     by writing multiple site page templates.
-//     You will typically want a site page template named "index"
-//     to render the home page for the site.
-//
-//   - Entity type page templates.
-//     declared in [EntityTypeTemplates.Pages].
-//     An entity type page template renders a page
-//     about the collection of entities of a given type.
-//     It is applied to an [entity.EntityTypeData],
-//     and its output is written to
-//     <output-dir>/<entity-type-plural>/<template-name>.html.
-//     You can render the collection in a variety of ways
-//     by writing multiple entity type page templates.
-//     You will typically want an entity type page named "index"
-//     for each type,
-//     to render a listing of the entities of the type.
-//
-//   - Entity templates
-//     declared in [EntityTypeTemplates.Entity].
-//     An entity template renders a page about an entity.
-//     It is applied to an [entity.EntityTypeData],
-//     and its output is written to
-//     <output-dir>/<entity-type-plural>/<entity-id>/index.html.
 package config
 
 import (
-	"path/filepath"
-
-	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
-
-var _ = entity.SiteData{}
-var _ = filepath.Match
 
 // SiteTemplates specifies the templates for each site page, entity type
 // page, and entity page.

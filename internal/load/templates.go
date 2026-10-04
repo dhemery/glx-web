@@ -30,8 +30,8 @@ type templateLoader struct {
 
 func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplates) (render.SiteTemplates, error) {
 	st := render.SiteTemplates{
-		Entities: map[glx.EntityType]render.EntityTemplates{},
-		Indexes:  map[string]*template.Template{},
+		EntityTypes: map[glx.EntityType]render.EntityTypeTemplates{},
+		Pages:       map[string]*template.Template{},
 	}
 
 	l := templateLoader{
@@ -45,7 +45,7 @@ func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplates) (render.SiteTem
 		if err != nil {
 			return st, fmt.Errorf("loading top-level template %q: %w", name, err)
 		}
-		st.Indexes[name] = t
+		st.Pages[name] = t
 	}
 
 	for et, entityTypeSpec := range siteSpec.Entities {
@@ -53,15 +53,15 @@ func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplates) (render.SiteTem
 		if err != nil {
 			return st, fmt.Errorf("loading %s templates: %w", et, err)
 		}
-		st.Entities[et] = templates
+		st.EntityTypes[et] = templates
 	}
 
 	return st, nil
 }
 
-func (l templateLoader) loadEntityTypeTemplates(spec config.EntityTypeTemplates) (render.EntityTemplates, error) {
-	et := render.EntityTemplates{
-		Indexes: make(map[string]*template.Template),
+func (l templateLoader) loadEntityTypeTemplates(spec config.EntityTypeTemplates) (render.EntityTypeTemplates, error) {
+	et := render.EntityTypeTemplates{
+		Pages: make(map[string]*template.Template),
 	}
 
 	for name, indexSpec := range spec.Pages {
@@ -69,7 +69,7 @@ func (l templateLoader) loadEntityTypeTemplates(spec config.EntityTypeTemplates)
 		if err != nil {
 			return et, fmt.Errorf("index template %q: %w", name, err)
 		}
-		et.Indexes[name] = t
+		et.Pages[name] = t
 	}
 	entityTemplate, err := l.load(spec.Entity)
 	if err != nil {

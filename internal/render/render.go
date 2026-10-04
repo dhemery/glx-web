@@ -7,22 +7,23 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dhemery/glx-web/data"
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
 
 type SiteTemplates struct {
+	// Templates to render top-level pages.
+	Pages map[string]*template.Template
 	// Templates for each entity type.
-	Entities map[glx.EntityType]EntityTemplates
-	// Templates for top-level files.
-	Indexes map[string]*template.Template
+	EntityTypes map[glx.EntityType]EntityTypeTemplates
 }
 
-type EntityTemplates struct {
-	// The template for entities of the ssociated type.
+type EntityTypeTemplates struct {
+	// Templates to render pages about the entity type.
+	Pages map[string]*template.Template
+	// Template to render the page about an entity of the type.
 	Entity *template.Template
-	// Templates for indexes for each entity type.
-	Indexes map[string]*template.Template
 }
 
 type Renderer struct {
@@ -38,12 +39,12 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 		return fmt.Errorf("creating output directory: %w", err)
 	}
 
-	data := entity.SiteData{
+	data := data.Site{
 		GLX:     glxfile,
 		Catalog: catalog,
 	}
 
-	err := r.renderTopLevelIndexes(data)
+	err := r.renderTopLevelPages(data)
 	if err != nil {
 		return err
 	}
@@ -61,25 +62,25 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 	return r.Err
 }
 
-func (r *Renderer) renderTopLevelIndexes(data entity.SiteData) error {
-	for name, tmpl := range r.Templates.Indexes {
+func (r *Renderer) renderTopLevelPages(data data.Site) error {
+	for name, tmpl := range r.Templates.Pages {
 		fname := filepath.Join(r.OutputDir, name+".html")
 		err := render(fname, data, tmpl)
 		if err != nil {
-			return fmt.Errorf("rendering top-level index with template %q: %w", name, err)
+			return fmt.Errorf("rendering top-level page with template %q: %w", name, err)
 		}
 	}
 
 	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, archiveData entity.SiteData) {
+func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, siteData data.Site) {
 	if r.Err != nil {
 		return
 	}
 
-	entityTypeData := entity.EntityTypeData[T]{
-		SiteData:   archiveData,
+	entityTypeData := data.EntityType[T]{
+		Site:       siteData,
 		EntityType: t,
 		Entities:   entities,
 	}
@@ -91,18 +92,18 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 		return
 	}
 
-	templates := r.Templates.Entities[t]
-	for name, tmpl := range templates.Indexes {
+	templates := r.Templates.EntityTypes[t]
+	for name, tmpl := range templates.Pages {
 		fname := filepath.Join(entityTypeDir, name+".html")
 		err := render(fname, entityTypeData, tmpl)
 		if err != nil {
-			r.Err = fmt.Errorf("rendering %s with index template %q: %w", t, name, err)
+			r.Err = fmt.Errorf("rendering %s with page template %q: %w", t, name, err)
 			return
 		}
 	}
 
-	entityData := entity.EntityData{
-		SiteData: archiveData,
+	entityData := data.Entity{
+		Site: siteData,
 	}
 	entityTemplate := templates.Entity
 	if entityTemplate == nil {
