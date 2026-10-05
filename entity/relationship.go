@@ -21,11 +21,13 @@ type Relationship struct {
 }
 
 // String returns a description of r
-// composed by concatinating
+// composed by concatenating
 // the role and name of each participant,
 // separated by commas and conjunctions as appropriate.
 func (r *Relationship) String() string {
 	var parts []string
+
+	// TODO(dale): Maybe include only names of principals.
 	for _, p := range r.Participants {
 		role := p.Role.Definition.Label
 		name := p.Person.DisplayName()

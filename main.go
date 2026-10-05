@@ -48,7 +48,7 @@
 //   - Group persons by surname.
 //   - Group places by parent place.
 //
-// It is akward for templates
+// It is awkward for templates
 // to handle properties differently
 // depending on their types:
 //
@@ -89,7 +89,7 @@
 // See each entity's String method for details.
 //
 // You can use the PagePath and String methods
-// link to any entity using this construction
+// to link to any entity using this construction
 // (using .Source as an example):
 //
 //	{{ with .Source }}<a href="/{{ .PagePath }}">{{ . }}</a>{{ end }}
