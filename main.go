@@ -1,23 +1,26 @@
-// glx-web builds a website
+// The glx-web command
+// builds a website
 // that describes the entities in a GLX archive.
 // It applies user-specified templates to render pages:
 //   - for each entity,
 //   - for the set of entities of each type,
 //   - and for tthe website as a whole.
 //
-// glx-web presents the data in a GLX archive
+// The glx-web command presents the data in a GLX archive
 // to templates
 // in a form that makes it relatively straightforward to render.
 //
 // # Known Limitations
 //
-// glx-web is a work in progress.
+// The glx-web project
+// is a work in progress.
 // Every feature is subject to change without notice.
 // Each limitation
 // mentioned here and in the following sections
 // is under consideration.
 //
-// glx-web does not render research logs or studies.
+// The glx-web command
+// does not render research logs or studies.
 // It renders only:
 //   - Assertions
 //   - Citations
@@ -29,11 +32,13 @@
 //   - Repositories
 //   - Sources
 //
-// gls-web generally expects each entity's properties to be well-formed,
+// The glx-web command
+// generally expects each entity's properties to be well-formed,
 // even beyond the guarantees enforced by GLX deserialization.
 //
 // Templates have no way to sort or filter
-// the slices and maps that glx-web delivers to them,
+// the slices and maps
+// that the glx-web command delivers to them,
 // or to group elements by some property
 // (in the generic sense of the word).
 // For example, there is no way to:
@@ -57,11 +62,13 @@
 //	  {{ end }}
 //	{{ end ))
 //
-// glx-web uses only HTML templates
+// The glx-web command
+// uses only HTML templates
 // to render files.
 // There is no way to use text templates instead.
 //
-// glx-web does not privatize living persons.
+// The glx-web command
+// does not privatize living persons.
 //
 // # Entities
 //
@@ -73,7 +80,7 @@
 //
 // Each entity has a PagePath method
 // that returns the path to the directory
-// where glx-web renders the entity,
+// where the glx-web command renders the entity,
 // relative to the output directory.
 //
 // Each entity has a String method that,
@@ -203,7 +210,8 @@
 //
 // # Configuration
 //
-// glx-web applies user-specified templates to render pages.
+// The glx-web command
+// applies user-specified templates to render pages.
 // It does not supply any built-in templates.
 //
 // To specify the templates,
