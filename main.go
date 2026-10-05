@@ -4,7 +4,7 @@
 // It applies user-specified templates to render pages:
 //   - for each entity,
 //   - for the set of entities of each type,
-//   - and for tthe website as a whole.
+//   - and for the website as a whole.
 //
 // The glx-web command presents the data in a GLX archive
 // to templates

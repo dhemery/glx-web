@@ -20,7 +20,7 @@ type Relationship struct {
 	Assertions []*Assertion
 }
 
-// String resturns a descrition of r
+// String returns a description of r
 // composed by concatinating
 // the role and name of each participant,
 // separated by commas and conjunctions as appropriate.
