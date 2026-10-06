@@ -2,6 +2,7 @@ package entity
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -58,8 +59,36 @@ type PersonName struct {
 //	"surname_prefix" SurnamePrefix
 //	"surname"        Surname
 //	"suffix"         Suffix
-func NewPersonName(parts []string) *PersonName {
-	return nil
+func NewPersonName(pairs []string) (*PersonName, error) {
+	if len(pairs)%2 != 0 {
+		return nil, ErrNotPairs(pairs)
+	}
+
+	var n PersonName
+	var i int
+	for i < len(pairs) {
+		k := pairs[i]
+		v := pairs[i+1]
+		i = i + 2
+		switch k {
+		case "prefix":
+			n.Prefix = v
+		case "given":
+			n.Given = v
+		case "nickname":
+			n.Nickname = v
+		case "surname_prefix":
+			n.SurnamePrefix = v
+		case "surname":
+			n.Surname = v
+		case "suffix":
+			n.Suffix = v
+		default:
+			return nil, ErrUnknownKey(k)
+		}
+	}
+
+	return &n, nil
 }
 
 // String returns a string representation of n.
@@ -69,26 +98,26 @@ func NewPersonName(parts []string) *PersonName {
 // Prefix, Given, Nickname, SurnamePrefix, Surname, Suffix.
 // Nickname is double-quoted.
 func (n *PersonName) String() string {
-	var parts []string
+	var pairs []string
 	if n.Prefix != "" {
-		parts = append(parts, n.Prefix)
+		pairs = append(pairs, n.Prefix)
 	}
 	if n.Given != "" {
-		parts = append(parts, n.Given)
+		pairs = append(pairs, n.Given)
 	}
 	if n.Nickname != "" {
-		parts = append(parts, `"`+n.Nickname+`"`)
+		pairs = append(pairs, `"`+n.Nickname+`"`)
 	}
 	if n.SurnamePrefix != "" {
-		parts = append(parts, n.SurnamePrefix)
+		pairs = append(pairs, n.SurnamePrefix)
 	}
 	if n.Surname != "" {
-		parts = append(parts, n.Surname)
+		pairs = append(pairs, n.Surname)
 	}
 	if n.Suffix != "" {
-		parts = append(parts, n.Suffix)
+		pairs = append(pairs, n.Suffix)
 	}
-	return strings.Join(parts, " ")
+	return strings.Join(pairs, " ")
 }
 
 // Formatted formets n according to a format specifier.
@@ -189,6 +218,31 @@ type PersonNameList []*PersonName
 
 func (l PersonNameList) SortFormatted(format string) PersonNameList {
 	return nil
+}
+
+type ErrNotPairs []string
+
+func (e ErrNotPairs) Error() string {
+	return fmt.Sprintf("%d args: %s", len(e), []string(e))
+}
+
+func (e ErrNotPairs) Is(target error) bool {
+	if t, ok := target.(ErrNotPairs); ok {
+		return slices.Equal(e, t)
+	}
+	return false
+}
+
+type ErrUnknownKey string
+
+func (e ErrUnknownKey) Error() string {
+	return fmt.Sprintf("unknown key: %q", string(e))
+}
+func (e ErrUnknownKey) Is(target error) bool {
+	if t, ok := target.(ErrUnknownKey); ok {
+		return e == t
+	}
+	return false
 }
 
 func newPerson(id string, inner *glx.Person) *Person {
