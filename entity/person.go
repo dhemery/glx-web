@@ -2,6 +2,7 @@ package entity
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/genealogix/glx/go-glx"
 )
@@ -29,6 +30,11 @@ func (p *Person) String() string {
 
 type PersonList []*Person
 
+// Sort returns the persons sorted by String value.
+func (l PersonList) Sort() PersonList {
+	return sortStringers(l)
+}
+
 type PersonName struct {
 	Prefix        string `json:"prefix"`
 	Given         string `json:"given"`
@@ -44,18 +50,132 @@ type PersonName struct {
 // the value is assigned to the name part identified by the key.
 // Name parts are identified
 // using the same keys as the "name" property
-// in the standard property vocabularies for Person.
+// in the standard GLX property vocabularyfor Person:
+//
+//	"prefix"         Prefix
+//	"given"          Given
+//	"nickname"       Nickname
+//	"surname_prefix" SurnamePrefix
+//	"surname"        Surname
+//	"suffix"         Suffix
 func NewPersonName(parts []string) *PersonName {
 	return nil
 }
 
-// Format implements [fmt.Formatter].
-// It is not useful for users to call directly.
-func (n *PersonName) Format(f fmt.State, verb rune) {}
+// String returns a string representation of n.
+// The result includes the non-empty fields of n
+// separated by spaces
+// in this order:
+// Prefix, Given, Nickname, SurnamePrefix, Surname, Suffix.
+// Nickname is double-quoted.
+func (n *PersonName) String() string {
+	var parts []string
+	if n.Prefix != "" {
+		parts = append(parts, n.Prefix)
+	}
+	if n.Given != "" {
+		parts = append(parts, n.Given)
+	}
+	if n.Nickname != "" {
+		parts = append(parts, `"`+n.Nickname+`"`)
+	}
+	if n.SurnamePrefix != "" {
+		parts = append(parts, n.SurnamePrefix)
+	}
+	if n.Surname != "" {
+		parts = append(parts, n.Surname)
+	}
+	if n.Suffix != "" {
+		parts = append(parts, n.Suffix)
+	}
+	return strings.Join(parts, " ")
+}
 
-// Formatted formets n according to format.
+// Formatted formets n according to a format specifier.
+// Formatted uses the custom verbs
+// implemented by [PersonName.Format].
+//
+// Unlike [fmt.Sprintf] and similar functions in the fmt package,
+// which by default format one argument per verb,
+// Formatted applies each verb to the same argument:
+// the method's receiver:
+//
+//	n := %PersonName{Given: "George", Surname: "Washington"}
+//	f := n.Formatted("%S, %g") // Yields "Washington, George".
 func (n *PersonName) Formatted(format string) string {
-	return ""
+	return fmt.Sprintf(format, n)
+}
+
+// Format implements [fmt.Formatter]
+// to add custom verbs to format a PersonName.
+// Format is called by [PersonName.Formatted]
+// and by [fmt.Sprintf] and similar functions in the fmt package.
+// It is not useful to call Format directly.
+//
+// Each new verb prints a field of the PersonName:
+//
+//	'<' Prefix
+//	'g' Given
+//	'n' Nickname
+//	'{' SurnamePrefix
+//	'S' Surname
+//	'>' Suffix
+//
+// To format multiple fields of a single name,
+// see [PersonName.Formatted].
+//
+// The functions in package fmt work differently.
+// They format one argument per verb.
+// To format more than one field of a name via [fmt.Sprintf]
+// you must supply the name as multiple arguments:
+//
+//	mother := %PersonName{ ... }
+//	child := &PersonName{ ... }
+//	f := fmt.Sprintf("%S, %g was the mother of %S, %g", mother, mother, child, child)
+//
+// Alternatively, you can use explicit argument indexes
+// to to apply multiple verbs to the same argument:
+//
+//	mother := %PersonName{ ... }
+//	child := &PersonName{ ... }
+//	f := fmt.Sprintf("%[1]S, %[1]g was the mother of %[2]S, %[2]g", mother, child)
+func (n *PersonName) Format(f fmt.State, verb rune) {
+	// Verbs defined by package fmt.
+	switch verb {
+	case 's':
+		fmt.Fprint(f, n.String())
+		return
+	case 'q':
+		fmt.Fprintf(f, "%q", n.String())
+		return
+	case 'v':
+		fmt.Fprintf(f, "%v", n.GoString())
+		return
+	case 'x':
+		fmt.Fprintf(f, "%x", n.String())
+		return
+	case 'X':
+		fmt.Fprintf(f, "%X", n.String())
+		return
+	}
+
+	// Verbs specific to PersonName
+	switch verb {
+	case '<':
+		fmt.Fprint(f, n.Prefix)
+	case 'g':
+		fmt.Fprint(f, n.Given)
+	case 'n':
+		fmt.Fprint(f, n.Nickname)
+	case '{':
+		fmt.Fprint(f, n.SurnamePrefix)
+	case 'S':
+		fmt.Fprint(f, n.Surname)
+	case '>':
+		fmt.Fprint(f, n.Suffix)
+	default:
+		fmt.Fprintf(f, "PersonName unknown verb %q", verb)
+	}
 }
 
 // WithDefaults returns a copy of n
@@ -63,11 +183,6 @@ func (n *PersonName) Formatted(format string) string {
 // replaced by the corresponding fields of defaults.
 func (n *PersonName) WithDefaults(defaults *PersonName) *PersonName {
 	return nil
-}
-
-// Sort returns the persons sorted by String value.
-func (l PersonList) Sort() PersonList {
-	return sortStringers(l)
 }
 
 type PersonNameList []*PersonName
@@ -99,4 +214,11 @@ func (p *Person) addEvent(e *Event) {
 
 func (p *Person) addRelationship(e *Relationship) {
 	p.Relationships = append(p.Relationships, e)
+}
+
+// GoString implements [fmt.GoStringer]
+// to implement the 'v' verb used by package fmt.
+func (n *PersonName) GoString() string {
+	format := "&PersonName{Prefix: %q, Given: %q, Nickname: %q, SurnamePrefix: %q, Surname: %q, Suffix: %q}"
+	return fmt.Sprintf(format, n.Prefix, n.Given, n.Nickname, n.SurnamePrefix, n.Surname, n.Suffix)
 }
