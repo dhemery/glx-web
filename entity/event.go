@@ -10,7 +10,7 @@ type Event struct {
 	*glx.Event
 
 	Date         glxdate.Date
-	Participants []*Participant
+	Participants ParticipantList
 	Place        *Place
 	Properties   map[string]Property
 	Type         VocabularyValue
