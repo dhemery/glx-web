@@ -41,6 +41,9 @@ func (v PropertyValue) Field(name string) PropertyField {
 
 // String returns the string representation of the value of v.
 func (v PropertyValue) String() string {
+	if v.Value == nil {
+		return ""
+	}
 	return v.Value.String()
 }
 
@@ -52,6 +55,9 @@ type PropertyField struct {
 
 // String returns the string representation of the value of f.
 func (f PropertyField) String() string {
+	if f.Value == nil {
+		return ""
+	}
 	return f.Value.String()
 }
 

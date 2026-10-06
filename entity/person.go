@@ -24,6 +24,23 @@ type Person struct {
 	Relationships RelationshipList
 }
 
+func (p *Person) Name() *PersonName {
+	nameProp, ok := p.Properties["name"]
+	if !ok {
+		return new(PersonName)
+	}
+
+	fields := nameProp.Value().Fields
+	return &PersonName{
+		Prefix:        fields["prefix"].String(),
+		Given:         fields["given"].String(),
+		Nickname:      fields["nickname"].String(),
+		SurnamePrefix: fields["surname_prefix"].String(),
+		Surname:       fields["surname"].String(),
+		Suffix:        fields["suffix"].String(),
+	}
+}
+
 // String returns the display name
 // composed by [glx.PersonDisplayName].
 func (p *Person) String() string {
@@ -207,7 +224,11 @@ func (n *PersonName) Format(f fmt.State, verb rune) {
 		printString(f, verb, n.String())
 		return
 	case 'v':
-		printString(f, 's', n.GoString())
+		if f.Flag('#') {
+			printString(f, 's', n.GoString())
+			return
+		}
+		printString(f, 's', n.String())
 		return
 	}
 

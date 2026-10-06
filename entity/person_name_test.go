@@ -216,11 +216,12 @@ func TestPersonNameFormat(t *testing.T) {
 
 	cases := map[string]string{
 		// Standard verbs defined by package fmt.
-		"%s": personName.String(),
-		"%q": fmt.Sprintf("%q", personName.String()),
-		"%v": personName.GoString(),
-		"%x": fmt.Sprintf("%x", personName.String()),
-		"%X": fmt.Sprintf("%X", personName.String()),
+		"%s":  personName.String(),
+		"%q":  fmt.Sprintf("%q", personName.String()),
+		"%v":  personName.String(),
+		"%#v": personName.GoString(),
+		"%x":  fmt.Sprintf("%x", personName.String()),
+		"%X":  fmt.Sprintf("%X", personName.String()),
 
 		// Custom verbs specific to PersonName.
 		"%<": "prefix",
