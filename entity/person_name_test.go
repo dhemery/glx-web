@@ -77,6 +77,91 @@ func TestNewPersonName(t *testing.T) {
 	}
 }
 
+func TestPersonNameMerge(t *testing.T) {
+	cases := map[string]struct {
+		original     *PersonName
+		replacements *PersonName
+		want         *PersonName
+	}{
+		"original with no blanks fields": {
+			// All fields non-blank
+			original: &PersonName{
+				Prefix:        "original prefix",
+				Given:         "original given",
+				Nickname:      "original nickname",
+				SurnamePrefix: "original surname prefix",
+				Surname:       "original surname",
+				Suffix:        "original suffix",
+			},
+			replacements: &PersonName{
+				Prefix:        "replacement prefix",
+				Given:         "replacement given",
+				Nickname:      "replacement nickname",
+				SurnamePrefix: "replacement surname prefix",
+				Surname:       "replacement surname",
+				Suffix:        "replacement suffix",
+			},
+			// Same as original. No fields changed.
+			want: &PersonName{
+				Prefix:        "original prefix",
+				Given:         "original given",
+				Nickname:      "original nickname",
+				SurnamePrefix: "original surname prefix",
+				Surname:       "original surname",
+				Suffix:        "original suffix",
+			},
+		},
+		"original with all blank fields": {
+			original: &PersonName{},
+			replacements: &PersonName{
+				Prefix:        "replacement prefix",
+				Given:         "replacement given",
+				Nickname:      "replacement nickname",
+				SurnamePrefix: "replacement surname prefix",
+				Surname:       "replacement surname",
+				Suffix:        "replacement suffix",
+			},
+			// All values replaced.
+			want: &PersonName{
+				Prefix:        "replacement prefix",
+				Given:         "replacement given",
+				Nickname:      "replacement nickname",
+				SurnamePrefix: "replacement surname prefix",
+				Surname:       "replacement surname",
+				Suffix:        "replacement suffix",
+			},
+		},
+		"nil original": {
+			original: nil,
+			replacements: &PersonName{
+				Nickname: "replacement nickname",
+			},
+			// Same as replacements. No other fields filled in.
+			want: &PersonName{
+				Nickname: "replacement nickname",
+			},
+		},
+		"nil replacement": {
+			original:     &PersonName{Given: "given"},
+			replacements: nil,
+			// Same as original. No other fields filled in.
+			want: &PersonName{Given: "given"},
+		},
+		"nil original and replacement": {
+			original:     nil,
+			replacements: nil,
+			want:         nil,
+		},
+	}
+
+	for name, tc := range cases {
+		got := tc.original.Merge(tc.replacements)
+		if !reflect.DeepEqual(got, tc.want) {
+			t.Errorf("%s\nwant %#v,\n got %#v", name, tc.want, got)
+		}
+	}
+}
+
 func TestPersonNameString(t *testing.T) {
 	var personName = PersonName{
 		Prefix:        "prefix",
@@ -137,7 +222,7 @@ func TestPersonNameFormat(t *testing.T) {
 		"%x": fmt.Sprintf("%x", personName.String()),
 		"%X": fmt.Sprintf("%X", personName.String()),
 
-		// Verbs specific to PersonName.
+		// Custom verbs specific to PersonName.
 		"%<": "prefix",
 		"%g": "given",
 		"%n": "nickname",
@@ -148,7 +233,7 @@ func TestPersonNameFormat(t *testing.T) {
 	for format, want := range cases {
 		got := personName.Formatted(format)
 		if got != want {
-			t.Errorf("format %q: want %q, got %q", format, want, got)
+			t.Errorf("format %q:\n want %q,\n  got %q", format, want, got)
 		}
 	}
 }

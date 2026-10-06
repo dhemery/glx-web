@@ -65,11 +65,9 @@ func NewPersonName(pairs []string) (*PersonName, error) {
 	}
 
 	var n PersonName
-	var i int
-	for i < len(pairs) {
+	for i := 0; i < len(pairs); i += 2 {
 		k := pairs[i]
 		v := pairs[i+1]
-		i = i + 2
 		switch k {
 		case "prefix":
 			n.Prefix = v
@@ -207,11 +205,46 @@ func (n *PersonName) Format(f fmt.State, verb rune) {
 	}
 }
 
-// WithDefaults returns a copy of n
-// with its empty fields
-// replaced by the corresponding fields of defaults.
-func (n *PersonName) WithDefaults(defaults *PersonName) *PersonName {
-	return nil
+// Merge returns a copy of n
+// with its blank fields
+// replaced by the corresponding fields of replacements.
+// If n is nil, replacements is returned.
+// If replacements is nil, n is returned.
+//
+// Use this method to replace blank name parts
+// with visible default values for display.
+// For example,
+// you might replace a blank Given or Surname
+// with "Unknown" or an em dash.
+func (n *PersonName) Merge(replacements *PersonName) *PersonName {
+	if n == nil {
+		return replacements
+	}
+	if replacements == nil {
+		return n
+	}
+
+	replaced := *n
+	if replaced.Prefix == "" {
+		replaced.Prefix = replacements.Prefix
+	}
+	if replaced.Given == "" {
+		replaced.Given = replacements.Given
+	}
+	if replaced.Nickname == "" {
+		replaced.Nickname = replacements.Nickname
+	}
+	if replaced.SurnamePrefix == "" {
+		replaced.SurnamePrefix = replacements.SurnamePrefix
+	}
+	if replaced.Surname == "" {
+		replaced.Surname = replacements.Surname
+	}
+	if replaced.Suffix == "" {
+		replaced.Suffix = replacements.Suffix
+	}
+
+	return &replaced
 }
 
 type PersonNameList []*PersonName
