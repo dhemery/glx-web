@@ -68,11 +68,11 @@ func TestNewPersonName(t *testing.T) {
 	for _, tc := range cases {
 		got, err := NewPersonName(tc.args)
 		if !errors.Is(err, tc.wantErr) {
-			t.Errorf("%s:\n  want %#v,\n   got %#v", tc.args, tc.wantErr, err)
+			t.Errorf("%s\n   got %#v,\n  want %#v", tc.args, err, tc.wantErr)
 
 		}
 		if !reflect.DeepEqual(got, tc.want) {
-			t.Errorf("%s\n  want %#v,\n   got %#v", tc.args, tc.want, got)
+			t.Errorf("%s\n   got %#v,\n  want %#v", tc.args, got, tc.want)
 		}
 	}
 }
@@ -157,7 +157,7 @@ func TestPersonNameMerge(t *testing.T) {
 	for name, tc := range cases {
 		got := tc.original.Merge(tc.replacements)
 		if !reflect.DeepEqual(got, tc.want) {
-			t.Errorf("%s\nwant %#v,\n got %#v", name, tc.want, got)
+			t.Errorf("%s\n   got %#v,\n  want %#v", name, got, tc.want)
 		}
 	}
 }
@@ -175,7 +175,7 @@ func TestPersonNameString(t *testing.T) {
 	want := `prefix given "nickname" surnameprefix surname suffix`
 	got := personName.String()
 	if got != want {
-		t.Errorf("want %q, got %q", want, got)
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
@@ -200,7 +200,7 @@ func TestPersonNameGoString(t *testing.T) {
 
 	got := personName.GoString()
 	if got != want {
-		t.Errorf("\n  want %q,\n   got %q", want, got)
+		t.Errorf("\n   got %q,\n  want %q", got, want)
 	}
 }
 
@@ -229,11 +229,15 @@ func TestPersonNameFormat(t *testing.T) {
 		"%{": "surnameprefix",
 		"%S": "surname",
 		"%>": "suffix",
+		// Custom verbs specific to PersonName.
+
+		"%20.10<": "prefix",
 	}
+
 	for format, want := range cases {
 		got := personName.Formatted(format)
 		if got != want {
-			t.Errorf("format %q:\n want %q,\n  got %q", format, want, got)
+			t.Errorf("format %q:\n   got %q,\n  want %q", format, got, want)
 		}
 	}
 }
