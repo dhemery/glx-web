@@ -11,13 +11,13 @@ type Citation struct {
 	entity
 	*glx.Citation
 
-	Media      []*Media
+	Media      MediaList
 	Properties map[string]Property
 	Repository *Repository
 	Source     *Source
 
 	// Assertions that cite this citation as evidence.
-	Assertions []*Assertion
+	Assertions AssertionList
 }
 
 // String returns a string formed by concatenating

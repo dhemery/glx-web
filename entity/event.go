@@ -16,9 +16,9 @@ type Event struct {
 	Type         VocabularyValue
 
 	// Assertions about this event.
-	Assertions []*Assertion
+	Assertions AssertionList
 	// Relationships started or ended by this event.
-	Relationships []*Relationship
+	Relationships RelationshipList
 }
 
 // String returns e's Title.

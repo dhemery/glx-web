@@ -18,11 +18,11 @@ type Source struct {
 	// Assertions that directly cite this source as evidence. Assertions
 	// that cite this source only indirectly via citations or media are not
 	// included.
-	Assertions []*Assertion
+	Assertions AssertionList
 	// Citations of this source.
-	Citations []*Citation
+	Citations CitationList
 	// Media that reference this source.
-	ReferencingMedia []*Media
+	ReferencingMedia MediaList
 }
 
 // String returns s's Title.

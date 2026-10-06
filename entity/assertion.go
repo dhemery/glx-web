@@ -9,11 +9,11 @@ type Assertion struct {
 	entity
 	*glx.Assertion
 
-	Citations   []*Citation
+	Citations   CitationList
 	Date        glxdate.Date
-	Media       []*Media
+	Media       MediaList
 	Participant *Participant
-	Sources     []*Source
+	Sources     SourceList
 	Subject     entityReference
 
 	// TODO(dale): Resolve value if the property has a reference type or vocabulary type

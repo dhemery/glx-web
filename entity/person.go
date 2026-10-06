@@ -12,11 +12,11 @@ type Person struct {
 	Properties map[string]Property
 
 	// Assertions about this person.
-	Assertions []*Assertion
+	Assertions AssertionList
 	// Events this person participated in.
-	Events []*Event
+	Events EventList
 	// Relationships this person participated in.
-	Relationships []*Relationship
+	Relationships RelationshipList
 }
 
 // DisplayName returns a display name extracted from p's properties.

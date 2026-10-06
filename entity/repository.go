@@ -15,9 +15,9 @@ type Repository struct {
 	// Citations that directly reference this repository. Citations that
 	// reference this repository only indirectly through sources are not
 	// included.
-	Citations []*Citation
+	Citations CitationList
 	// Sources in this repository.
-	Sources []*Source
+	Sources SourceList
 }
 
 // String returns r's Name.

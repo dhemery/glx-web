@@ -13,12 +13,12 @@ type Place struct {
 	Type       VocabularyValue
 
 	// Assertions about this place.
-	Assertions []*Assertion
+	Assertions AssertionList
 	// Places that identify this place as their parent.
-	ChildPlaces []*Place
+	ChildPlaces PlaceList
 	// Events identified as happening specifically in this place. This does
 	// not include events in the "child" places of this place.
-	Events []*Event
+	Events EventList
 }
 
 // FullName returns p's Name followed by the FullName of its parent Place, if

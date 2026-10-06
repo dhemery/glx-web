@@ -17,7 +17,7 @@ type Relationship struct {
 	Type         VocabularyValue
 
 	// Assertions about this relationship.
-	Assertions []*Assertion
+	Assertions AssertionList
 }
 
 // String returns a description of r
