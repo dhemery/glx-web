@@ -229,9 +229,29 @@ func TestPersonNameFormat(t *testing.T) {
 		"%{": "surnameprefix",
 		"%S": "surname",
 		"%>": "suffix",
-		// Custom verbs specific to PersonName.
 
-		"%20.10<": "prefix",
+		// Width and precision
+		"%6.3<":  fmt.Sprintf("%6.3s", personName.Prefix),
+		"%-6.3<": fmt.Sprintf("%-6.3s", personName.Prefix),
+		"%6.3g":  fmt.Sprintf("%6.3s", personName.Given),
+		"%-6.3g": fmt.Sprintf("%-6.3s", personName.Given),
+		"%6.3n":  fmt.Sprintf("%6.3s", personName.Nickname),
+		"%-6.3n": fmt.Sprintf("%-6.3s", personName.Nickname),
+		"%6.3{":  fmt.Sprintf("%6.3s", personName.SurnamePrefix),
+		"%-6.3{": fmt.Sprintf("%-6.3s", personName.SurnamePrefix),
+		"%6.3S":  fmt.Sprintf("%6.3s", personName.Surname),
+		"%-6.3S": fmt.Sprintf("%-6.3s", personName.Surname),
+		"%6.3>":  fmt.Sprintf("%6.3s", personName.Suffix),
+		"%-6.3>": fmt.Sprintf("%-6.3s", personName.Suffix),
+
+		"%20.10s":  fmt.Sprintf("%20.10s", personName.String()),
+		"%-20.10s": fmt.Sprintf("%-20.10s", personName.String()),
+		"%20.10q":  fmt.Sprintf("%20.10q", personName.String()),
+		"%-20.10q": fmt.Sprintf("%-20.10q", personName.String()),
+		"%20.10x":  fmt.Sprintf("%20.10x", personName.String()),
+		"%-20.10x": fmt.Sprintf("%-20.10x", personName.String()),
+		"%20.10X":  fmt.Sprintf("%20.10X", personName.String()),
+		"%-20.10X": fmt.Sprintf("%-20.10X", personName.String()),
 	}
 
 	for format, want := range cases {

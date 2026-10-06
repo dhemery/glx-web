@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/genealogix/glx/go-glx"
 )
@@ -167,39 +168,49 @@ func (n *PersonName) Formatted(format string) string {
 //	child := &PersonName{ ... }
 //	f := fmt.Sprintf("%[1]S, %[1]g was the mother of %[2]S, %[2]g", mother, child)
 func (n *PersonName) Format(f fmt.State, verb rune) {
+	printString := func(f fmt.State, verb rune, s string) {
+		l := utf8.RuneCountInString(s)
+
+		var w, p int
+		var ok bool
+		if w, ok = f.Width(); !ok {
+			w = l
+		}
+		if p, ok = f.Precision(); !ok {
+			p = l
+		}
+		var justify string
+		if f.Flag('-') {
+			justify = "-"
+		}
+		format := fmt.Sprintf("%%%s%d.%d%c", justify, w, p, verb)
+		fmt.Fprintf(f, format, s)
+	}
+
 	// Verbs defined by package fmt.
 	switch verb {
-	case 's':
-		fmt.Fprint(f, n.String())
-		return
-	case 'q':
-		fmt.Fprintf(f, "%q", n.String())
+	case 's', 'q', 'x', 'X':
+		printString(f, verb, n.String())
 		return
 	case 'v':
-		fmt.Fprintf(f, "%v", n.GoString())
-		return
-	case 'x':
-		fmt.Fprintf(f, "%x", n.String())
-		return
-	case 'X':
-		fmt.Fprintf(f, "%X", n.String())
+		printString(f, 's', n.GoString())
 		return
 	}
 
 	// Verbs specific to PersonName
 	switch verb {
 	case '<':
-		fmt.Fprint(f, n.Prefix)
+		printString(f, 's', n.Prefix)
 	case 'g':
-		fmt.Fprint(f, n.Given)
+		printString(f, 's', n.Given)
 	case 'n':
-		fmt.Fprint(f, n.Nickname)
+		printString(f, 's', n.Nickname)
 	case '{':
-		fmt.Fprint(f, n.SurnamePrefix)
+		printString(f, 's', n.SurnamePrefix)
 	case 'S':
-		fmt.Fprint(f, n.Surname)
+		printString(f, 's', n.Surname)
 	case '>':
-		fmt.Fprint(f, n.Suffix)
+		printString(f, 's', n.Suffix)
 	default:
 		fmt.Fprintf(f, "PersonName unknown verb %q", verb)
 	}
