@@ -131,7 +131,17 @@ func (n *PersonName) String() string {
 //	n := %PersonName{Given: "George", Surname: "Washington"}
 //	f := n.Formatted("%S, %g") // Yields "Washington, George".
 func (n *PersonName) Formatted(format string) string {
-	return fmt.Sprintf(format, n)
+	var args []any
+	for i := 0; i < len(format); i++ {
+		if format[i] == '%' {
+			if format[i+1] == '%' {
+				i = i + 1
+				continue
+			}
+			args = append(args, n)
+		}
+	}
+	return fmt.Sprintf(format, args...)
 }
 
 // Format implements [fmt.Formatter]
@@ -140,7 +150,7 @@ func (n *PersonName) Formatted(format string) string {
 // and by [fmt.Sprintf] and similar functions in the fmt package.
 // It is not useful to call Format directly.
 //
-// Each new verb prints a field of the PersonName:
+// Each custom verb prints a field of the PersonName:
 //
 //	'<' Prefix
 //	'g' Given
@@ -148,6 +158,10 @@ func (n *PersonName) Formatted(format string) string {
 //	'{' SurnamePrefix
 //	'S' Surname
 //	'>' Suffix
+//
+// Package fmt's standard verbs 's', 'q', 'x', and 'X'
+// are applied to the String value of n.
+// The verb 'v' formats n as Go string.
 //
 // To format multiple fields of a single name,
 // see [PersonName.Formatted].
@@ -171,19 +185,19 @@ func (n *PersonName) Format(f fmt.State, verb rune) {
 	printString := func(f fmt.State, verb rune, s string) {
 		l := utf8.RuneCountInString(s)
 
-		var w, p int
+		var width, precision int
 		var ok bool
-		if w, ok = f.Width(); !ok {
-			w = l
+		if width, ok = f.Width(); !ok {
+			width = l
 		}
-		if p, ok = f.Precision(); !ok {
-			p = l
+		if precision, ok = f.Precision(); !ok {
+			precision = l
 		}
 		var justify string
 		if f.Flag('-') {
 			justify = "-"
 		}
-		format := fmt.Sprintf("%%%s%d.%d%c", justify, w, p, verb)
+		format := fmt.Sprintf("%%%s%d.%d%c", justify, width, precision, verb)
 		fmt.Fprintf(f, format, s)
 	}
 

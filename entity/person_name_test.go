@@ -215,7 +215,7 @@ func TestPersonNameFormat(t *testing.T) {
 	}
 
 	cases := map[string]string{
-		// Verbs defined by package fmt.
+		// Standard verbs defined by package fmt.
 		"%s": personName.String(),
 		"%q": fmt.Sprintf("%q", personName.String()),
 		"%v": personName.GoString(),
@@ -252,6 +252,12 @@ func TestPersonNameFormat(t *testing.T) {
 		"%-20.10x": fmt.Sprintf("%-20.10x", personName.String()),
 		"%20.10X":  fmt.Sprintf("%20.10X", personName.String()),
 		"%-20.10X": fmt.Sprintf("%-20.10X", personName.String()),
+
+		// %
+		"%%%g%%": "%given%",
+
+		// Compound format
+		"%> %S %{ %n %g %<": "suffix surname surnameprefix nickname given prefix",
 	}
 
 	for format, want := range cases {
