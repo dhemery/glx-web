@@ -77,7 +77,7 @@ type PersonName struct {
 //	"surname_prefix" SurnamePrefix
 //	"surname"        Surname
 //	"suffix"         Suffix
-func NewPersonName(pairs []string) (*PersonName, error) {
+func NewPersonName(pairs ...string) (*PersonName, error) {
 	if len(pairs)%2 != 0 {
 		return nil, ErrNotPairs(pairs)
 	}

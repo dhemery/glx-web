@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/dhemery/glx-web/config"
+	"github.com/dhemery/glx-web/entity"
 	"github.com/dhemery/glx-web/internal/render"
 	"github.com/genealogix/glx/go-glx"
 	"gopkg.in/yaml.v3"
@@ -20,6 +21,10 @@ func Templates(templateDir string) (render.SiteTemplates, error) {
 	}
 
 	return newSiteTemplates(os.DirFS(templateDir), spec)
+}
+
+var funcs = template.FuncMap{
+	"personName": entity.NewPersonName,
 }
 
 type templateLoader struct {
@@ -114,6 +119,7 @@ func (l *templateLoader) cloneBase(name string) (*template.Template, error) {
 		if err != nil {
 			return nil, fmt.Errorf("loading base template %q: %w", name, err)
 		}
+		base.Funcs(funcs)
 		l.baseTemplates[name] = base
 	}
 
