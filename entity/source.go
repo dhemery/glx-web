@@ -30,11 +30,18 @@ func (s *Source) String() string {
 	return s.Title
 }
 
+type SourceList []*Source
+
+// Sort returns the sources sorted by String value.
+func (l SourceList) Sort() SourceList {
+	return sortStringers(l)
+}
+
 func newSource(id string, inner *glx.Source) *Source {
 	return &Source{
 		Source:     inner,
 		EntityType: glx.EntityTypeSources,
-		ID:         id,
+		id:         id,
 		Date:       newDate(inner.Date.String()),
 	}
 }
@@ -43,7 +50,7 @@ func (s *Source) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := s.Source
 	s.Media = catalog.mediaWithIDs(inner.Media)
 	s.Properties = newProperties(inner.Properties, glxfile.SourceProperties, catalog, glxfile)
-	s.Repository = catalog.Repositories[s.RepositoryID]
+	s.Repository = catalog.RepositoriesByID[s.RepositoryID]
 	s.Type = VocabularyValue{Value: inner.Type, Definition: glxfile.SourceTypes[inner.Type]}
 
 	for _, m := range s.Media {

@@ -29,11 +29,18 @@ func (p *Person) String() string {
 	return p.DisplayName()
 }
 
+type PersonList []*Person
+
+// Sort returns the persons sorted by String value.
+func (l PersonList) Sort() PersonList {
+	return sortStringers(l)
+}
+
 func newPerson(id string, inner *glx.Person) *Person {
 	return &Person{
 		Person:     inner,
 		EntityType: glx.EntityTypePersons,
-		ID:         id,
+		id:         id,
 	}
 }
 

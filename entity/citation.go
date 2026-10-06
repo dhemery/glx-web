@@ -35,11 +35,18 @@ func (c *Citation) String() string {
 	return strings.Join(parts, ", ")
 }
 
+type CitationList []*Citation
+
+// Sort returns the citations sorted by String value.
+func (l CitationList) Sort() CitationList {
+	return sortStringers(l)
+}
+
 func newCitation(id string, inner *glx.Citation) *Citation {
 	return &Citation{
 		Citation:   inner,
 		EntityType: glx.EntityTypeCitations,
-		ID:         id,
+		id:         id,
 	}
 }
 
@@ -47,8 +54,8 @@ func (c *Citation) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := c.Citation
 	c.Media = catalog.mediaWithIDs(inner.Media)
 	c.Properties = newProperties(inner.Properties, glxfile.CitationProperties, catalog, glxfile)
-	c.Repository = catalog.Repositories[c.RepositoryID]
-	c.Source = catalog.Sources[c.SourceID]
+	c.Repository = catalog.RepositoriesByID[c.RepositoryID]
+	c.Source = catalog.SourcesByID[c.SourceID]
 
 	for _, m := range c.Media {
 		m.addCitation(c)

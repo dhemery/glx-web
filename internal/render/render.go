@@ -45,15 +45,15 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 		return err
 	}
 
-	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions, data)
-	r.renderEntities(glx.EntityTypeCitations, catalog.Citations, data)
-	r.renderEntities(glx.EntityTypeEvents, catalog.Events, data)
-	r.renderEntities(glx.EntityTypeMedia, catalog.Media, data)
-	r.renderEntities(glx.EntityTypePersons, catalog.Persons, data)
-	r.renderEntities(glx.EntityTypePlaces, catalog.Places, data)
-	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships, data)
-	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories, data)
-	r.renderEntities(glx.EntityTypeSources, catalog.Sources, data)
+	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions(), data)
+	r.renderEntities(glx.EntityTypeCitations, catalog.Citations(), data)
+	r.renderEntities(glx.EntityTypeEvents, catalog.Events(), data)
+	r.renderEntities(glx.EntityTypeMedia, catalog.Media(), data)
+	r.renderEntities(glx.EntityTypePersons, catalog.Persons(), data)
+	r.renderEntities(glx.EntityTypePlaces, catalog.Places(), data)
+	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships(), data)
+	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories(), data)
+	r.renderEntities(glx.EntityTypeSources, catalog.Sources(), data)
 
 	return r.Err
 }
@@ -70,12 +70,16 @@ func (r *Renderer) renderTopLevelPages(data data.Site) error {
 	return r.Err
 }
 
-func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*T, siteData data.Site) {
+type ider interface {
+	ID() string
+}
+
+func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S, siteData data.Site) {
 	if r.Err != nil {
 		return
 	}
 
-	entityTypeData := data.EntityType[T]{
+	entityTypeData := data.EntityType[S, E]{
 		Site:       siteData,
 		EntityType: t,
 		Entities:   entities,
@@ -107,7 +111,8 @@ func (r *Renderer) renderEntities[T any](t glx.EntityType, entities map[string]*
 		return
 	}
 
-	for id, entity := range entities {
+	for _, entity := range entities {
+		id := entity.ID()
 		entityDir := filepath.Join(entityTypeDir, id)
 		if err := os.Mkdir(entityDir, 0755); err != nil {
 			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)

@@ -35,7 +35,7 @@ func (r *Relationship) String() string {
 	}
 	switch len(parts) {
 	case 0:
-		return r.Type.Definition.Label + r.ID
+		return r.Type.Definition.Label + r.ID()
 	case 1:
 		return r.Type.Definition.Label + " of " + parts[0]
 	case 2:
@@ -46,20 +46,27 @@ func (r *Relationship) String() string {
 	}
 }
 
+type RelationshipList []*Relationship
+
+// Sort returns the relationships sorted by String value.
+func (l RelationshipList) Sort() RelationshipList {
+	return sortStringers(l)
+}
+
 func newRelationship(id string, inner *glx.Relationship) *Relationship {
 	return &Relationship{
 		Relationship: inner,
 		EntityType:   glx.EntityTypeRelationships,
-		ID:           id,
+		id:           id,
 	}
 }
 
 func (r *Relationship) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := r.Relationship
-	r.EndEvent = catalog.Events[inner.EndEvent]
+	r.EndEvent = catalog.EventsByID[inner.EndEvent]
 	r.Participants = newParticipants(inner.Participants, glxfile.RelationshipProperties, catalog, glxfile)
 	r.Properties = newProperties(inner.Properties, glxfile.RelationshipProperties, catalog, glxfile)
-	r.StartEvent = catalog.Events[inner.StartEvent]
+	r.StartEvent = catalog.EventsByID[inner.StartEvent]
 	r.Type = newVocabularyValue(inner.Type, glxfile.RelationshipTypes)
 
 	for _, p := range r.Participants {

@@ -29,7 +29,7 @@ func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyE
 	}
 	return &Participant{
 		Participant: inner,
-		Person:      catalog.Persons[inner.Person],
+		Person:      catalog.PersonsByID[inner.Person],
 		Properties:  newProperties(inner.Properties, propertyDefs, catalog, glxfile),
 		Role:        newVocabularyValue(inner.Role, roleDefs),
 	}

@@ -16,14 +16,29 @@ type Assertion struct {
 	Sources     []*Source
 	Subject     entityReference
 
-	// TODO: Resolve value if the property has a reference type or vocabulary type
+	// TODO(dale): Resolve value if the property has a reference type or vocabulary type
+}
+
+// String returns a string representation of a.
+// The value returned by the current implementation
+// is useful only to identify which assertion produced it.
+func (a *Assertion) String() string {
+	// TODO: Better String()
+	return "Assertion " + a.ID()
+}
+
+type AssertionList []*Assertion
+
+// Sort returns the assertions sorted by String value.
+func (l AssertionList) Sort() AssertionList {
+	return sortStringers(l)
 }
 
 func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	return &Assertion{
 		Assertion:  inner,
 		EntityType: glx.EntityTypeAssertions,
-		ID:         id,
+		id:         id,
 		Date:       newDate(inner.Date.String()),
 	}
 }
@@ -37,19 +52,19 @@ func (a *Assertion) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	s := inner.Subject
 	switch {
 	case s.Person != "":
-		a.Subject = catalog.Persons[s.Person]
+		a.Subject = catalog.PersonsByID[s.Person]
 	case s.Event != "":
-		a.Subject = catalog.Events[s.Event]
+		a.Subject = catalog.EventsByID[s.Event]
 		roles := glxfile.ParticipantRoles
 		props := glxfile.EventProperties
 		a.Participant = newParticipant(inner.Participant, roles, props, catalog, glxfile)
 	case s.Relationship != "":
-		a.Subject = catalog.Relationships[s.Relationship]
+		a.Subject = catalog.RelationshipsByID[s.Relationship]
 		roles := glxfile.ParticipantRoles
 		props := glxfile.RelationshipProperties
 		a.Participant = newParticipant(inner.Participant, roles, props, catalog, glxfile)
 	case s.Place != "":
-		a.Subject = catalog.Places[s.Place]
+		a.Subject = catalog.PlacesByID[s.Place]
 	}
 
 	if s, ok := a.Subject.(subject); ok {
@@ -71,12 +86,4 @@ func (a *Assertion) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 
 type subject interface {
 	addAssertion(*Assertion)
-}
-
-// String returns a string representation of a.
-// The value returned by the current implementation
-// is useful only to identify which assertion produced it.
-func (a *Assertion) String() string {
-	// TODO: Better String()
-	return "Assertion " + a.ID
 }

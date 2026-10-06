@@ -25,11 +25,18 @@ func (r *Repository) String() string {
 	return r.Name
 }
 
+type RepositoryList []*Repository
+
+// Sort returns the repositories sorted by String value.
+func (l RepositoryList) Sort() RepositoryList {
+	return sortStringers(l)
+}
+
 func newRepository(id string, inner *glx.Repository) *Repository {
 	return &Repository{
 		Repository: inner,
 		EntityType: glx.EntityTypeRepositories,
-		ID:         id,
+		id:         id,
 	}
 }
 

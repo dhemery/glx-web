@@ -35,17 +35,24 @@ func (p *Place) String() string {
 	return p.FullName()
 }
 
+type PlaceList []*Place
+
+// Sort returns the places sorted by String value.
+func (l PlaceList) Sort() PlaceList {
+	return sortStringers(l)
+}
+
 func newPlace(id string, inner *glx.Place) *Place {
 	return &Place{
 		Place:      inner,
 		EntityType: glx.EntityTypePlaces,
-		ID:         id,
+		id:         id,
 	}
 }
 
 func (p *Place) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := p.Place
-	p.Parent = catalog.Places[p.ParentID]
+	p.Parent = catalog.PlacesByID[p.ParentID]
 	p.Properties = newProperties(inner.Properties, glxfile.PlaceProperties, catalog, glxfile)
 	p.Type = VocabularyValue{Value: inner.Type, Definition: glxfile.PlaceTypes[inner.Type]}
 

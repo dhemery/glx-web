@@ -30,11 +30,18 @@ func (m *Media) String() string {
 	return m.Title
 }
 
+type MediaList []*Media
+
+// Sort returns the media sorted by String value.
+func (l MediaList) Sort() MediaList {
+	return sortStringers(l)
+}
+
 func newMedia(id string, inner *glx.Media) *Media {
 	return &Media{
 		Media:      inner,
 		EntityType: glx.EntityTypeMedia,
-		ID:         id,
+		id:         id,
 		Date:       newDate(inner.Date.String()),
 	}
 }
@@ -43,7 +50,7 @@ func (m *Media) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := m.Media
 	m.Type = VocabularyValue{Value: inner.Type, Definition: glxfile.MediaTypes[inner.Type]}
 	m.Properties = newProperties(inner.Properties, glxfile.MediaProperties, catalog, glxfile)
-	m.Source = catalog.Sources[inner.Source]
+	m.Source = catalog.SourcesByID[inner.Source]
 
 	if m.Source != nil {
 		m.Source.addMedia(m)

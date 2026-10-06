@@ -18,12 +18,12 @@ type Site struct {
 }
 
 // EntityType describes the site and the set of entities of type T.
-type EntityType[T any] struct {
+type EntityType[S ~[]T, T any] struct {
 	Site
 	// The type of entity being rendered.
 	EntityType glx.EntityType
-	// The map of entities being rendered, keyed by ID.
-	Entities map[string]*T
+	// The entities being rendered, keyed by ID.
+	Entities S
 }
 
 // Entity describes the site and an entity.

@@ -26,11 +26,18 @@ func (e *Event) String() string {
 	return e.Title
 }
 
+type EventList []*Event
+
+// Sort returns the events sorted by String value.
+func (l EventList) Sort() EventList {
+	return sortStringers(l)
+}
+
 func newEvent(id string, inner *glx.Event) *Event {
 	return &Event{
 		Event:      inner,
 		EntityType: glx.EntityTypeEvents,
-		ID:         id,
+		id:         id,
 		Date:       newDate(inner.Date.String()),
 	}
 }
@@ -38,7 +45,7 @@ func newEvent(id string, inner *glx.Event) *Event {
 func (e *Event) compile(catalog *Catalog, glxfile *glx.GLXFile) {
 	inner := e.Event
 	e.Participants = newParticipants(inner.Participants, glxfile.EventProperties, catalog, glxfile)
-	e.Place = catalog.Places[e.PlaceID]
+	e.Place = catalog.PlacesByID[e.PlaceID]
 	e.Properties = newProperties(inner.Properties, glxfile.EventProperties, catalog, glxfile)
 	e.Type = newVocabularyValue(inner.Type, glxfile.EventTypes)
 

@@ -1,94 +1,136 @@
 package entity
 
 import (
+	"maps"
 	"path"
+	"slices"
 
 	"github.com/genealogix/glx/go-glx"
 )
 
 type entity struct {
-	EntityType glx.EntityType
-	ID         string
+	glx.EntityType
+	id string
+}
+
+func (e entity) ID() string {
+	return e.id
 }
 
 // PagePath returns the path to the directory where glx-web renders the entity,
 // relative to the site's output directory.
 func (e entity) PagePath() string {
-	return path.Join(e.EntityType.Plural(), e.ID)
+	return path.Join(e.Plural(), e.id)
 }
 
 // Catalog is a collection of entities compiled from a GLX archive.
 type Catalog struct {
-	Assertions    map[string]*Assertion
-	Citations     map[string]*Citation
-	Events        map[string]*Event
-	Media         map[string]*Media
-	Persons       map[string]*Person
-	Places        map[string]*Place
-	Relationships map[string]*Relationship
-	Repositories  map[string]*Repository
-	Sources       map[string]*Source
+	AssertionsByID    map[string]*Assertion
+	CitationsByID     map[string]*Citation
+	EventsByID        map[string]*Event
+	MediaByID         map[string]*Media
+	PersonsByID       map[string]*Person
+	PlacesByID        map[string]*Place
+	RelationshipsByID map[string]*Relationship
+	RepositoriesByID  map[string]*Repository
+	SourcesByID       map[string]*Source
+}
+
+func (c *Catalog) Assertions() AssertionList {
+	return slices.Collect(maps.Values(c.AssertionsByID))
+}
+
+func (c *Catalog) Citations() CitationList {
+	return slices.Collect(maps.Values(c.CitationsByID))
+}
+
+func (c *Catalog) Events() EventList {
+	return slices.Collect(maps.Values(c.EventsByID))
+}
+
+func (c *Catalog) Media() MediaList {
+	return slices.Collect(maps.Values(c.MediaByID))
+}
+
+func (c *Catalog) Persons() PersonList {
+	return slices.Collect(maps.Values(c.PersonsByID))
+}
+
+func (c *Catalog) Places() PlaceList {
+	return slices.Collect(maps.Values(c.PlacesByID))
+}
+
+func (c *Catalog) Relationships() RelationshipList {
+	return slices.Collect(maps.Values(c.RelationshipsByID))
+}
+
+func (c *Catalog) Repositories() RepositoryList {
+	return slices.Collect(maps.Values(c.RepositoriesByID))
+}
+
+func (c *Catalog) Sources() SourceList {
+	return slices.Collect(maps.Values(c.SourcesByID))
 }
 
 // NewCatalog compiles a catalog of entities from a GLX archive.
 func NewCatalog(g *glx.GLXFile) *Catalog {
 	a := &Catalog{
-		Assertions:    make(map[string]*Assertion),
-		Citations:     make(map[string]*Citation),
-		Events:        make(map[string]*Event),
-		Media:         make(map[string]*Media),
-		Persons:       make(map[string]*Person),
-		Places:        make(map[string]*Place),
-		Relationships: make(map[string]*Relationship),
-		Repositories:  make(map[string]*Repository),
-		Sources:       make(map[string]*Source),
+		AssertionsByID:    make(map[string]*Assertion),
+		CitationsByID:     make(map[string]*Citation),
+		EventsByID:        make(map[string]*Event),
+		MediaByID:         make(map[string]*Media),
+		PersonsByID:       make(map[string]*Person),
+		PlacesByID:        make(map[string]*Place),
+		RelationshipsByID: make(map[string]*Relationship),
+		RepositoriesByID:  make(map[string]*Repository),
+		SourcesByID:       make(map[string]*Source),
 	}
 
 	for id, ga := range g.Assertions {
-		a.Assertions[id] = newAssertion(id, ga)
+		a.AssertionsByID[id] = newAssertion(id, ga)
 	}
 
 	for id, gc := range g.Citations {
-		a.Citations[id] = newCitation(id, gc)
+		a.CitationsByID[id] = newCitation(id, gc)
 	}
 
 	for id, ge := range g.Events {
-		a.Events[id] = newEvent(id, ge)
+		a.EventsByID[id] = newEvent(id, ge)
 	}
 
 	for id, gm := range g.Media {
-		a.Media[id] = newMedia(id, gm)
+		a.MediaByID[id] = newMedia(id, gm)
 	}
 
 	for id, gp := range g.Persons {
-		a.Persons[id] = newPerson(id, gp)
+		a.PersonsByID[id] = newPerson(id, gp)
 	}
 
 	for id, gp := range g.Places {
-		a.Places[id] = newPlace(id, gp)
+		a.PlacesByID[id] = newPlace(id, gp)
 	}
 
 	for id, gr := range g.Relationships {
-		a.Relationships[id] = newRelationship(id, gr)
+		a.RelationshipsByID[id] = newRelationship(id, gr)
 	}
 
 	for id, gr := range g.Repositories {
-		a.Repositories[id] = newRepository(id, gr)
+		a.RepositoriesByID[id] = newRepository(id, gr)
 	}
 
 	for id, gs := range g.Sources {
-		a.Sources[id] = newSource(id, gs)
+		a.SourcesByID[id] = newSource(id, gs)
 	}
 
-	a.compile(a.Assertions, g)
-	a.compile(a.Citations, g)
-	a.compile(a.Events, g)
-	a.compile(a.Media, g)
-	a.compile(a.Persons, g)
-	a.compile(a.Places, g)
-	a.compile(a.Relationships, g)
-	a.compile(a.Repositories, g)
-	a.compile(a.Sources, g)
+	a.compile(a.AssertionsByID, g)
+	a.compile(a.CitationsByID, g)
+	a.compile(a.EventsByID, g)
+	a.compile(a.MediaByID, g)
+	a.compile(a.PersonsByID, g)
+	a.compile(a.PlacesByID, g)
+	a.compile(a.RelationshipsByID, g)
+	a.compile(a.RepositoriesByID, g)
+	a.compile(a.SourcesByID, g)
 
 	return a
 }
@@ -113,11 +155,11 @@ type entityReference interface {
 func (c *Catalog) entity(id string, entityType string) entityReference {
 	switch entityType {
 	case "citations":
-		return c.Citations[id]
+		return c.CitationsByID[id]
 	case "persons":
-		return c.Persons[id]
+		return c.PersonsByID[id]
 	case "places":
-		return c.Places[id]
+		return c.PlacesByID[id]
 	default:
 		return nil
 	}
@@ -126,7 +168,7 @@ func (c *Catalog) entity(id string, entityType string) entityReference {
 func (c *Catalog) citationsWithIDs(ids []string) []*Citation {
 	var citations []*Citation
 	for _, id := range ids {
-		citations = append(citations, c.Citations[id])
+		citations = append(citations, c.CitationsByID[id])
 	}
 	return citations
 }
@@ -134,7 +176,7 @@ func (c *Catalog) citationsWithIDs(ids []string) []*Citation {
 func (c *Catalog) mediaWithIDs(ids []string) []*Media {
 	var media []*Media
 	for _, mediaID := range ids {
-		media = append(media, c.Media[mediaID])
+		media = append(media, c.MediaByID[mediaID])
 	}
 	return media
 }
@@ -142,7 +184,7 @@ func (c *Catalog) mediaWithIDs(ids []string) []*Media {
 func (c *Catalog) sourcesWithIDs(ids []string) []*Source {
 	var sources []*Source
 	for _, id := range ids {
-		sources = append(sources, c.Sources[id])
+		sources = append(sources, c.SourcesByID[id])
 	}
 	return sources
 }
