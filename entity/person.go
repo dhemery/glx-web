@@ -36,6 +36,28 @@ func (l PersonList) Sort() PersonList {
 	return sortStringers(l)
 }
 
+func extractSurname(props map[string]Property) string {
+	nameProp, ok := props["name"]
+	if !ok {
+		return ""
+	}
+	surnameField, ok := nameProp.Value().Fields["surname"]
+	if !ok {
+		return ""
+	}
+	return surnameField.String()
+}
+
+func (l PersonList) GroupBySurname() map[string]PersonList {
+	grouped := make(map[string]PersonList)
+
+	for _, p := range l {
+		surname := extractSurname(p.Properties)
+		grouped[surname] = append(grouped[surname], p)
+	}
+	return grouped
+}
+
 func newPerson(id string, inner *glx.Person) *Person {
 	return &Person{
 		Person:     inner,
