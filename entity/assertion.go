@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"log/slog"
+
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -39,11 +41,12 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 		Assertion:  inner,
 		EntityType: glx.EntityTypeAssertions,
 		id:         id,
-		Date:       newDate(inner.Date.String()),
+		Date:       newDate(inner.Date.String(), slog.Default().With("new", id)),
 	}
 }
 
-func (a *Assertion) resolve(arch archive) {
+func (a *Assertion) resolve(arch archive, l *slog.Logger) {
+	l = l.With("entity", a.PagePath())
 	inner := a.Assertion
 	a.Citations = arch.citations(inner.Citations)
 	a.Media = arch.media(inner.Media)
@@ -57,12 +60,12 @@ func (a *Assertion) resolve(arch archive) {
 		a.Subject = arch.c.EventsByID[s.Event]
 		roles := arch.g.ParticipantRoles
 		props := arch.g.EventProperties
-		a.Participant = newParticipant(arch, inner.Participant, roles, props)
+		a.Participant = newParticipant(arch, inner.Participant, roles, props, l)
 	case s.Relationship != "":
 		a.Subject = arch.c.RelationshipsByID[s.Relationship]
 		roles := arch.g.ParticipantRoles
 		props := arch.g.RelationshipProperties
-		a.Participant = newParticipant(arch, inner.Participant, roles, props)
+		a.Participant = newParticipant(arch, inner.Participant, roles, props, l)
 	case s.Place != "":
 		a.Subject = arch.c.PlacesByID[s.Place]
 	}

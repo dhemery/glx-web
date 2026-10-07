@@ -2,6 +2,7 @@ package entity
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
@@ -55,30 +56,40 @@ func (f PropertyField) String() string {
 	return f.Value.String()
 }
 
-func newProperties(a archive, rawProperties map[string]any, defs map[string]*glx.PropertyDefinition) map[string]Property {
+func newProperties(a archive, rawProperties map[string]any, defs map[string]*glx.PropertyDefinition, l *slog.Logger) map[string]Property {
 	properties := make(map[string]Property)
 
 	for name, rawProperty := range rawProperties {
-		properties[name] = newProperty(a, rawProperty, defs[name])
+		properties[name] = newProperty(a, rawProperty, defs[name], l.With("property", name))
 	}
 
 	return properties
 }
 
-func newProperty(a archive, rawProperty any, def *glx.PropertyDefinition) Property {
+// TODO(dale): Property can lack definition. Property can be incomplete.
+func newProperty(a archive, rawProperty any, def *glx.PropertyDefinition, l *slog.Logger) Property {
+	if def == nil {
+		l.Warn("property incomplete: no definition")
+		return Property{}
+	}
+
 	property := Property{Definition: def}
 
 	switch v := rawProperty.(type) {
-	case []any: // In is multi-valued.
+	case []any:
+		// Convert each element to a property value map and parse it.
 		for _, rawPropertyValue := range v {
-			propertyValue := newPropertyValue(a, asPropertyMap(rawPropertyValue), def)
+			propertyValue := newPropertyValue(a, asPropertyMap(rawPropertyValue), def, l)
 			property.Values = append(property.Values, propertyValue)
 		}
-	case map[string]any: // In is an object.
-		property.Values = append(property.Values, newPropertyValue(a, v, def))
-	default: // In is a single non-object value.
+	case map[string]any:
+		// Assume the map is a property value map and parse it.
+		property.Values = append(property.Values, newPropertyValue(a, v, def, l))
+	default:
+		// Assume raw property is a scalar property value. Wrap it in a
+		// property value map and parse it.
 		rawValueMap := map[string]any{"value": v}
-		property.Values = append(property.Values, newPropertyValue(a, rawValueMap, def))
+		property.Values = append(property.Values, newPropertyValue(a, rawValueMap, def, l))
 	}
 
 	return property
@@ -92,31 +103,36 @@ func asPropertyMap(raw any) map[string]any {
 	return map[string]any{"value": raw}
 }
 
-func newPropertyValue(a archive, rawPropertyValue map[string]any, def *glx.PropertyDefinition) PropertyValue {
+func newPropertyValue(a archive, rawPropertyValue map[string]any, def *glx.PropertyDefinition, l *slog.Logger) PropertyValue {
 	propertyValue := PropertyValue{
-		Date:   newDate(fmt.Sprint(rawPropertyValue["date"])),
-		Fields: newPropertyFields(rawPropertyValue["fields"], def),
+		Fields: newPropertyFields(rawPropertyValue["fields"], def.Fields, l.With("element", "property fields")),
+	}
+
+	if rawDate, ok := rawPropertyValue["date"]; ok {
+		propertyValue.Date = newDate(rawDate, l.With("element", "property date"))
 	}
 
 	rawValue := rawPropertyValue["value"]
 
+	l = l.With("element", "property value")
+
 	// TODO(dale): Does GLX guarantee that exactly one type field names a type?
 	switch {
 	case def.ValueType != "":
-		propertyValue.Value = newPrimitiveValue(rawValue, def.ValueType)
+		propertyValue.Value = newPrimitiveValue(rawValue, def.ValueType, l)
 	case def.ReferenceType != "":
 		// TODO(dale): Does GLX guarantee a string?
 		id := rawValue.(string)
 		propertyValue.Value = a.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
 		key := rawValue.(string)
-		propertyValue.Value = newVocabularyValue(key, a.vocabulary(def.VocabularyType))
+		propertyValue.Value = newVocabularyValue(key, a.vocabulary(def.VocabularyType, l), l)
 	}
 
 	return propertyValue
 }
 
-func newPropertyFields(rawFields any, def *glx.PropertyDefinition) map[string]PropertyField {
+func newPropertyFields(rawFields any, defs map[string]*glx.FieldDefinition, l *slog.Logger) map[string]PropertyField {
 	propertyFields := make(map[string]PropertyField)
 
 	if rawFields == nil {
@@ -125,18 +141,22 @@ func newPropertyFields(rawFields any, def *glx.PropertyDefinition) map[string]Pr
 
 	rawFieldsMap, ok := rawFields.(map[string]any)
 	if !ok {
-		// TODO(dale): Warn and return empty map
-		propertyFields["ERROR"] = PropertyField{
-			Value: StringValue(fmt.Sprintf("property fields has unexpected type %T", rawFields)),
-		}
+		l.Warn("all fields dropped: cannot parse raw type", "type", fmt.Sprintf("%T", rawFieldsMap))
+		return propertyFields
 	}
 
 	for name, rawFieldValue := range rawFieldsMap {
-		propertyFields[name] = PropertyField{
-			// TODO(dale): If no definition, warn and store string value.
-			Definition: def.Fields[name],
-			Value:      newPrimitiveValue(rawFieldValue, def.Fields[name].ValueType),
+		fieldLogger := l.With("field", name)
+		def, ok := defs[name]
+		if !ok {
+			fieldLogger.Warn("field dropped: no field definition")
+			continue
 		}
+		value := newPrimitiveValue(rawFieldValue, def.ValueType, fieldLogger)
+		if value == nil {
+			continue
+		}
+		propertyFields[name] = PropertyField{Definition: def, Value: value}
 	}
 
 	return propertyFields

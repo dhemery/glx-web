@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"log/slog"
+
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -66,9 +68,10 @@ func newPerson(id string, inner *glx.Person) *Person {
 	}
 }
 
-func (p *Person) resolve(a archive) {
+func (p *Person) resolve(a archive, l *slog.Logger) {
+	l = l.With("entity", p.PagePath())
 	inner := p.Person
-	p.Properties = newProperties(a, inner.Properties, a.g.PersonProperties)
+	p.Properties = newProperties(a, inner.Properties, a.g.PersonProperties, l)
 }
 
 func (p *Person) addAssertion(a *Assertion) {

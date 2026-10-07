@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"log/slog"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -59,13 +60,14 @@ func newRelationship(id string, inner *glx.Relationship) *Relationship {
 	}
 }
 
-func (r *Relationship) resolve(a archive) {
+func (r *Relationship) resolve(a archive, l *slog.Logger) {
+	l = l.With("entity", r.PagePath())
 	inner := r.Relationship
 	r.EndEvent = a.c.EventsByID[inner.EndEvent]
-	r.Participants = newParticipants(a, inner.Participants, a.g.RelationshipProperties)
-	r.Properties = newProperties(a, inner.Properties, a.g.RelationshipProperties)
+	r.Participants = newParticipants(a, inner.Participants, a.g.RelationshipProperties, l)
+	r.Properties = newProperties(a, inner.Properties, a.g.RelationshipProperties, l)
 	r.StartEvent = a.c.EventsByID[inner.StartEvent]
-	r.Type = newVocabularyValue(inner.Type, a.g.RelationshipTypes)
+	r.Type = newVocabularyValue(inner.Type, a.g.RelationshipTypes, l)
 
 	for _, p := range r.Participants {
 		p.Person.addRelationship(r)

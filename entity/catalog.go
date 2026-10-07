@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"log/slog"
 	"maps"
 	"slices"
 
@@ -106,16 +107,17 @@ func NewCatalog(g *glx.GLXFile) *Catalog {
 		c.SourcesByID[id] = newSource(id, gs)
 	}
 
+	l := slog.Default()
 	a := archive{c: c, g: g}
-	a.resolve(c.AssertionsByID)
-	a.resolve(c.CitationsByID)
-	a.resolve(c.EventsByID)
-	a.resolve(c.MediaByID)
-	a.resolve(c.PersonsByID)
-	a.resolve(c.PlacesByID)
-	a.resolve(c.RelationshipsByID)
-	a.resolve(c.RepositoriesByID)
-	a.resolve(c.SourcesByID)
+	a.resolve(c.AssertionsByID, l)
+	a.resolve(c.CitationsByID, l)
+	a.resolve(c.EventsByID, l)
+	a.resolve(c.MediaByID, l)
+	a.resolve(c.PersonsByID, l)
+	a.resolve(c.PlacesByID, l)
+	a.resolve(c.RelationshipsByID, l)
+	a.resolve(c.RepositoriesByID, l)
+	a.resolve(c.SourcesByID, l)
 
 	return c
 }

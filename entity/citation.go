@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"log/slog"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -50,10 +51,11 @@ func newCitation(id string, inner *glx.Citation) *Citation {
 	}
 }
 
-func (c *Citation) resolve(a archive) {
+func (c *Citation) resolve(a archive, l *slog.Logger) {
+	l = l.With("entity", c.PagePath())
 	inner := c.Citation
 	c.Media = a.media(inner.Media)
-	c.Properties = newProperties(a, inner.Properties, a.g.CitationProperties)
+	c.Properties = newProperties(a, inner.Properties, a.g.CitationProperties, l)
 	c.Repository = a.c.RepositoriesByID[c.RepositoryID]
 	c.Source = a.c.SourcesByID[c.SourceID]
 

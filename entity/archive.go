@@ -1,6 +1,10 @@
 package entity
 
-import "github.com/genealogix/glx/go-glx"
+import (
+	"log/slog"
+
+	"github.com/genealogix/glx/go-glx"
+)
 
 type archive struct {
 	c *Catalog
@@ -11,12 +15,12 @@ type resolver interface {
 	// Resolve initializes the receiver's references to entities and
 	// vocabularies in the archive and notifies any referenced entities
 	// that the receiver refers to them.
-	resolve(archive)
+	resolve(archive, *slog.Logger)
 }
 
-func (a archive) resolve[R resolver](resolvers map[string]R) {
+func (a archive) resolve[R resolver](resolvers map[string]R, l *slog.Logger) {
 	for _, r := range resolvers {
-		r.resolve(a)
+		r.resolve(a, l)
 	}
 }
 
@@ -53,12 +57,13 @@ func (a archive) media(ids []string) []*Media {
 func (a archive) sources(ids []string) []*Source {
 	var sources []*Source
 	for _, id := range ids {
-		sources = append(sources, a.c.SourcesByID[id])
+		s := a.c.SourcesByID[id]
+		sources = append(sources, s)
 	}
 	return sources
 }
 
-func (a archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
+func (a archive) vocabulary(name string, l *slog.Logger) map[string]*glx.VocabularyEntry {
 	switch name {
 	case glx.VocabRelationshipTypes:
 		return a.g.RelationshipTypes
@@ -95,6 +100,7 @@ func (a archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
 	case glx.VocabInformationTypes:
 		return a.g.InformationTypes
 	default:
+		l.Warn("unknown vocabulary name", "name", name)
 		return make(map[string]*glx.VocabularyEntry)
 	}
 }

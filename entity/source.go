@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"log/slog"
+
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -42,14 +44,15 @@ func newSource(id string, inner *glx.Source) *Source {
 		Source:     inner,
 		EntityType: glx.EntityTypeSources,
 		id:         id,
-		Date:       newDate(inner.Date.String()),
+		Date:       newDate(inner.Date.String(), slog.Default().With("new", id)),
 	}
 }
 
-func (s *Source) resolve(a archive) {
+func (s *Source) resolve(a archive, l *slog.Logger) {
+	l = l.With("entity", s.PagePath())
 	inner := s.Source
 	s.Media = a.media(inner.Media)
-	s.Properties = newProperties(a, inner.Properties, a.g.SourceProperties)
+	s.Properties = newProperties(a, inner.Properties, a.g.SourceProperties, l)
 	s.Repository = a.c.RepositoriesByID[s.RepositoryID]
 	s.Type = VocabularyValue{Value: inner.Type, Definition: a.g.SourceTypes[inner.Type]}
 

@@ -1,6 +1,10 @@
 package entity
 
-import "github.com/genealogix/glx/go-glx"
+import (
+	"log/slog"
+
+	"github.com/genealogix/glx/go-glx"
+)
 
 type Participant struct {
 	*glx.Participant
@@ -25,26 +29,26 @@ func (l ParticipantList) Sort() ParticipantList {
 	return sortValues(l)
 }
 
-func newParticipants(a archive, inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition) ParticipantList {
+func newParticipants(a archive, inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition, l *slog.Logger) ParticipantList {
 	roleDefs := a.g.ParticipantRoles
 	var participants ParticipantList
 
 	for _, p := range inner {
-		participants = append(participants, newParticipant(a, &p, roleDefs, propertyDefs))
+		participants = append(participants, newParticipant(a, &p, roleDefs, propertyDefs, l))
 	}
 
 	return participants
 }
 
-func newParticipant(a archive, inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition) *Participant {
+func newParticipant(a archive, inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition, l *slog.Logger) *Participant {
 	if inner == nil {
 		return nil
-
 	}
+	l = l.With("participant", inner.Person)
 	return &Participant{
 		Participant: inner,
 		Person:      a.c.PersonsByID[inner.Person],
-		Properties:  newProperties(a, inner.Properties, propertyDefs),
-		Role:        newVocabularyValue(inner.Role, roleDefs),
+		Properties:  newProperties(a, inner.Properties, propertyDefs, l),
+		Role:        newVocabularyValue(inner.Role, roleDefs, l),
 	}
 }
