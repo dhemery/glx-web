@@ -66,7 +66,7 @@ func TestNewPersonName(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		got, err := NewPersonName(tc.args)
+		got, err := NewPersonName(tc.args...)
 		if !errors.Is(err, tc.wantErr) {
 			t.Errorf("%s\n   got %#v,\n  want %#v", tc.args, err, tc.wantErr)
 

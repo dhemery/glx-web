@@ -54,6 +54,19 @@ func (l PersonList) Sort() PersonList {
 	return sortStringers(l)
 }
 
+// GroupByName groups the persons by names,
+// as formatted by [PersonName.Formatted]
+// using the given the format specifier.
+func (l PersonList) GroupByName(format string) map[string]PersonList {
+	grouped := make(map[string]PersonList)
+
+	for _, p := range l {
+		key := p.Name().Formatted(format)
+		grouped[key] = append(grouped[key], p)
+	}
+	return grouped
+}
+
 type PersonName struct {
 	Prefix        string `json:"prefix"`
 	Given         string `json:"given"`
