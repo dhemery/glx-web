@@ -35,17 +35,21 @@ func (l EventList) Sort() EventList {
 	return sortValues(l)
 }
 
-func newEvent(id string, inner *glx.Event) *Event {
+func newEvent(id string, inner *glx.Event, l *slog.Logger) *Event {
+	l = l.With("entity_type", glx.EntityTypeEvents, "id", id)
+
+	date := newDate(inner.Date.String(), l.With("new", id))
+
 	return &Event{
 		Event:      inner,
 		EntityType: glx.EntityTypeEvents,
 		id:         id,
-		Date:       newDate(inner.Date.String(), slog.Default().With("new", id)),
+		Date:       date,
 	}
 }
 
 func (e *Event) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity", e.PagePath())
+	l = l.With("entity_type", glx.EntityTypeEvents, "id", e.id)
 
 	inner := e.Event
 	e.Participants = newParticipants(a, inner.Participants, a.g.EventProperties, l)

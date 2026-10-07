@@ -53,11 +53,12 @@ func newPlace(id string, inner *glx.Place) *Place {
 }
 
 func (p *Place) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity", p.PagePath())
+	l = l.With("entity_type", glx.EntityTypePlaces, "id", p.id)
+
 	inner := p.Place
 	p.Parent = a.c.PlacesByID[p.ParentID]
 	p.Properties = newProperties(a, inner.Properties, a.g.PlaceProperties, l)
-	p.Type = VocabularyValue{Value: inner.Type, Definition: a.g.PlaceTypes[inner.Type]}
+	p.Type = newVocabularyValue(inner.Type, a.g.PlaceTypes, l)
 
 	if p.Parent != nil {
 		p.Parent.addChild(p)

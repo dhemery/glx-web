@@ -52,7 +52,8 @@ func newCitation(id string, inner *glx.Citation) *Citation {
 }
 
 func (c *Citation) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity", c.PagePath())
+	l = l.With("entity_type", glx.EntityTypeCitations, "id", c.id)
+
 	inner := c.Citation
 	c.Media = a.media(inner.Media)
 	c.Properties = newProperties(a, inner.Properties, a.g.CitationProperties, l)

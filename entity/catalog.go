@@ -71,8 +71,10 @@ func NewCatalog(g *glx.GLXFile) *Catalog {
 		SourcesByID:       make(map[string]*Source),
 	}
 
+	l := slog.Default().With("phase", "create entities")
+
 	for id, ga := range g.Assertions {
-		c.AssertionsByID[id] = newAssertion(id, ga)
+		c.AssertionsByID[id] = newAssertion(id, ga, l)
 	}
 
 	for id, gc := range g.Citations {
@@ -80,11 +82,11 @@ func NewCatalog(g *glx.GLXFile) *Catalog {
 	}
 
 	for id, ge := range g.Events {
-		c.EventsByID[id] = newEvent(id, ge)
+		c.EventsByID[id] = newEvent(id, ge, l)
 	}
 
 	for id, gm := range g.Media {
-		c.MediaByID[id] = newMedia(id, gm)
+		c.MediaByID[id] = newMedia(id, gm, l)
 	}
 
 	for id, gp := range g.Persons {
@@ -104,10 +106,11 @@ func NewCatalog(g *glx.GLXFile) *Catalog {
 	}
 
 	for id, gs := range g.Sources {
-		c.SourcesByID[id] = newSource(id, gs)
+		c.SourcesByID[id] = newSource(id, gs, l)
 	}
 
-	l := slog.Default()
+	l = slog.Default().With("phase", "resolve references")
+
 	a := archive{c: c, g: g}
 	a.resolve(c.AssertionsByID, l)
 	a.resolve(c.CitationsByID, l)

@@ -36,17 +36,21 @@ func (l AssertionList) Sort() AssertionList {
 	return sortValues(l)
 }
 
-func newAssertion(id string, inner *glx.Assertion) *Assertion {
+func newAssertion(id string, inner *glx.Assertion, l *slog.Logger) *Assertion {
+	l = l.With("entity_type", glx.EntityTypeAssertions, "id", id)
+
+	date := newDate(inner.Date.String(), l)
 	return &Assertion{
 		Assertion:  inner,
 		EntityType: glx.EntityTypeAssertions,
 		id:         id,
-		Date:       newDate(inner.Date.String(), slog.Default().With("new", id)),
+		Date:       date,
 	}
 }
 
 func (a *Assertion) resolve(arch archive, l *slog.Logger) {
-	l = l.With("entity", a.PagePath())
+	l = l.With("entity_type", glx.EntityTypeAssertions, "id", a.id)
+
 	inner := a.Assertion
 	a.Citations = arch.citations(inner.Citations)
 	a.Media = arch.media(inner.Media)

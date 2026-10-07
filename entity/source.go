@@ -39,22 +39,27 @@ func (l SourceList) Sort() SourceList {
 	return sortValues(l)
 }
 
-func newSource(id string, inner *glx.Source) *Source {
+func newSource(id string, inner *glx.Source, l *slog.Logger) *Source {
+	l = l.With("entity_type", glx.EntityTypeSources, "id", id)
+
+	date := newDate(inner.Date.String(), l)
+
 	return &Source{
 		Source:     inner,
 		EntityType: glx.EntityTypeSources,
 		id:         id,
-		Date:       newDate(inner.Date.String(), slog.Default().With("new", id)),
+		Date:       date,
 	}
 }
 
 func (s *Source) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity", s.PagePath())
+	l = l.With("entity_type", glx.EntityTypeSources, "id", s.id)
+
 	inner := s.Source
 	s.Media = a.media(inner.Media)
 	s.Properties = newProperties(a, inner.Properties, a.g.SourceProperties, l)
 	s.Repository = a.c.RepositoriesByID[s.RepositoryID]
-	s.Type = VocabularyValue{Value: inner.Type, Definition: a.g.SourceTypes[inner.Type]}
+	s.Type = newVocabularyValue(inner.Type, a.g.SourceTypes, l)
 
 	for _, m := range s.Media {
 		m.addSource(s)

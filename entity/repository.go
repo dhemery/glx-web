@@ -43,9 +43,10 @@ func newRepository(id string, inner *glx.Repository) *Repository {
 }
 
 func (r *Repository) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity", r.PagePath())
+	l = l.With("entity_type", glx.EntityTypeRepositories, "id", r.id)
+
 	inner := r.Repository
-	r.Type = VocabularyValue{Value: inner.Type, Definition: a.g.RepositoryTypes[inner.Type]}
+	r.Type = newVocabularyValue(inner.Type, a.g.RepositoryTypes, l)
 	r.Properties = newProperties(a, inner.Properties, a.g.RepositoryProperties, l)
 }
 
