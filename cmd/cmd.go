@@ -84,7 +84,7 @@ func build() error {
 		return fmt.Errorf("template directory: %w", err)
 	}
 
-	glxFile, err := load.Archive(absArchiveDir)
+	glxFile, err := load.GLX(absArchiveDir)
 	if err != nil {
 		return err
 	}

@@ -46,12 +46,12 @@ func newSource(id string, inner *glx.Source) *Source {
 	}
 }
 
-func (s *Source) compile(catalog *Catalog, glxfile *glx.GLXFile) {
+func (s *Source) compile(a archive) {
 	inner := s.Source
-	s.Media = catalog.mediaWithIDs(inner.Media)
-	s.Properties = newProperties(inner.Properties, glxfile.SourceProperties, catalog, glxfile)
-	s.Repository = catalog.RepositoriesByID[s.RepositoryID]
-	s.Type = VocabularyValue{Value: inner.Type, Definition: glxfile.SourceTypes[inner.Type]}
+	s.Media = a.mediaWithIDs(inner.Media)
+	s.Properties = newProperties(inner.Properties, a.g.SourceProperties, a)
+	s.Repository = a.c.RepositoriesByID[s.RepositoryID]
+	s.Type = VocabularyValue{Value: inner.Type, Definition: a.g.SourceTypes[inner.Type]}
 
 	for _, m := range s.Media {
 		m.addSource(s)

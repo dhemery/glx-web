@@ -26,27 +26,27 @@ func (l ParticipantList) Sort() ParticipantList {
 }
 
 func newParticipants(inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition,
-	catalog *Catalog, glxfile *glx.GLXFile) ParticipantList {
-	roleDefs := glxfile.ParticipantRoles
+	a archive) ParticipantList {
+	roleDefs := a.g.ParticipantRoles
 	var participants ParticipantList
 
 	for _, p := range inner {
-		participants = append(participants, newParticipant(&p, roleDefs, propertyDefs, catalog, glxfile))
+		participants = append(participants, newParticipant(&p, roleDefs, propertyDefs, a))
 	}
 
 	return participants
 }
 
 func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry,
-	propertyDefs map[string]*glx.PropertyDefinition, catalog *Catalog, glxfile *glx.GLXFile) *Participant {
+	propertyDefs map[string]*glx.PropertyDefinition, a archive) *Participant {
 	if inner == nil {
 		return nil
 
 	}
 	return &Participant{
 		Participant: inner,
-		Person:      catalog.PersonsByID[inner.Person],
-		Properties:  newProperties(inner.Properties, propertyDefs, catalog, glxfile),
+		Person:      a.c.PersonsByID[inner.Person],
+		Properties:  newProperties(inner.Properties, propertyDefs, a),
 		Role:        newVocabularyValue(inner.Role, roleDefs),
 	}
 }

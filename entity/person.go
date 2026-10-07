@@ -66,9 +66,9 @@ func newPerson(id string, inner *glx.Person) *Person {
 	}
 }
 
-func (p *Person) compile(catalog *Catalog, glxfile *glx.GLXFile) {
+func (p *Person) compile(a archive) {
 	inner := p.Person
-	p.Properties = newProperties(inner.Properties, glxfile.PersonProperties, catalog, glxfile)
+	p.Properties = newProperties(inner.Properties, a.g.PersonProperties, a)
 }
 
 func (p *Person) addAssertion(a *Assertion) {

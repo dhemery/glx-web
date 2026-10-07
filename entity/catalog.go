@@ -74,7 +74,7 @@ func (c *Catalog) Sources() SourceList {
 
 // NewCatalog compiles a catalog of entities from a GLX archive.
 func NewCatalog(g *glx.GLXFile) *Catalog {
-	a := &Catalog{
+	c := &Catalog{
 		AssertionsByID:    make(map[string]*Assertion),
 		CitationsByID:     make(map[string]*Citation),
 		EventsByID:        make(map[string]*Event),
@@ -87,63 +87,69 @@ func NewCatalog(g *glx.GLXFile) *Catalog {
 	}
 
 	for id, ga := range g.Assertions {
-		a.AssertionsByID[id] = newAssertion(id, ga)
+		c.AssertionsByID[id] = newAssertion(id, ga)
 	}
 
 	for id, gc := range g.Citations {
-		a.CitationsByID[id] = newCitation(id, gc)
+		c.CitationsByID[id] = newCitation(id, gc)
 	}
 
 	for id, ge := range g.Events {
-		a.EventsByID[id] = newEvent(id, ge)
+		c.EventsByID[id] = newEvent(id, ge)
 	}
 
 	for id, gm := range g.Media {
-		a.MediaByID[id] = newMedia(id, gm)
+		c.MediaByID[id] = newMedia(id, gm)
 	}
 
 	for id, gp := range g.Persons {
-		a.PersonsByID[id] = newPerson(id, gp)
+		c.PersonsByID[id] = newPerson(id, gp)
 	}
 
 	for id, gp := range g.Places {
-		a.PlacesByID[id] = newPlace(id, gp)
+		c.PlacesByID[id] = newPlace(id, gp)
 	}
 
 	for id, gr := range g.Relationships {
-		a.RelationshipsByID[id] = newRelationship(id, gr)
+		c.RelationshipsByID[id] = newRelationship(id, gr)
 	}
 
 	for id, gr := range g.Repositories {
-		a.RepositoriesByID[id] = newRepository(id, gr)
+		c.RepositoriesByID[id] = newRepository(id, gr)
 	}
 
 	for id, gs := range g.Sources {
-		a.SourcesByID[id] = newSource(id, gs)
+		c.SourcesByID[id] = newSource(id, gs)
 	}
 
-	a.compile(a.AssertionsByID, g)
-	a.compile(a.CitationsByID, g)
-	a.compile(a.EventsByID, g)
-	a.compile(a.MediaByID, g)
-	a.compile(a.PersonsByID, g)
-	a.compile(a.PlacesByID, g)
-	a.compile(a.RelationshipsByID, g)
-	a.compile(a.RepositoriesByID, g)
-	a.compile(a.SourcesByID, g)
+	a := archive{c: c, g: g}
+	a.compile(c.AssertionsByID, g)
+	a.compile(c.CitationsByID, g)
+	a.compile(c.EventsByID, g)
+	a.compile(c.MediaByID, g)
+	a.compile(c.PersonsByID, g)
+	a.compile(c.PlacesByID, g)
+	a.compile(c.RelationshipsByID, g)
+	a.compile(c.RepositoriesByID, g)
+	a.compile(c.SourcesByID, g)
 
-	return a
+	return c
+}
+
+type archive struct {
+	c *Catalog
+	g *glx.GLXFile
 }
 
 type compiler interface {
 	// Compile initializes fields and properties that refer to entities and
 	// vocabularies in the archive.
-	compile(*Catalog, *glx.GLXFile)
+	compile(archive)
 }
 
-func (c *Catalog) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
+func (a archive) compile[C compiler](compilers map[string]C, g *glx.GLXFile) {
 	for _, compiler := range compilers {
-		compiler.compile(c, g)
+		compiler.compile(a)
 	}
 }
 
@@ -152,79 +158,79 @@ type entityReference interface {
 	String() string
 }
 
-func (c *Catalog) entity(id string, entityType string) entityReference {
+func (a archive) entity(id string, entityType string) entityReference {
 	switch entityType {
 	case "citations":
-		return c.CitationsByID[id]
+		return a.c.CitationsByID[id]
 	case "persons":
-		return c.PersonsByID[id]
+		return a.c.PersonsByID[id]
 	case "places":
-		return c.PlacesByID[id]
+		return a.c.PlacesByID[id]
 	default:
 		return nil
 	}
 }
 
-func (c *Catalog) citationsWithIDs(ids []string) []*Citation {
+func (a archive) citationsWithIDs(ids []string) []*Citation {
 	var citations []*Citation
 	for _, id := range ids {
-		citations = append(citations, c.CitationsByID[id])
+		citations = append(citations, a.c.CitationsByID[id])
 	}
 	return citations
 }
 
-func (c *Catalog) mediaWithIDs(ids []string) []*Media {
+func (a archive) mediaWithIDs(ids []string) []*Media {
 	var media []*Media
 	for _, mediaID := range ids {
-		media = append(media, c.MediaByID[mediaID])
+		media = append(media, a.c.MediaByID[mediaID])
 	}
 	return media
 }
 
-func (c *Catalog) sourcesWithIDs(ids []string) []*Source {
+func (a archive) sourcesWithIDs(ids []string) []*Source {
 	var sources []*Source
 	for _, id := range ids {
-		sources = append(sources, c.SourcesByID[id])
+		sources = append(sources, a.c.SourcesByID[id])
 	}
 	return sources
 }
 
-func vocabulary(glxFile *glx.GLXFile, name string) map[string]*glx.VocabularyEntry {
+func (a archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
 	switch name {
 	case glx.VocabRelationshipTypes:
-		return glxFile.RelationshipTypes
+		return a.g.RelationshipTypes
 	case glx.VocabEventTypes:
-		return glxFile.EventTypes
+		return a.g.EventTypes
 	case glx.VocabPlaceTypes:
-		return glxFile.PlaceTypes
+		return a.g.PlaceTypes
 	case glx.VocabRepositoryTypes:
-		return glxFile.RepositoryTypes
+		return a.g.RepositoryTypes
 	case glx.VocabParticipantRoles:
-		return glxFile.ParticipantRoles
+		return a.g.ParticipantRoles
 	case glx.VocabMediaTypes:
-		return glxFile.MediaTypes
+		return a.g.MediaTypes
 	case glx.VocabConfidenceLevels:
-		return glxFile.ConfidenceLevels
+		return a.g.ConfidenceLevels
 	case glx.VocabSourceTypes:
-		return glxFile.SourceTypes
+		return a.g.SourceTypes
 	case glx.VocabSexTypes:
-		return glxFile.SexTypes
+		return a.g.SexTypes
 	case glx.VocabGenderTypes:
-		return glxFile.GenderTypes
+		return a.g.GenderTypes
 	case glx.VocabSearchResultTypes:
-		return glxFile.SearchResultTypes
+		return a.g.SearchResultTypes
 	case glx.VocabResearchLogStatusTypes:
-		return glxFile.ResearchLogStatusTypes
+		return a.g.ResearchLogStatusTypes
 	case glx.VocabStudyTypes:
-		return glxFile.StudyTypes
+		return a.g.StudyTypes
 	case glx.VocabStudyStatuses:
-		return glxFile.StudyStatuses
+		return a.g.StudyStatuses
 	case glx.VocabLegalStatuses:
-		return glxFile.LegalStatuses
+		return a.g.LegalStatuses
 	case glx.VocabSourceNatures:
-		return glxFile.SourceNatures
+		return a.g.SourceNatures
 	case glx.VocabInformationTypes:
-		return glxFile.InformationTypes
+		return a.g.InformationTypes
 	default:
 		return make(map[string]*glx.VocabularyEntry)
 	}

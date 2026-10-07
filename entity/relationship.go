@@ -59,13 +59,13 @@ func newRelationship(id string, inner *glx.Relationship) *Relationship {
 	}
 }
 
-func (r *Relationship) compile(catalog *Catalog, glxfile *glx.GLXFile) {
+func (r *Relationship) compile(a archive) {
 	inner := r.Relationship
-	r.EndEvent = catalog.EventsByID[inner.EndEvent]
-	r.Participants = newParticipants(inner.Participants, glxfile.RelationshipProperties, catalog, glxfile)
-	r.Properties = newProperties(inner.Properties, glxfile.RelationshipProperties, catalog, glxfile)
-	r.StartEvent = catalog.EventsByID[inner.StartEvent]
-	r.Type = newVocabularyValue(inner.Type, glxfile.RelationshipTypes)
+	r.EndEvent = a.c.EventsByID[inner.EndEvent]
+	r.Participants = newParticipants(inner.Participants, a.g.RelationshipProperties, a)
+	r.Properties = newProperties(inner.Properties, a.g.RelationshipProperties, a)
+	r.StartEvent = a.c.EventsByID[inner.StartEvent]
+	r.Type = newVocabularyValue(inner.Type, a.g.RelationshipTypes)
 
 	for _, p := range r.Participants {
 		p.Person.addRelationship(r)

@@ -50,12 +50,12 @@ func newCitation(id string, inner *glx.Citation) *Citation {
 	}
 }
 
-func (c *Citation) compile(catalog *Catalog, glxfile *glx.GLXFile) {
+func (c *Citation) compile(a archive) {
 	inner := c.Citation
-	c.Media = catalog.mediaWithIDs(inner.Media)
-	c.Properties = newProperties(inner.Properties, glxfile.CitationProperties, catalog, glxfile)
-	c.Repository = catalog.RepositoriesByID[c.RepositoryID]
-	c.Source = catalog.SourcesByID[c.SourceID]
+	c.Media = a.mediaWithIDs(inner.Media)
+	c.Properties = newProperties(inner.Properties, a.g.CitationProperties, a)
+	c.Repository = a.c.RepositoriesByID[c.RepositoryID]
+	c.Source = a.c.SourcesByID[c.SourceID]
 
 	for _, m := range c.Media {
 		m.addCitation(c)

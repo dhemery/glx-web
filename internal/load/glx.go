@@ -11,8 +11,8 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-func Archive(archiveDir string) (*glx.GLXFile, error) {
-	files, err := readGLXFiles(archiveDir)
+func GLX(dir string) (*glx.GLXFile, error) {
+	files, err := readGLXFiles(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -31,10 +31,10 @@ func Archive(archiveDir string) (*glx.GLXFile, error) {
 	return g, nil
 }
 
-func readGLXFiles(archiveDir string) (map[string][]byte, error) {
+func readGLXFiles(dir string) (map[string][]byte, error) {
 	files := make(map[string][]byte)
 
-	err := filepath.WalkDir(archiveDir, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ func readGLXFiles(archiveDir string) (map[string][]byte, error) {
 			return fmt.Errorf("reading %s: %w", cleanPath, err)
 		}
 
-		relPath, err := filepath.Rel(archiveDir, cleanPath)
+		relPath, err := filepath.Rel(dir, cleanPath)
 		if err != nil {
 			return fmt.Errorf("getting relative path: %w", err)
 		}

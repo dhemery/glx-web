@@ -50,11 +50,11 @@ func newPlace(id string, inner *glx.Place) *Place {
 	}
 }
 
-func (p *Place) compile(catalog *Catalog, glxfile *glx.GLXFile) {
+func (p *Place) compile(a archive) {
 	inner := p.Place
-	p.Parent = catalog.PlacesByID[p.ParentID]
-	p.Properties = newProperties(inner.Properties, glxfile.PlaceProperties, catalog, glxfile)
-	p.Type = VocabularyValue{Value: inner.Type, Definition: glxfile.PlaceTypes[inner.Type]}
+	p.Parent = a.c.PlacesByID[p.ParentID]
+	p.Properties = newProperties(inner.Properties, a.g.PlaceProperties, a)
+	p.Type = VocabularyValue{Value: inner.Type, Definition: a.g.PlaceTypes[inner.Type]}
 
 	if p.Parent != nil {
 		p.Parent.addChild(p)
