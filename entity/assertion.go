@@ -31,7 +31,7 @@ type AssertionList []*Assertion
 
 // Sort returns the assertions sorted by String value.
 func (l AssertionList) Sort() AssertionList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func newAssertion(id string, inner *glx.Assertion) *Assertion {
@@ -43,11 +43,11 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	}
 }
 
-func (a *Assertion) compile(arch archive) {
+func (a *Assertion) resolve(arch archive) {
 	inner := a.Assertion
-	a.Citations = arch.citationsWithIDs(inner.Citations)
-	a.Media = arch.mediaWithIDs(inner.Media)
-	a.Sources = arch.sourcesWithIDs(inner.Sources)
+	a.Citations = arch.citations(inner.Citations)
+	a.Media = arch.media(inner.Media)
+	a.Sources = arch.sources(inner.Sources)
 
 	s := inner.Subject
 	switch {
@@ -57,12 +57,12 @@ func (a *Assertion) compile(arch archive) {
 		a.Subject = arch.c.EventsByID[s.Event]
 		roles := arch.g.ParticipantRoles
 		props := arch.g.EventProperties
-		a.Participant = newParticipant(inner.Participant, roles, props, arch)
+		a.Participant = newParticipant(arch, inner.Participant, roles, props)
 	case s.Relationship != "":
 		a.Subject = arch.c.RelationshipsByID[s.Relationship]
 		roles := arch.g.ParticipantRoles
 		props := arch.g.RelationshipProperties
-		a.Participant = newParticipant(inner.Participant, roles, props, arch)
+		a.Participant = newParticipant(arch, inner.Participant, roles, props)
 	case s.Place != "":
 		a.Subject = arch.c.PlacesByID[s.Place]
 	}
@@ -86,4 +86,9 @@ func (a *Assertion) compile(arch archive) {
 
 type subject interface {
 	addAssertion(*Assertion)
+}
+
+type entityReference interface {
+	PagePath() string
+	String() string
 }

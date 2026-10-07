@@ -8,6 +8,10 @@ import (
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
+type Stringer interface {
+	String() string
+}
+
 type IntValue int
 
 func (i IntValue) String() string {
@@ -43,7 +47,7 @@ func newDate(s string) glxdate.Date {
 	return date
 }
 
-func newPrimitiveValue(in any, valueType string) fmt.Stringer {
+func newPrimitiveValue(in any, valueType string) Stringer {
 	switch typedIn := in.(type) {
 	case string:
 		if valueType == "date" {

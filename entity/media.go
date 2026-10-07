@@ -34,7 +34,7 @@ type MediaList []*Media
 
 // Sort returns the media sorted by String value.
 func (l MediaList) Sort() MediaList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func newMedia(id string, inner *glx.Media) *Media {
@@ -46,10 +46,10 @@ func newMedia(id string, inner *glx.Media) *Media {
 	}
 }
 
-func (m *Media) compile(a archive) {
+func (m *Media) resolve(a archive) {
 	inner := m.Media
 	m.Type = VocabularyValue{Value: inner.Type, Definition: a.g.MediaTypes[inner.Type]}
-	m.Properties = newProperties(inner.Properties, a.g.MediaProperties, a)
+	m.Properties = newProperties(a, inner.Properties, a.g.MediaProperties)
 	m.Source = a.c.SourcesByID[inner.Source]
 
 	if m.Source != nil {

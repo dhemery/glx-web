@@ -48,7 +48,7 @@ type RelationshipList []*Relationship
 
 // Sort returns the relationships sorted by String value.
 func (l RelationshipList) Sort() RelationshipList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func newRelationship(id string, inner *glx.Relationship) *Relationship {
@@ -59,11 +59,11 @@ func newRelationship(id string, inner *glx.Relationship) *Relationship {
 	}
 }
 
-func (r *Relationship) compile(a archive) {
+func (r *Relationship) resolve(a archive) {
 	inner := r.Relationship
 	r.EndEvent = a.c.EventsByID[inner.EndEvent]
-	r.Participants = newParticipants(inner.Participants, a.g.RelationshipProperties, a)
-	r.Properties = newProperties(inner.Properties, a.g.RelationshipProperties, a)
+	r.Participants = newParticipants(a, inner.Participants, a.g.RelationshipProperties)
+	r.Properties = newProperties(a, inner.Properties, a.g.RelationshipProperties)
 	r.StartEvent = a.c.EventsByID[inner.StartEvent]
 	r.Type = newVocabularyValue(inner.Type, a.g.RelationshipTypes)
 

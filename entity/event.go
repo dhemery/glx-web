@@ -30,7 +30,7 @@ type EventList []*Event
 
 // Sort returns the events sorted by String value.
 func (l EventList) Sort() EventList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func newEvent(id string, inner *glx.Event) *Event {
@@ -42,11 +42,11 @@ func newEvent(id string, inner *glx.Event) *Event {
 	}
 }
 
-func (e *Event) compile(a archive) {
+func (e *Event) resolve(a archive) {
 	inner := e.Event
-	e.Participants = newParticipants(inner.Participants, a.g.EventProperties, a)
+	e.Participants = newParticipants(a, inner.Participants, a.g.EventProperties)
 	e.Place = a.c.PlacesByID[e.PlaceID]
-	e.Properties = newProperties(inner.Properties, a.g.EventProperties, a)
+	e.Properties = newProperties(a, inner.Properties, a.g.EventProperties)
 	e.Type = newVocabularyValue(inner.Type, a.g.EventTypes)
 
 	for _, p := range e.Participants {

@@ -34,7 +34,7 @@ type SourceList []*Source
 
 // Sort returns the sources sorted by String value.
 func (l SourceList) Sort() SourceList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func newSource(id string, inner *glx.Source) *Source {
@@ -46,10 +46,10 @@ func newSource(id string, inner *glx.Source) *Source {
 	}
 }
 
-func (s *Source) compile(a archive) {
+func (s *Source) resolve(a archive) {
 	inner := s.Source
-	s.Media = a.mediaWithIDs(inner.Media)
-	s.Properties = newProperties(inner.Properties, a.g.SourceProperties, a)
+	s.Media = a.media(inner.Media)
+	s.Properties = newProperties(a, inner.Properties, a.g.SourceProperties)
 	s.Repository = a.c.RepositoriesByID[s.RepositoryID]
 	s.Type = VocabularyValue{Value: inner.Type, Definition: a.g.SourceTypes[inner.Type]}
 

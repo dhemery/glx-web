@@ -39,7 +39,7 @@ type CitationList []*Citation
 
 // Sort returns the citations sorted by String value.
 func (l CitationList) Sort() CitationList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func newCitation(id string, inner *glx.Citation) *Citation {
@@ -50,10 +50,10 @@ func newCitation(id string, inner *glx.Citation) *Citation {
 	}
 }
 
-func (c *Citation) compile(a archive) {
+func (c *Citation) resolve(a archive) {
 	inner := c.Citation
-	c.Media = a.mediaWithIDs(inner.Media)
-	c.Properties = newProperties(inner.Properties, a.g.CitationProperties, a)
+	c.Media = a.media(inner.Media)
+	c.Properties = newProperties(a, inner.Properties, a.g.CitationProperties)
 	c.Repository = a.c.RepositoriesByID[c.RepositoryID]
 	c.Source = a.c.SourcesByID[c.SourceID]
 

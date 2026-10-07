@@ -39,7 +39,7 @@ type PlaceList []*Place
 
 // Sort returns the places sorted by String value.
 func (l PlaceList) Sort() PlaceList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func newPlace(id string, inner *glx.Place) *Place {
@@ -50,10 +50,10 @@ func newPlace(id string, inner *glx.Place) *Place {
 	}
 }
 
-func (p *Place) compile(a archive) {
+func (p *Place) resolve(a archive) {
 	inner := p.Place
 	p.Parent = a.c.PlacesByID[p.ParentID]
-	p.Properties = newProperties(inner.Properties, a.g.PlaceProperties, a)
+	p.Properties = newProperties(a, inner.Properties, a.g.PlaceProperties)
 	p.Type = VocabularyValue{Value: inner.Type, Definition: a.g.PlaceTypes[inner.Type]}
 
 	if p.Parent != nil {

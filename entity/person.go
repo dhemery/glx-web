@@ -33,7 +33,7 @@ type PersonList []*Person
 
 // Sort returns the persons sorted by String value.
 func (l PersonList) Sort() PersonList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func extractSurname(props map[string]Property) string {
@@ -66,9 +66,9 @@ func newPerson(id string, inner *glx.Person) *Person {
 	}
 }
 
-func (p *Person) compile(a archive) {
+func (p *Person) resolve(a archive) {
 	inner := p.Person
-	p.Properties = newProperties(inner.Properties, a.g.PersonProperties, a)
+	p.Properties = newProperties(a, inner.Properties, a.g.PersonProperties)
 }
 
 func (p *Person) addAssertion(a *Assertion) {

@@ -29,7 +29,7 @@ type RepositoryList []*Repository
 
 // Sort returns the repositories sorted by String value.
 func (l RepositoryList) Sort() RepositoryList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
 func newRepository(id string, inner *glx.Repository) *Repository {
@@ -40,10 +40,10 @@ func newRepository(id string, inner *glx.Repository) *Repository {
 	}
 }
 
-func (r *Repository) compile(a archive) {
+func (r *Repository) resolve(a archive) {
 	inner := r.Repository
 	r.Type = VocabularyValue{Value: inner.Type, Definition: a.g.RepositoryTypes[inner.Type]}
-	r.Properties = newProperties(inner.Properties, a.g.RepositoryProperties, a)
+	r.Properties = newProperties(a, inner.Properties, a.g.RepositoryProperties)
 }
 
 func (r *Repository) addCitation(c *Citation) {

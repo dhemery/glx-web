@@ -1,17 +1,16 @@
 package entity
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 )
 
-func sortStringers[S ~[]E, E fmt.Stringer](in S) S {
+func sortValues[S ~[]E, E Stringer](in S) S {
 	sorted := slices.Clone(in)
-	slices.SortStableFunc(sorted, compareStringers)
+	slices.SortStableFunc(sorted, compareValues)
 	return sorted
 }
 
-func compareStringers[T fmt.Stringer](a, b T) int {
+func compareValues[V Stringer](a, b V) int {
 	return strings.Compare(a.String(), b.String())
 }

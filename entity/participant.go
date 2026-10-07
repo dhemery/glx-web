@@ -22,23 +22,21 @@ type ParticipantList []*Participant
 
 // Sort returns the participants sorted by String value.
 func (l ParticipantList) Sort() ParticipantList {
-	return sortStringers(l)
+	return sortValues(l)
 }
 
-func newParticipants(inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition,
-	a archive) ParticipantList {
+func newParticipants(a archive, inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition) ParticipantList {
 	roleDefs := a.g.ParticipantRoles
 	var participants ParticipantList
 
 	for _, p := range inner {
-		participants = append(participants, newParticipant(&p, roleDefs, propertyDefs, a))
+		participants = append(participants, newParticipant(a, &p, roleDefs, propertyDefs))
 	}
 
 	return participants
 }
 
-func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry,
-	propertyDefs map[string]*glx.PropertyDefinition, a archive) *Participant {
+func newParticipant(a archive, inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition) *Participant {
 	if inner == nil {
 		return nil
 
@@ -46,7 +44,7 @@ func newParticipant(inner *glx.Participant, roleDefs map[string]*glx.VocabularyE
 	return &Participant{
 		Participant: inner,
 		Person:      a.c.PersonsByID[inner.Person],
-		Properties:  newProperties(inner.Properties, propertyDefs, a),
+		Properties:  newProperties(a, inner.Properties, propertyDefs),
 		Role:        newVocabularyValue(inner.Role, roleDefs),
 	}
 }
