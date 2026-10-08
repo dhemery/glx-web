@@ -1,0 +1,3 @@
+persons:
+    error-property-raw-not-object:
+        properties: true

@@ -1,0 +1,6 @@
+persons:
+    accepted-property-value-fields-raw-not-map:
+        properties:
+            residence:
+                value: some-place
+                fields: true

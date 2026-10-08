@@ -1,0 +1,6 @@
+persons:
+    accepted-property-vocabulary-value-not-defined:
+        properties:
+            name:
+                value: Property Vocabulary Value Not Defined
+                type: unknown_name_type

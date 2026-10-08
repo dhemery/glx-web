@@ -1,0 +1,4 @@
+persons:
+    error-property-unknown-reference:
+        properties:
+            residence: unknown-reference

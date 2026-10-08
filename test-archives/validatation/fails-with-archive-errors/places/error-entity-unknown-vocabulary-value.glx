@@ -1,0 +1,4 @@
+places:
+    error-entity-field-unknown-vocabulary-value:
+        name: Entity Field Vocabulary Value Not Defined
+        type: galaxy

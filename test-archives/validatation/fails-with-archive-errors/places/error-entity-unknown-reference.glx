@@ -1,0 +1,4 @@
+places:
+    error-entity-unkown-reference:
+        name: Place with Unknown Parent
+        parent: unknown-place

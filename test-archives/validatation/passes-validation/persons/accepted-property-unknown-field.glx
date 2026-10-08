@@ -1,0 +1,7 @@
+persons:
+    accepted-property-value-field-not-defined:
+        properties:
+            name:
+                value: "A Name Value"
+                field:
+                    monkey: "monkey property field value"

@@ -1,0 +1,6 @@
+person_properties:
+    error_multiple_types:
+        label: "Multiple Types"
+        description: "A property definition with multiple types"
+        value_type: bool
+        reference_type: places
