@@ -36,15 +36,12 @@ func (l AssertionList) Sort() AssertionList {
 	return sortValues(l)
 }
 
-func newAssertion(id string, inner *glx.Assertion, l *slog.Logger) *Assertion {
-	l = l.With("entity_type", glx.EntityTypeAssertions, "id", id)
-
-	date := newDate(inner.Date.String(), l)
+func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	return &Assertion{
 		Assertion:  inner,
 		EntityType: glx.EntityTypeAssertions,
 		id:         id,
-		Date:       date,
+		Date:       parseDate(inner.Date.String()),
 	}
 }
 

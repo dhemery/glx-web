@@ -56,7 +56,7 @@ func (c *Citation) resolve(a archive, l *slog.Logger) {
 
 	inner := c.Citation
 	c.Media = a.media(inner.Media)
-	c.Properties = newProperties(a, inner.Properties, a.g.CitationProperties, l)
+	c.Properties = parseProperties(a, inner.Properties, a.g.CitationProperties, l)
 	c.Repository = a.c.RepositoriesByID[c.RepositoryID]
 	c.Source = a.c.SourcesByID[c.SourceID]
 

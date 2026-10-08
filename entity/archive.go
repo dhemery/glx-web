@@ -63,7 +63,7 @@ func (a archive) sources(ids []string) []*Source {
 	return sources
 }
 
-func (a archive) vocabulary(name string, l *slog.Logger) map[string]*glx.VocabularyEntry {
+func (a archive) vocabulary(name string) map[string]*glx.VocabularyEntry {
 	switch name {
 	case glx.VocabRelationshipTypes:
 		return a.g.RelationshipTypes
@@ -100,7 +100,6 @@ func (a archive) vocabulary(name string, l *slog.Logger) map[string]*glx.Vocabul
 	case glx.VocabInformationTypes:
 		return a.g.InformationTypes
 	default:
-		l.Warn("unknown vocabulary name", "name", name)
-		return make(map[string]*glx.VocabularyEntry)
+		return nil
 	}
 }

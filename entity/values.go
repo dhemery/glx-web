@@ -33,12 +33,12 @@ func (s StringValue) String() string {
 	return string(s)
 }
 
-func newPrimitiveValue(raw any, valueType string, l *slog.Logger) Stringer {
+func parsePrimitiveValue(raw any, valueType string, l *slog.Logger) Stringer {
 	l = l.With("value_type", valueType)
 	switch v := raw.(type) {
 	case string:
 		if valueType == "date" {
-			return newDate(v, l)
+			return parseDate(v)
 		}
 		return StringValue(v)
 	case int:
@@ -46,23 +46,14 @@ func newPrimitiveValue(raw any, valueType string, l *slog.Logger) Stringer {
 	case bool:
 		return BoolValue(v)
 	default:
-		l.Warn("value dropped: cannot parse type", "type", fmt.Sprintf("%T", raw))
+		// TODO(dale): Maybe return error instead.
+		l.Warn("value discarded: cannot parse raw type", "raw_type", fmt.Sprintf("%T", raw))
 		return nil
 	}
 }
 
-func newDate(raw any, l *slog.Logger) glxdate.Date {
-	s, ok := raw.(string)
-	if !ok {
-		l.Warn("date dropped: cannot parse type", "type", fmt.Sprintf("%T", raw))
-		return glxdate.Date{}
-	}
-
-	date, err := glxdate.Parse(s)
-	if err != nil {
-		l.Warn("date dropped: error parsing date", "error", err)
-		return glxdate.Date{}
-	}
+func parseDate(s string) glxdate.Date {
+	date, _ := glxdate.Parse(s)
 
 	return date
 }
@@ -78,9 +69,12 @@ func (v VocabularyValue) String() string {
 	return v.Definition.Label
 }
 
+// TODO(dale): Does GLX validate vocabulary values in entity fields?
+// TODO(dale): Does GLX validate vocabulary values in properties?
 func newVocabularyValue(key string, vocabulary map[string]*glx.VocabularyEntry, l *slog.Logger) VocabularyValue {
 	def, ok := vocabulary[key]
 	if !ok {
+		// TODO(dale): Maybe return nil
 		l.Warn("vocabulary value incomplete: no vocabulary entry", "value", key)
 	}
 	return VocabularyValue{Value: key, Definition: def}

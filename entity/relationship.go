@@ -66,7 +66,7 @@ func (r *Relationship) resolve(a archive, l *slog.Logger) {
 	inner := r.Relationship
 	r.EndEvent = a.c.EventsByID[inner.EndEvent]
 	r.Participants = newParticipants(a, inner.Participants, a.g.RelationshipProperties, l)
-	r.Properties = newProperties(a, inner.Properties, a.g.RelationshipProperties, l)
+	r.Properties = parseProperties(a, inner.Properties, a.g.RelationshipProperties, l)
 	r.StartEvent = a.c.EventsByID[inner.StartEvent]
 	r.Type = newVocabularyValue(inner.Type, a.g.RelationshipTypes, l)
 

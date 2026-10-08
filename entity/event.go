@@ -35,16 +35,12 @@ func (l EventList) Sort() EventList {
 	return sortValues(l)
 }
 
-func newEvent(id string, inner *glx.Event, l *slog.Logger) *Event {
-	l = l.With("entity_type", glx.EntityTypeEvents, "id", id)
-
-	date := newDate(inner.Date.String(), l.With("new", id))
-
+func newEvent(id string, inner *glx.Event) *Event {
 	return &Event{
 		Event:      inner,
 		EntityType: glx.EntityTypeEvents,
 		id:         id,
-		Date:       date,
+		Date:       parseDate(inner.Date.String()),
 	}
 }
 
@@ -54,7 +50,7 @@ func (e *Event) resolve(a archive, l *slog.Logger) {
 	inner := e.Event
 	e.Participants = newParticipants(a, inner.Participants, a.g.EventProperties, l)
 	e.Place = a.c.PlacesByID[e.PlaceID]
-	e.Properties = newProperties(a, inner.Properties, a.g.EventProperties, l)
+	e.Properties = parseProperties(a, inner.Properties, a.g.EventProperties, l)
 	e.Type = newVocabularyValue(inner.Type, a.g.EventTypes, l)
 
 	for _, p := range e.Participants {

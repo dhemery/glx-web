@@ -39,16 +39,12 @@ func (l MediaList) Sort() MediaList {
 	return sortValues(l)
 }
 
-func newMedia(id string, inner *glx.Media, l *slog.Logger) *Media {
-	l = l.With("entity_type", glx.EntityTypeMedia, "id", id)
-
-	date := newDate(inner.Date.String(), l)
-
+func newMedia(id string, inner *glx.Media) *Media {
 	return &Media{
 		Media:      inner,
 		EntityType: glx.EntityTypeMedia,
 		id:         id,
-		Date:       date,
+		Date:       parseDate(inner.Date.String()),
 	}
 }
 
@@ -57,7 +53,7 @@ func (m *Media) resolve(a archive, l *slog.Logger) {
 
 	inner := m.Media
 	m.Type = newVocabularyValue(inner.Type, a.g.MediaTypes, l)
-	m.Properties = newProperties(a, inner.Properties, a.g.MediaProperties, l)
+	m.Properties = parseProperties(a, inner.Properties, a.g.MediaProperties, l)
 	m.Source = a.c.SourcesByID[inner.Source]
 
 	if m.Source != nil {

@@ -47,7 +47,7 @@ func (r *Repository) resolve(a archive, l *slog.Logger) {
 
 	inner := r.Repository
 	r.Type = newVocabularyValue(inner.Type, a.g.RepositoryTypes, l)
-	r.Properties = newProperties(a, inner.Properties, a.g.RepositoryProperties, l)
+	r.Properties = parseProperties(a, inner.Properties, a.g.RepositoryProperties, l)
 }
 
 func (r *Repository) addCitation(c *Citation) {

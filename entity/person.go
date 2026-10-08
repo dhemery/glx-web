@@ -72,7 +72,7 @@ func (p *Person) resolve(a archive, l *slog.Logger) {
 	l = l.With("entity_type", glx.EntityTypePersons, "id", p.id)
 
 	inner := p.Person
-	p.Properties = newProperties(a, inner.Properties, a.g.PersonProperties, l)
+	p.Properties = parseProperties(a, inner.Properties, a.g.PersonProperties, l)
 }
 
 func (p *Person) addAssertion(a *Assertion) {

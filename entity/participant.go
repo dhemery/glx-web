@@ -48,7 +48,7 @@ func newParticipant(a archive, inner *glx.Participant, roleDefs map[string]*glx.
 	return &Participant{
 		Participant: inner,
 		Person:      a.c.PersonsByID[inner.Person],
-		Properties:  newProperties(a, inner.Properties, propertyDefs, l),
+		Properties:  parseProperties(a, inner.Properties, propertyDefs, l),
 		Role:        newVocabularyValue(inner.Role, roleDefs, l),
 	}
 }
