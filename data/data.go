@@ -13,7 +13,7 @@ type Site struct {
 	// The catalog of entities being rendered.
 	Catalog *entity.Catalog
 
-	// TODO(dale): Add data parsed from a user-supplied site configuration
+	// TODO(feature): Add data parsed from a user-supplied site configuration
 	// YAML file.
 }
 

@@ -28,7 +28,7 @@ type Relationship struct {
 func (r *Relationship) String() string {
 	var parts []string
 
-	// TODO(dale): Maybe include only principals.
+	// TODO(feature): Include only principals?
 	for _, p := range r.Participants {
 		parts = append(parts, p.String())
 	}

@@ -25,7 +25,7 @@ func (a archive) resolve[R resolver](resolvers map[string]R, l *slog.Logger) {
 }
 
 func (a archive) entity(id string, entityType string) entityReference {
-	// TODO(dale): Handle the rest of the entity types.
+	// TODO(feature): Handle the rest of the entity types.
 	switch entityType {
 	case glx.EntityTypeCitations.Plural():
 		return a.c.CitationsByID[id]

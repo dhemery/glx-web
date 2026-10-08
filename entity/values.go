@@ -9,7 +9,8 @@ import (
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
-// TODO(dale): Probably these functions should return error instead of logging.
+// TODO(errors): These low-level functions should return error instead of
+// logging. Let the caller log a warning.
 
 type Stringer interface {
 	String() string
@@ -46,7 +47,7 @@ func parsePrimitiveValue(raw any, valueType string, l *slog.Logger) Stringer {
 	case bool:
 		return BoolValue(v)
 	default:
-		// TODO(dale): Maybe return error instead.
+		// TODO(errors): Maybe return error instead.
 		l.Warn("value discarded: cannot parse raw type", "raw_type", fmt.Sprintf("%T", raw))
 		return nil
 	}
@@ -69,12 +70,12 @@ func (v VocabularyValue) String() string {
 	return v.Definition.Label
 }
 
-// TODO(dale): Does GLX validate vocabulary values in entity fields?
-// TODO(dale): Does GLX validate vocabulary values in properties?
+// TODO(validate): Vocabulary key with no entry in entity fields
+// TODO(validate): Vocabulary key with no entry in property values
+// TODO(errors): StringValue and error.
 func newVocabularyValue(key string, vocabulary map[string]*glx.VocabularyEntry, l *slog.Logger) VocabularyValue {
 	def, ok := vocabulary[key]
 	if !ok {
-		// TODO(dale): Maybe return nil
 		l.Warn("vocabulary value incomplete: no vocabulary entry", "value", key)
 	}
 	return VocabularyValue{Value: key, Definition: def}

@@ -18,14 +18,14 @@ type Assertion struct {
 	Sources     SourceList
 	Subject     entityReference
 
-	// TODO(dale): Resolve value if the property has a reference type or vocabulary type
+	// TODO(feature): Resolve value if the property has a reference type or vocabulary type
 }
 
 // String returns a string representation of a.
 // The value returned by the current implementation
 // is useful only to identify which assertion produced it.
 func (a *Assertion) String() string {
-	// TODO: Better String()
+	// TODO(feature): Better String()
 	return "Assertion " + a.ID()
 }
 

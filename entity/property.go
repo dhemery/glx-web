@@ -67,7 +67,8 @@ func parseProperties(a archive, rawProperties map[string]any, defs map[string]*g
 
 func parseProperty(a archive, rawProperty any, def *glx.PropertyDefinition, l *slog.Logger) Property {
 	if def == nil {
-		// TODO(dale): Return nil instead.
+		// TODO(validate): Property with no definition.
+		// TODO(errors): Return Property and error, and discard the property.
 		l.Warn("property incomplete: no definition")
 		return Property{}
 	}
@@ -119,7 +120,6 @@ func parsePropertyValueDate(raw any, l *slog.Logger) glxdate.Date {
 
 	s, ok := raw.(string)
 	if !ok {
-		// TODO(dale): Maybe return nil instead.
 		l.Warn("date discarded: cannot parse raw type",
 			"element", "property date", "raw_type", fmt.Sprintf("%T", raw))
 
@@ -164,12 +164,14 @@ func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinitio
 func parsePropertyValueValue(a archive, raw any, def *glx.PropertyDefinition, l *slog.Logger) Stringer {
 	l = l.With("element", "property value")
 
-	// TODO(dale): Maybe catch error in each case and return nil.
+	// TODO(validate): Property definition with no type.
+	// TODO(validate): Property definition with more than one type.
+	// TODO(errors): Catch error in each case and return nil.
 	switch {
 	case def.ValueType != "":
 		return parsePrimitiveValue(raw, def.ValueType, l)
 	case def.ReferenceType != "":
-		// TODO(dale): Does GLX guarantee a string?
+		// TODO(validate): raw property reference value not a string
 		id := raw.(string)
 		return a.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
@@ -177,6 +179,5 @@ func parsePropertyValueValue(a archive, raw any, def *glx.PropertyDefinition, l 
 		return newVocabularyValue(key, a.vocabulary(def.VocabularyType), l)
 	}
 
-	// TODO(dale): Does GLX validate that exactly one type field names a type?
 	return nil
 }
