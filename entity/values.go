@@ -70,18 +70,18 @@ func (v VocabularyValue) String() string {
 	return v.Definition.Label
 }
 
-func unknownVocabularyEntry(key string) *glx.VocabularyEntry {
+func synthesizeVocabularyEntry(term string) *glx.VocabularyEntry {
 	return &glx.VocabularyEntry{
-		Label:       key + ": GLX-WEB UNKNOWN VOCABULARY VALUE",
-		Description: "Synthetic vocabulary entry for unknown value " + key,
+		Label:       term,
+		Description: "Vocabulary entry synthesized by glx-web",
 	}
 }
 
 func newVocabularyValue(key string, vocabulary map[string]*glx.VocabularyEntry, l *slog.Logger) VocabularyValue {
 	def, ok := vocabulary[key]
 	if !ok {
-		def = unknownVocabularyEntry(key)
-		l.Warn("unknown vocabulary value: using synthetic VocabularyEntry", "value", key, "definition", def)
+		def = synthesizeVocabularyEntry(key)
+		l.Warn("unknown vocabulary value: using synthetic VocabularyEntry", "value", key)
 	}
 	return VocabularyValue{Value: key, Definition: def}
 }

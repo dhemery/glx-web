@@ -62,7 +62,7 @@ func parseProperties(a archive, rawProperties map[string]any, defs map[string]*g
 		propertyLogger := l.With("property", name)
 		def := defs[name]
 		if def == nil {
-			def = unknownPropertyDefinition(name)
+			def = synthesizePropertyDefinition(name)
 			propertyLogger.Warn("unknown property: using synthetic property definition",
 				"definition", def)
 		}
@@ -72,10 +72,10 @@ func parseProperties(a archive, rawProperties map[string]any, defs map[string]*g
 	return properties
 }
 
-func unknownPropertyDefinition(name string) *glx.PropertyDefinition {
+func synthesizePropertyDefinition(name string) *glx.PropertyDefinition {
 	return &glx.PropertyDefinition{
-		Label:       name + ": GLX-WEB UNKNOWN PROPERTY",
-		Description: "Synthetic property definition for unknown property " + name,
+		Label:       name,
+		Description: "Property definition synthesized by glx-web",
 		ValueType:   "string",
 	}
 }
@@ -139,10 +139,10 @@ func parsePropertyValueDate(raw any, l *slog.Logger) glxdate.Date {
 	return parseDate(s)
 }
 
-func unknownFieldDefinition(name string) *glx.FieldDefinition {
+func synthesizeFieldDefinition(name string) *glx.FieldDefinition {
 	return &glx.FieldDefinition{
-		Label:       name + ": GLX-WEB UNKOWN FIELD",
-		Description: "Synthetic field definition for unknown field " + name,
+		Label:       name,
+		Description: "Field definition synthesized by glx-web",
 		ValueType:   "string",
 	}
 }
@@ -166,7 +166,7 @@ func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinitio
 		fieldLogger := l.With("field", name)
 		def, ok := defs[name]
 		if !ok {
-			def = unknownFieldDefinition(name)
+			def = synthesizeFieldDefinition(name)
 			fieldLogger.Warn("unknown field: using synthetic field definition", "definition", def)
 			rawFieldValue = fmt.Sprint(rawFieldValue)
 		}
