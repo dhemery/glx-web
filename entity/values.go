@@ -47,9 +47,9 @@ func parsePrimitiveValue(raw any, valueType string, l *slog.Logger) Stringer {
 	case bool:
 		return BoolValue(v)
 	default:
-		// TODO(errors): Maybe return error instead.
-		l.Warn("cannot parse primitive value", "raw_type", fmt.Sprintf("%T", raw))
-		return nil
+		coerced := fmt.Sprint(raw)
+		l.Warn("cannot parse primitive value: coercing to string", "coerced", coerced)
+		return StringValue(coerced)
 	}
 }
 
@@ -70,12 +70,18 @@ func (v VocabularyValue) String() string {
 	return v.Definition.Label
 }
 
+func unknownVocabularyEntry(key string) *glx.VocabularyEntry {
+	return &glx.VocabularyEntry{
+		Label:       key + ": GLX-WEB UNKNOWN VOCABULARY VALUE",
+		Description: "Synthetic vocabulary entry for unknown value " + key,
+	}
+}
+
 func newVocabularyValue(key string, vocabulary map[string]*glx.VocabularyEntry, l *slog.Logger) VocabularyValue {
 	def, ok := vocabulary[key]
 	if !ok {
-		// TODO(errors): Handle unknown vocabulary value.
-		// Maybe return STringValue.
-		l.Error("unknown vocabulary value", "value", key)
+		def = unknownVocabularyEntry(key)
+		l.Warn("unknown vocabulary value: using synthetic VocabularyEntry", "value", key, "definition", def)
 	}
 	return VocabularyValue{Value: key, Definition: def}
 }

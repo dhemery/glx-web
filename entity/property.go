@@ -59,21 +59,28 @@ func parseProperties(a archive, rawProperties map[string]any, defs map[string]*g
 	properties := make(map[string]Property)
 
 	for name, rawProperty := range rawProperties {
-		properties[name] = parseProperty(a, rawProperty, defs[name], l.With("property", name))
+		propertyLogger := l.With("property", name)
+		def := defs[name]
+		if def == nil {
+			def = unknownPropertyDefinition(name)
+			propertyLogger.Warn("unknown property: using synthetic property definition",
+				"definition", def)
+		}
+		properties[name] = parseProperty(a, rawProperty, def, propertyLogger)
 	}
 
 	return properties
 }
 
-// TODO(errors): If parsePropertyValueValue can fail, parseProperty must handle
-// the possibility of a Property with no values.
-func parseProperty(a archive, rawProperty any, def *glx.PropertyDefinition, l *slog.Logger) Property {
-	if def == nil {
-		// TODO(errors): Handle unknown property.
-		// Maybe assign a synthetic definition and coerce the value to string.
-		l.Error("unknown property")
-		return Property{}
+func unknownPropertyDefinition(name string) *glx.PropertyDefinition {
+	return &glx.PropertyDefinition{
+		Label:       name + ": GLX-WEB UNKNOWN PROPERTY",
+		Description: "Synthetic property definition for unknown property " + name,
+		ValueType:   "string",
 	}
+}
+
+func parseProperty(a archive, rawProperty any, def *glx.PropertyDefinition, l *slog.Logger) Property {
 
 	property := Property{Definition: def}
 
@@ -122,13 +129,22 @@ func parsePropertyValueDate(raw any, l *slog.Logger) glxdate.Date {
 
 	s, ok := raw.(string)
 	if !ok {
-		l.Warn("cannot parse date",
-			"element", "property date", "raw_type", fmt.Sprintf("%T", raw))
+		coerced := fmt.Sprint(raw)
+		l.Warn("cannot parse date: coercing to string",
+			"element", "property date", "coerced", coerced)
 
-		return glxdate.Date{}
+		return parseDate(coerced)
 	}
 
 	return parseDate(s)
+}
+
+func unknownFieldDefinition(name string) *glx.FieldDefinition {
+	return &glx.FieldDefinition{
+		Label:       name + ": GLX-WEB UNKOWN FIELD",
+		Description: "Synthetic field definition for unknown field " + name,
+		ValueType:   "string",
+	}
 }
 
 func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinition, l *slog.Logger) map[string]PropertyField {
@@ -142,7 +158,7 @@ func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinitio
 
 	rawFieldsMap, ok := rawFields.(map[string]any)
 	if !ok {
-		l.Warn("cannot parse fields", "raw_type", fmt.Sprintf("%T", rawFieldsMap))
+		l.Warn("cannot parse fields", "unparseable", fmt.Sprint(rawFields))
 		return propertyFields
 	}
 
@@ -150,13 +166,11 @@ func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinitio
 		fieldLogger := l.With("field", name)
 		def, ok := defs[name]
 		if !ok {
-			fieldLogger.Warn("field discarded: no field definition")
-			continue
+			def = unknownFieldDefinition(name)
+			fieldLogger.Warn("unknown field: using synthetic field definition", "definition", def)
+			rawFieldValue = fmt.Sprint(rawFieldValue)
 		}
 		value := parsePrimitiveValue(rawFieldValue, def.ValueType, fieldLogger)
-		if value == nil {
-			continue
-		}
 		propertyFields[name] = PropertyField{Definition: def, Value: value}
 	}
 
@@ -174,8 +188,8 @@ func parsePropertyValueValue(a archive, raw any, def *glx.PropertyDefinition, l 
 		if !ok {
 			// GLX validation guarantees raw is a string.
 			// TODO(errors): Fails when raw == nil.
-			l.Error("cannot parse reference", "raw_type", raw)
-			return nil
+			l.Warn("cannot parse reference: using empty string", "raw_type", raw)
+			return StringValue("")
 		}
 		return a.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
@@ -184,6 +198,6 @@ func parsePropertyValueValue(a archive, raw any, def *glx.PropertyDefinition, l 
 	}
 
 	// GLX validation guarantees exactly one type field has a value.
-	l.Error("discarded property value: property definition has no type")
+	l.Warn("discarded property value: property definition has no type")
 	return nil
 }
