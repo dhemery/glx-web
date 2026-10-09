@@ -41,10 +41,11 @@ func newRepository(id string, inner *glx.Repository) *Repository {
 }
 
 func (r *Repository) compile(ctx *context) {
+	rctx := ctx.ForEntity(r.entity)
 
 	inner := r.Repository
-	r.Type = newVocabularyValue(ctx, inner.Type, ctx.G.RepositoryTypes)
-	r.Properties = parseProperties(ctx, inner.Properties, ctx.G.RepositoryProperties)
+	r.Type = newVocabularyValue(rctx.Sub("Type"), inner.Type, rctx.GLX.RepositoryTypes)
+	r.Properties = parseProperties(rctx.Sub("Properties"), inner.Properties, rctx.GLX.RepositoryProperties)
 }
 
 func (r *Repository) addCitation(c *Citation) {

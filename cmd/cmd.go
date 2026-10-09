@@ -115,7 +115,9 @@ func build() error {
 		Templates: templates,
 	}
 
-	if err := r.Render(entity.NewCatalog(glxFile), glxFile); err != nil {
+	catalog := entity.NewCatalog(glxFile, os.Stderr)
+
+	if err := r.Render(catalog, glxFile); err != nil {
 		return fmt.Errorf("rendering: %w", err)
 	}
 	return nil

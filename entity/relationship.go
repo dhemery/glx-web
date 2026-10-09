@@ -60,12 +60,14 @@ func newRelationship(id string, inner *glx.Relationship) *Relationship {
 }
 
 func (r *Relationship) compile(ctx *context) {
+	rctx := ctx.ForEntity(r.entity)
+
 	inner := r.Relationship
-	r.EndEvent = ctx.C.EventsByID[inner.EndEvent]
-	r.Participants = newParticipants(ctx, inner.Participants, ctx.G.RelationshipProperties)
-	r.Properties = parseProperties(ctx, inner.Properties, ctx.G.RelationshipProperties)
-	r.StartEvent = ctx.C.EventsByID[inner.StartEvent]
-	r.Type = newVocabularyValue(ctx, inner.Type, ctx.G.RelationshipTypes)
+	r.EndEvent = rctx.Catalog.EventsByID[inner.EndEvent]
+	r.Participants = newParticipants(rctx.Sub("Participants"), inner.Participants, rctx.GLX.RelationshipProperties)
+	r.Properties = parseProperties(rctx.Sub("Properties"), inner.Properties, rctx.GLX.RelationshipProperties)
+	r.StartEvent = rctx.Catalog.EventsByID[inner.StartEvent]
+	r.Type = newVocabularyValue(rctx.Sub("Type"), inner.Type, rctx.GLX.RelationshipTypes)
 
 	for _, p := range r.Participants {
 		p.Person.addRelationship(r)

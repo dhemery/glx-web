@@ -47,10 +47,12 @@ func newMedia(id string, inner *glx.Media) *Media {
 }
 
 func (m *Media) compile(ctx *context) {
+	mctx := ctx.ForEntity(m.entity)
+
 	inner := m.Media
-	m.Type = newVocabularyValue(ctx, inner.Type, ctx.G.MediaTypes)
-	m.Properties = parseProperties(ctx, inner.Properties, ctx.G.MediaProperties)
-	m.Source = ctx.C.SourcesByID[inner.Source]
+	m.Type = newVocabularyValue(mctx.Sub("Type"), inner.Type, mctx.GLX.MediaTypes)
+	m.Properties = parseProperties(mctx.Sub("Properties"), inner.Properties, mctx.GLX.MediaProperties)
+	m.Source = mctx.Catalog.SourcesByID[inner.Source]
 
 	if m.Source != nil {
 		m.Source.addMedia(m)

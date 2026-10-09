@@ -67,8 +67,10 @@ func newPerson(id string, inner *glx.Person) *Person {
 }
 
 func (p *Person) compile(ctx *context) {
+	pctx := ctx.ForEntity(p.entity)
+
 	inner := p.Person
-	p.Properties = parseProperties(ctx, inner.Properties, ctx.G.PersonProperties)
+	p.Properties = parseProperties(pctx.Sub("Properties"), inner.Properties, pctx.GLX.PersonProperties)
 }
 
 func (p *Person) addAssertion(a *Assertion) {

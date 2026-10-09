@@ -1,8 +1,8 @@
 package entity
 
 import (
+	"io"
 	"maps"
-	"os"
 	"slices"
 
 	"github.com/genealogix/glx/go-glx"
@@ -58,7 +58,7 @@ func (c *Catalog) Sources() SourceList {
 }
 
 // NewCatalog compiles a catalog of entities from a GLX archive.
-func NewCatalog(g *glx.GLXFile) *Catalog {
+func NewCatalog(g *glx.GLXFile, w io.Writer) *Catalog {
 	c := &Catalog{
 		AssertionsByID:    make(map[string]*Assertion),
 		CitationsByID:     make(map[string]*Citation),
@@ -107,7 +107,7 @@ func NewCatalog(g *glx.GLXFile) *Catalog {
 		c.SourcesByID[id] = newSource(id, gs)
 	}
 
-	ctx := &context{C: c, G: g, ErrOut: os.Stderr}
+	ctx := &context{Catalog: c, GLX: g, Output: w}
 	compile(ctx, c.AssertionsByID)
 	compile(ctx, c.CitationsByID)
 	compile(ctx, c.EventsByID)
@@ -119,19 +119,6 @@ func NewCatalog(g *glx.GLXFile) *Catalog {
 	compile(ctx, c.SourcesByID)
 
 	return c
-}
-
-type compiler interface {
-	// Compile initializes the receiver's references to entities and
-	// vocabularies in the context and notifies any referenced entities
-	// that the receiver refers to them.
-	compile(*context)
-}
-
-func compile[C compiler](ctx *context, compilers map[string]C) {
-	for _, r := range compilers {
-		r.compile(ctx)
-	}
 }
 
 func (c *Catalog) entity(id string, entityType string) entityReference {

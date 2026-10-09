@@ -44,27 +44,29 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 }
 
 func (a *Assertion) compile(ctx *context) {
+	actx := ctx.ForEntity(a.entity)
+
 	inner := a.Assertion
-	a.Citations = ctx.C.citations(inner.Citations)
-	a.Media = ctx.C.media(inner.Media)
-	a.Sources = ctx.C.sources(inner.Sources)
+	a.Citations = actx.Catalog.citations(inner.Citations)
+	a.Media = actx.Catalog.media(inner.Media)
+	a.Sources = actx.Catalog.sources(inner.Sources)
 
 	s := inner.Subject
 	switch {
 	case s.Person != "":
-		a.Subject = ctx.C.PersonsByID[s.Person]
+		a.Subject = actx.Catalog.PersonsByID[s.Person]
 	case s.Event != "":
-		a.Subject = ctx.C.EventsByID[s.Event]
-		roles := ctx.G.ParticipantRoles
-		props := ctx.G.EventProperties
-		a.Participant = newParticipant(ctx, inner.Participant, roles, props)
+		a.Subject = actx.Catalog.EventsByID[s.Event]
+		roles := actx.GLX.ParticipantRoles
+		props := actx.GLX.EventProperties
+		a.Participant = newParticipant(actx.Sub("Participant"), inner.Participant, roles, props)
 	case s.Relationship != "":
-		a.Subject = ctx.C.RelationshipsByID[s.Relationship]
-		roles := ctx.G.ParticipantRoles
-		props := ctx.G.RelationshipProperties
-		a.Participant = newParticipant(ctx, inner.Participant, roles, props)
+		a.Subject = actx.Catalog.RelationshipsByID[s.Relationship]
+		roles := actx.GLX.ParticipantRoles
+		props := actx.GLX.RelationshipProperties
+		a.Participant = newParticipant(actx.Sub("Participant"), inner.Participant, roles, props)
 	case s.Place != "":
-		a.Subject = ctx.C.PlacesByID[s.Place]
+		a.Subject = actx.Catalog.PlacesByID[s.Place]
 	}
 
 	if s, ok := a.Subject.(subject); ok {

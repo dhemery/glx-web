@@ -43,11 +43,13 @@ func newEvent(id string, inner *glx.Event) *Event {
 }
 
 func (e *Event) compile(ctx *context) {
+	ectx := ctx.ForEntity(e.entity)
+
 	inner := e.Event
-	e.Participants = newParticipants(ctx, inner.Participants, ctx.G.EventProperties)
-	e.Place = ctx.C.PlacesByID[e.PlaceID]
-	e.Properties = parseProperties(ctx, inner.Properties, ctx.G.EventProperties)
-	e.Type = newVocabularyValue(ctx, inner.Type, ctx.G.EventTypes)
+	e.Participants = newParticipants(ectx.Sub("Participants"), inner.Participants, ectx.GLX.EventProperties)
+	e.Place = ectx.Catalog.PlacesByID[e.PlaceID]
+	e.Properties = parseProperties(ectx.Sub("Poperties"), inner.Properties, ectx.GLX.EventProperties)
+	e.Type = newVocabularyValue(ectx.Sub("Type"), inner.Type, ectx.GLX.EventTypes)
 
 	for _, p := range e.Participants {
 		p.Person.addEvent(e)

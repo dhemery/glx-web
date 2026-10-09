@@ -51,12 +51,13 @@ func newCitation(id string, inner *glx.Citation) *Citation {
 }
 
 func (c *Citation) compile(ctx *context) {
+	cctx := ctx.ForEntity(c.entity)
 
 	inner := c.Citation
-	c.Media = ctx.C.media(inner.Media)
-	c.Properties = parseProperties(ctx, inner.Properties, ctx.G.CitationProperties)
-	c.Repository = ctx.C.RepositoriesByID[c.RepositoryID]
-	c.Source = ctx.C.SourcesByID[c.SourceID]
+	c.Media = cctx.Catalog.media(inner.Media)
+	c.Properties = parseProperties(cctx.Sub("Properties"), inner.Properties, cctx.GLX.CitationProperties)
+	c.Repository = cctx.Catalog.RepositoriesByID[c.RepositoryID]
+	c.Source = cctx.Catalog.SourcesByID[c.SourceID]
 
 	for _, m := range c.Media {
 		m.addCitation(c)

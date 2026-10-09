@@ -2,6 +2,7 @@ package entity
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
@@ -58,11 +59,14 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 	properties := make(map[string]Property)
 
 	for name, rawProperty := range rawProperties {
+		pctx := ctx.Sub(name)
 		def := defs[name]
 		if def == nil {
 			def = synthesizePropertyDefinition(name)
+			pctx.Warnf("unknown property: using synthesized property definition with label %q",
+				def.Label)
 		}
-		properties[name] = parseProperty(ctx, rawProperty, def)
+		properties[name] = parseProperty(pctx, rawProperty, def)
 	}
 
 	return properties
@@ -77,14 +81,14 @@ func synthesizePropertyDefinition(name string) *glx.PropertyDefinition {
 }
 
 func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) Property {
-
 	property := Property{Definition: def}
 
 	switch v := rawProperty.(type) {
 	case []any:
 		// Convert each element to a property value map and parse it.
-		for _, rawPropertyValue := range v {
-			propertyValue := parsePropertyValue(ctx, asPropertyMap(rawPropertyValue), def)
+		for i, rawPropertyValue := range v {
+			pvictx := ctx.Sub(strconv.Itoa(i))
+			propertyValue := parsePropertyValue(pvictx, asPropertyMap(rawPropertyValue), def)
 			property.Values = append(property.Values, propertyValue)
 		}
 	case map[string]any:
@@ -111,14 +115,14 @@ func asPropertyMap(raw any) map[string]any {
 func parsePropertyValue(ctx *context, rawPropertyValue map[string]any, def *glx.PropertyDefinition) PropertyValue {
 	var propertyValue PropertyValue
 
-	propertyValue.Date = parsePropertyValueDate(ctx, rawPropertyValue["date"])
-	propertyValue.Fields = parsePropertyValueFields(ctx, rawPropertyValue["fields"], def.Fields)
-	propertyValue.Value = parsePropertyValueValue(ctx, rawPropertyValue["value"], def)
+	propertyValue.Date = parsePropertyValueDate(ctx.Sub("Date"), rawPropertyValue["date"])
+	propertyValue.Fields = parsePropertyValueFields(ctx.Sub("Fields"), rawPropertyValue["fields"], def.Fields)
+	propertyValue.Value = parsePropertyValueValue(ctx.Sub("Value"), rawPropertyValue["value"], def)
 
 	return propertyValue
 }
 
-func parsePropertyValueDate(_ *context, raw any) glxdate.Date {
+func parsePropertyValueDate(ctx *context, raw any) glxdate.Date {
 	if raw == nil {
 		return glxdate.Date{}
 	}
@@ -126,6 +130,7 @@ func parsePropertyValueDate(_ *context, raw any) glxdate.Date {
 	s, ok := raw.(string)
 	if !ok {
 		coerced := fmt.Sprint(raw)
+		ctx.Warnf("cannot parse type %T: parsing string value %q", raw, coerced)
 		return parseDate(coerced)
 	}
 
@@ -149,13 +154,18 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 
 	rawFieldsMap, ok := rawFields.(map[string]any)
 	if !ok {
+		ctx.Warnf("cannot parse type %T: discarding all fields", rawFieldsMap)
 		return propertyFields
 	}
 
 	for name, rawFieldValue := range rawFieldsMap {
+		fctx := ctx.Sub(name)
+
 		def, ok := defs[name]
 		if !ok {
 			def = synthesizeFieldDefinition(name)
+			fctx.Warnf("unknown field: using synthesized field definition with label %q",
+				def.Label)
 			rawFieldValue = fmt.Sprint(rawFieldValue)
 		}
 		value := parsePrimitiveValue(ctx, rawFieldValue, def.ValueType)
@@ -166,22 +176,25 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 }
 
 func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition) Stringer {
+	// TODO(errors): Handle raw == nil, which can happen if a property value has no "value" key.
 	switch {
 	case def.ValueType != "":
 		return parsePrimitiveValue(ctx, raw, def.ValueType)
 	case def.ReferenceType != "":
 		id, ok := raw.(string)
 		if !ok {
-			// GLX validation guarantees raw is a string.
-			// TODO(errors): Fails when raw == nil.
-			return StringValue("")
+			coerced := fmt.Sprint(raw)
+			ctx.Warnf("cannot parse %s reference type %T: creating property with string value %q",
+				def.ReferenceType, raw, coerced)
+			return StringValue(coerced)
 		}
-		return ctx.C.entity(id, def.ReferenceType)
+		return ctx.Catalog.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
 		key := raw.(string)
-		return newVocabularyValue(ctx, key, vocabulary(ctx.G, def.VocabularyType))
+		return newVocabularyValue(ctx, key, vocabulary(ctx.GLX, def.VocabularyType))
+	default:
+		// GLX validation guarantees exactly one type field has a value.
 	}
 
-	// GLX validation guarantees exactly one type field has a value.
 	return nil
 }

@@ -33,7 +33,7 @@ func (s StringValue) String() string {
 	return string(s)
 }
 
-func parsePrimitiveValue(_ *context, raw any, valueType string) Stringer {
+func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 	switch v := raw.(type) {
 	case string:
 		if valueType == "date" {
@@ -46,13 +46,14 @@ func parsePrimitiveValue(_ *context, raw any, valueType string) Stringer {
 		return BoolValue(v)
 	default:
 		coerced := fmt.Sprint(raw)
+		ctx.Warnf("cannot parse primitive value type %T: using string value %q instead",
+			raw, coerced)
 		return StringValue(coerced)
 	}
 }
 
 func parseDate(s string) glxdate.Date {
 	date, _ := glxdate.Parse(s)
-
 	return date
 }
 
@@ -74,10 +75,13 @@ func synthesizeVocabularyEntry(term string) *glx.VocabularyEntry {
 	}
 }
 
-func newVocabularyValue(_ *context, key string, vocabulary map[string]*glx.VocabularyEntry) VocabularyValue {
-	def, ok := vocabulary[key]
+func newVocabularyValue(ctx *context, term string, vocabulary map[string]*glx.VocabularyEntry) VocabularyValue {
+	def, ok := vocabulary[term]
 	if !ok {
-		def = synthesizeVocabularyEntry(key)
+
+		def = synthesizeVocabularyEntry(term)
+		ctx.Warnf("unknown vocabulary term %q: using synthesized vocabulary value with label %q",
+			term, def.Label)
 	}
-	return VocabularyValue{Value: key, Definition: def}
+	return VocabularyValue{Value: term, Definition: def}
 }

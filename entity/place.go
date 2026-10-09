@@ -51,11 +51,12 @@ func newPlace(id string, inner *glx.Place) *Place {
 }
 
 func (p *Place) compile(ctx *context) {
+	pctx := ctx.ForEntity(p.entity)
 
 	inner := p.Place
-	p.Parent = ctx.C.PlacesByID[p.ParentID]
-	p.Properties = parseProperties(ctx, inner.Properties, ctx.G.PlaceProperties)
-	p.Type = newVocabularyValue(ctx, inner.Type, ctx.G.PlaceTypes)
+	p.Parent = pctx.Catalog.PlacesByID[p.ParentID]
+	p.Properties = parseProperties(pctx.Sub("Properties"), inner.Properties, pctx.GLX.PlaceProperties)
+	p.Type = newVocabularyValue(pctx.Sub("Type"), inner.Type, pctx.GLX.PlaceTypes)
 
 	if p.Parent != nil {
 		p.Parent.addChild(p)

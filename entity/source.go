@@ -47,11 +47,13 @@ func newSource(id string, inner *glx.Source) *Source {
 }
 
 func (s *Source) compile(ctx *context) {
+	sctx := ctx.ForEntity(s.entity)
+
 	inner := s.Source
-	s.Media = ctx.C.media(inner.Media)
-	s.Properties = parseProperties(ctx, inner.Properties, ctx.G.SourceProperties)
-	s.Repository = ctx.C.RepositoriesByID[s.RepositoryID]
-	s.Type = newVocabularyValue(ctx, inner.Type, ctx.G.SourceTypes)
+	s.Media = sctx.Catalog.media(inner.Media)
+	s.Properties = parseProperties(sctx.Sub("Properties"), inner.Properties, sctx.GLX.SourceProperties)
+	s.Repository = sctx.Catalog.RepositoriesByID[s.RepositoryID]
+	s.Type = newVocabularyValue(sctx.Sub("Type"), inner.Type, sctx.GLX.SourceTypes)
 
 	for _, m := range s.Media {
 		m.addSource(s)
