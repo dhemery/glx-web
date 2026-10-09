@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"log/slog"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -42,12 +40,11 @@ func newRepository(id string, inner *glx.Repository) *Repository {
 	}
 }
 
-func (r *Repository) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity_type", glx.EntityTypeRepositories, "id", r.id)
+func (r *Repository) compile(ctx *context) {
 
 	inner := r.Repository
-	r.Type = newVocabularyValue(inner.Type, a.g.RepositoryTypes, l)
-	r.Properties = parseProperties(a, inner.Properties, a.g.RepositoryProperties, l)
+	r.Type = newVocabularyValue(ctx, inner.Type, ctx.G.RepositoryTypes)
+	r.Properties = parseProperties(ctx, inner.Properties, ctx.G.RepositoryProperties)
 }
 
 func (r *Repository) addCitation(c *Citation) {

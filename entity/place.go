@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"log/slog"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -52,13 +50,12 @@ func newPlace(id string, inner *glx.Place) *Place {
 	}
 }
 
-func (p *Place) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity_type", glx.EntityTypePlaces, "id", p.id)
+func (p *Place) compile(ctx *context) {
 
 	inner := p.Place
-	p.Parent = a.c.PlacesByID[p.ParentID]
-	p.Properties = parseProperties(a, inner.Properties, a.g.PlaceProperties, l)
-	p.Type = newVocabularyValue(inner.Type, a.g.PlaceTypes, l.With("entity_field", "type"))
+	p.Parent = ctx.C.PlacesByID[p.ParentID]
+	p.Properties = parseProperties(ctx, inner.Properties, ctx.G.PlaceProperties)
+	p.Type = newVocabularyValue(ctx, inner.Type, ctx.G.PlaceTypes)
 
 	if p.Parent != nil {
 		p.Parent.addChild(p)

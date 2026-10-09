@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"log/slog"
-
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -45,30 +43,28 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	}
 }
 
-func (a *Assertion) resolve(arch archive, l *slog.Logger) {
-	l = l.With("entity_type", glx.EntityTypeAssertions, "id", a.id)
-
+func (a *Assertion) compile(ctx *context) {
 	inner := a.Assertion
-	a.Citations = arch.citations(inner.Citations)
-	a.Media = arch.media(inner.Media)
-	a.Sources = arch.sources(inner.Sources)
+	a.Citations = ctx.C.citations(inner.Citations)
+	a.Media = ctx.C.media(inner.Media)
+	a.Sources = ctx.C.sources(inner.Sources)
 
 	s := inner.Subject
 	switch {
 	case s.Person != "":
-		a.Subject = arch.c.PersonsByID[s.Person]
+		a.Subject = ctx.C.PersonsByID[s.Person]
 	case s.Event != "":
-		a.Subject = arch.c.EventsByID[s.Event]
-		roles := arch.g.ParticipantRoles
-		props := arch.g.EventProperties
-		a.Participant = newParticipant(arch, inner.Participant, roles, props, l)
+		a.Subject = ctx.C.EventsByID[s.Event]
+		roles := ctx.G.ParticipantRoles
+		props := ctx.G.EventProperties
+		a.Participant = newParticipant(ctx, inner.Participant, roles, props)
 	case s.Relationship != "":
-		a.Subject = arch.c.RelationshipsByID[s.Relationship]
-		roles := arch.g.ParticipantRoles
-		props := arch.g.RelationshipProperties
-		a.Participant = newParticipant(arch, inner.Participant, roles, props, l)
+		a.Subject = ctx.C.RelationshipsByID[s.Relationship]
+		roles := ctx.G.ParticipantRoles
+		props := ctx.G.RelationshipProperties
+		a.Participant = newParticipant(ctx, inner.Participant, roles, props)
 	case s.Place != "":
-		a.Subject = arch.c.PlacesByID[s.Place]
+		a.Subject = ctx.C.PlacesByID[s.Place]
 	}
 
 	if s, ok := a.Subject.(subject); ok {

@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"log/slog"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -51,14 +50,13 @@ func newCitation(id string, inner *glx.Citation) *Citation {
 	}
 }
 
-func (c *Citation) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity_type", glx.EntityTypeCitations, "id", c.id)
+func (c *Citation) compile(ctx *context) {
 
 	inner := c.Citation
-	c.Media = a.media(inner.Media)
-	c.Properties = parseProperties(a, inner.Properties, a.g.CitationProperties, l)
-	c.Repository = a.c.RepositoriesByID[c.RepositoryID]
-	c.Source = a.c.SourcesByID[c.SourceID]
+	c.Media = ctx.C.media(inner.Media)
+	c.Properties = parseProperties(ctx, inner.Properties, ctx.G.CitationProperties)
+	c.Repository = ctx.C.RepositoriesByID[c.RepositoryID]
+	c.Source = ctx.C.SourcesByID[c.SourceID]
 
 	for _, m := range c.Media {
 		m.addCitation(c)

@@ -1,8 +1,8 @@
 package entity
 
 import (
-	"log/slog"
 	"maps"
+	"os"
 	"slices"
 
 	"github.com/genealogix/glx/go-glx"
@@ -107,18 +107,109 @@ func NewCatalog(g *glx.GLXFile) *Catalog {
 		c.SourcesByID[id] = newSource(id, gs)
 	}
 
-	l := slog.Default()
-
-	a := archive{c: c, g: g}
-	a.resolve(c.AssertionsByID, l)
-	a.resolve(c.CitationsByID, l)
-	a.resolve(c.EventsByID, l)
-	a.resolve(c.MediaByID, l)
-	a.resolve(c.PersonsByID, l)
-	a.resolve(c.PlacesByID, l)
-	a.resolve(c.RelationshipsByID, l)
-	a.resolve(c.RepositoriesByID, l)
-	a.resolve(c.SourcesByID, l)
+	ctx := &context{C: c, G: g, ErrOut: os.Stderr}
+	compile(ctx, c.AssertionsByID)
+	compile(ctx, c.CitationsByID)
+	compile(ctx, c.EventsByID)
+	compile(ctx, c.MediaByID)
+	compile(ctx, c.PersonsByID)
+	compile(ctx, c.PlacesByID)
+	compile(ctx, c.RelationshipsByID)
+	compile(ctx, c.RepositoriesByID)
+	compile(ctx, c.SourcesByID)
 
 	return c
+}
+
+type compiler interface {
+	// Compile initializes the receiver's references to entities and
+	// vocabularies in the context and notifies any referenced entities
+	// that the receiver refers to them.
+	compile(*context)
+}
+
+func compile[C compiler](ctx *context, compilers map[string]C) {
+	for _, r := range compilers {
+		r.compile(ctx)
+	}
+}
+
+func (c *Catalog) entity(id string, entityType string) entityReference {
+	// TODO(feature): Handle the rest of the entity types.
+	switch entityType {
+	case glx.EntityTypeCitations.Plural():
+		return c.CitationsByID[id]
+	case glx.EntityTypePersons.Plural():
+		return c.PersonsByID[id]
+	case glx.EntityTypeMedia.Plural():
+		return c.PlacesByID[id]
+	default:
+		return nil
+	}
+}
+
+func (c *Catalog) citations(ids []string) []*Citation {
+	var citations []*Citation
+	for _, id := range ids {
+		citations = append(citations, c.CitationsByID[id])
+	}
+	return citations
+}
+
+func (c *Catalog) media(ids []string) []*Media {
+	var media []*Media
+	for _, mediaID := range ids {
+		media = append(media, c.MediaByID[mediaID])
+	}
+	return media
+}
+
+func (c *Catalog) sources(ids []string) []*Source {
+	var sources []*Source
+	for _, id := range ids {
+		s := c.SourcesByID[id]
+		sources = append(sources, s)
+	}
+	return sources
+}
+
+func vocabulary(g *glx.GLXFile, name string) map[string]*glx.VocabularyEntry {
+	switch name {
+	case glx.VocabRelationshipTypes:
+		return g.RelationshipTypes
+	case glx.VocabEventTypes:
+		return g.EventTypes
+	case glx.VocabPlaceTypes:
+		return g.PlaceTypes
+	case glx.VocabRepositoryTypes:
+		return g.RepositoryTypes
+	case glx.VocabParticipantRoles:
+		return g.ParticipantRoles
+	case glx.VocabMediaTypes:
+		return g.MediaTypes
+	case glx.VocabConfidenceLevels:
+		return g.ConfidenceLevels
+	case glx.VocabSourceTypes:
+		return g.SourceTypes
+	case glx.VocabSexTypes:
+		return g.SexTypes
+	case glx.VocabGenderTypes:
+		return g.GenderTypes
+	case glx.VocabSearchResultTypes:
+		return g.SearchResultTypes
+	case glx.VocabResearchLogStatusTypes:
+		return g.ResearchLogStatusTypes
+	case glx.VocabStudyTypes:
+		return g.StudyTypes
+	case glx.VocabStudyStatuses:
+		return g.StudyStatuses
+	case glx.VocabLegalStatuses:
+		return g.LegalStatuses
+	case glx.VocabSourceNatures:
+		return g.SourceNatures
+	case glx.VocabInformationTypes:
+		return g.InformationTypes
+	default:
+		return nil
+	}
 }

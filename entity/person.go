@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"log/slog"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -68,11 +66,9 @@ func newPerson(id string, inner *glx.Person) *Person {
 	}
 }
 
-func (p *Person) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity_type", glx.EntityTypePersons, "id", p.id)
-
+func (p *Person) compile(ctx *context) {
 	inner := p.Person
-	p.Properties = parseProperties(a, inner.Properties, a.g.PersonProperties, l)
+	p.Properties = parseProperties(ctx, inner.Properties, ctx.G.PersonProperties)
 }
 
 func (p *Person) addAssertion(a *Assertion) {

@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"log/slog"
-
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -44,14 +42,12 @@ func newEvent(id string, inner *glx.Event) *Event {
 	}
 }
 
-func (e *Event) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity_type", glx.EntityTypeEvents, "id", e.id)
-
+func (e *Event) compile(ctx *context) {
 	inner := e.Event
-	e.Participants = newParticipants(a, inner.Participants, a.g.EventProperties, l)
-	e.Place = a.c.PlacesByID[e.PlaceID]
-	e.Properties = parseProperties(a, inner.Properties, a.g.EventProperties, l)
-	e.Type = newVocabularyValue(inner.Type, a.g.EventTypes, l)
+	e.Participants = newParticipants(ctx, inner.Participants, ctx.G.EventProperties)
+	e.Place = ctx.C.PlacesByID[e.PlaceID]
+	e.Properties = parseProperties(ctx, inner.Properties, ctx.G.EventProperties)
+	e.Type = newVocabularyValue(ctx, inner.Type, ctx.G.EventTypes)
 
 	for _, p := range e.Participants {
 		p.Person.addEvent(e)

@@ -2,7 +2,6 @@ package entity
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
@@ -55,18 +54,15 @@ func (f PropertyField) String() string {
 	return f.Value.String()
 }
 
-func parseProperties(a archive, rawProperties map[string]any, defs map[string]*glx.PropertyDefinition, l *slog.Logger) map[string]Property {
+func parseProperties(ctx *context, rawProperties map[string]any, defs map[string]*glx.PropertyDefinition) map[string]Property {
 	properties := make(map[string]Property)
 
 	for name, rawProperty := range rawProperties {
-		propertyLogger := l.With("property", name)
 		def := defs[name]
 		if def == nil {
 			def = synthesizePropertyDefinition(name)
-			propertyLogger.Warn("unknown property: using synthetic property definition",
-				"definition", def)
 		}
-		properties[name] = parseProperty(a, rawProperty, def, propertyLogger)
+		properties[name] = parseProperty(ctx, rawProperty, def)
 	}
 
 	return properties
@@ -80,7 +76,7 @@ func synthesizePropertyDefinition(name string) *glx.PropertyDefinition {
 	}
 }
 
-func parseProperty(a archive, rawProperty any, def *glx.PropertyDefinition, l *slog.Logger) Property {
+func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) Property {
 
 	property := Property{Definition: def}
 
@@ -88,17 +84,17 @@ func parseProperty(a archive, rawProperty any, def *glx.PropertyDefinition, l *s
 	case []any:
 		// Convert each element to a property value map and parse it.
 		for _, rawPropertyValue := range v {
-			propertyValue := parsePropertyValue(a, asPropertyMap(rawPropertyValue), def, l)
+			propertyValue := parsePropertyValue(ctx, asPropertyMap(rawPropertyValue), def)
 			property.Values = append(property.Values, propertyValue)
 		}
 	case map[string]any:
 		// Assume the map is a property value map and parse it.
-		property.Values = append(property.Values, parsePropertyValue(a, v, def, l))
+		property.Values = append(property.Values, parsePropertyValue(ctx, v, def))
 	default:
 		// Assume raw property is a scalar property value. Wrap it in a
 		// property value map and parse it.
 		rawValueMap := map[string]any{"value": v}
-		property.Values = append(property.Values, parsePropertyValue(a, rawValueMap, def, l))
+		property.Values = append(property.Values, parsePropertyValue(ctx, rawValueMap, def))
 	}
 
 	return property
@@ -112,17 +108,17 @@ func asPropertyMap(raw any) map[string]any {
 	return map[string]any{"value": raw}
 }
 
-func parsePropertyValue(a archive, rawPropertyValue map[string]any, def *glx.PropertyDefinition, l *slog.Logger) PropertyValue {
+func parsePropertyValue(ctx *context, rawPropertyValue map[string]any, def *glx.PropertyDefinition) PropertyValue {
 	var propertyValue PropertyValue
 
-	propertyValue.Date = parsePropertyValueDate(rawPropertyValue["date"], l)
-	propertyValue.Fields = parsePropertyValueFields(rawPropertyValue["fields"], def.Fields, l)
-	propertyValue.Value = parsePropertyValueValue(a, rawPropertyValue["value"], def, l)
+	propertyValue.Date = parsePropertyValueDate(ctx, rawPropertyValue["date"])
+	propertyValue.Fields = parsePropertyValueFields(ctx, rawPropertyValue["fields"], def.Fields)
+	propertyValue.Value = parsePropertyValueValue(ctx, rawPropertyValue["value"], def)
 
 	return propertyValue
 }
 
-func parsePropertyValueDate(raw any, l *slog.Logger) glxdate.Date {
+func parsePropertyValueDate(_ *context, raw any) glxdate.Date {
 	if raw == nil {
 		return glxdate.Date{}
 	}
@@ -130,9 +126,6 @@ func parsePropertyValueDate(raw any, l *slog.Logger) glxdate.Date {
 	s, ok := raw.(string)
 	if !ok {
 		coerced := fmt.Sprint(raw)
-		l.Warn("cannot parse date: coercing to string",
-			"element", "property date", "coerced", coerced)
-
 		return parseDate(coerced)
 	}
 
@@ -147,9 +140,7 @@ func synthesizeFieldDefinition(name string) *glx.FieldDefinition {
 	}
 }
 
-func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinition, l *slog.Logger) map[string]PropertyField {
-	l = l.With("element", "property fields")
-
+func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.FieldDefinition) map[string]PropertyField {
 	propertyFields := make(map[string]PropertyField)
 
 	if rawFields == nil {
@@ -158,46 +149,39 @@ func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinitio
 
 	rawFieldsMap, ok := rawFields.(map[string]any)
 	if !ok {
-		l.Warn("cannot parse fields", "unparseable", fmt.Sprint(rawFields))
 		return propertyFields
 	}
 
 	for name, rawFieldValue := range rawFieldsMap {
-		fieldLogger := l.With("field", name)
 		def, ok := defs[name]
 		if !ok {
 			def = synthesizeFieldDefinition(name)
-			fieldLogger.Warn("unknown field: using synthetic field definition", "definition", def)
 			rawFieldValue = fmt.Sprint(rawFieldValue)
 		}
-		value := parsePrimitiveValue(rawFieldValue, def.ValueType, fieldLogger)
+		value := parsePrimitiveValue(ctx, rawFieldValue, def.ValueType)
 		propertyFields[name] = PropertyField{Definition: def, Value: value}
 	}
 
 	return propertyFields
 }
 
-func parsePropertyValueValue(a archive, raw any, def *glx.PropertyDefinition, l *slog.Logger) Stringer {
-	l = l.With("element", "property value")
-
+func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition) Stringer {
 	switch {
 	case def.ValueType != "":
-		return parsePrimitiveValue(raw, def.ValueType, l)
+		return parsePrimitiveValue(ctx, raw, def.ValueType)
 	case def.ReferenceType != "":
 		id, ok := raw.(string)
 		if !ok {
 			// GLX validation guarantees raw is a string.
 			// TODO(errors): Fails when raw == nil.
-			l.Warn("cannot parse reference: using empty string", "raw_type", raw)
 			return StringValue("")
 		}
-		return a.entity(id, def.ReferenceType)
+		return ctx.C.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
 		key := raw.(string)
-		return newVocabularyValue(key, a.vocabulary(def.VocabularyType), l)
+		return newVocabularyValue(ctx, key, vocabulary(ctx.G, def.VocabularyType))
 	}
 
 	// GLX validation guarantees exactly one type field has a value.
-	l.Warn("discarded property value: property definition has no type")
 	return nil
 }

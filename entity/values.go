@@ -2,7 +2,6 @@ package entity
 
 import (
 	"fmt"
-	"log/slog"
 	"strconv"
 
 	"github.com/genealogix/glx/go-glx"
@@ -34,8 +33,7 @@ func (s StringValue) String() string {
 	return string(s)
 }
 
-func parsePrimitiveValue(raw any, valueType string, l *slog.Logger) Stringer {
-	l = l.With("value_type", valueType)
+func parsePrimitiveValue(_ *context, raw any, valueType string) Stringer {
 	switch v := raw.(type) {
 	case string:
 		if valueType == "date" {
@@ -48,7 +46,6 @@ func parsePrimitiveValue(raw any, valueType string, l *slog.Logger) Stringer {
 		return BoolValue(v)
 	default:
 		coerced := fmt.Sprint(raw)
-		l.Warn("cannot parse primitive value: coercing to string", "coerced", coerced)
 		return StringValue(coerced)
 	}
 }
@@ -77,11 +74,10 @@ func synthesizeVocabularyEntry(term string) *glx.VocabularyEntry {
 	}
 }
 
-func newVocabularyValue(key string, vocabulary map[string]*glx.VocabularyEntry, l *slog.Logger) VocabularyValue {
+func newVocabularyValue(_ *context, key string, vocabulary map[string]*glx.VocabularyEntry) VocabularyValue {
 	def, ok := vocabulary[key]
 	if !ok {
 		def = synthesizeVocabularyEntry(key)
-		l.Warn("unknown vocabulary value: using synthetic VocabularyEntry", "value", key)
 	}
 	return VocabularyValue{Value: key, Definition: def}
 }

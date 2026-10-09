@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"log/slog"
-
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -48,13 +46,11 @@ func newMedia(id string, inner *glx.Media) *Media {
 	}
 }
 
-func (m *Media) resolve(a archive, l *slog.Logger) {
-	l = l.With("entity_type", glx.EntityTypeMedia, "id", m.id)
-
+func (m *Media) compile(ctx *context) {
 	inner := m.Media
-	m.Type = newVocabularyValue(inner.Type, a.g.MediaTypes, l)
-	m.Properties = parseProperties(a, inner.Properties, a.g.MediaProperties, l)
-	m.Source = a.c.SourcesByID[inner.Source]
+	m.Type = newVocabularyValue(ctx, inner.Type, ctx.G.MediaTypes)
+	m.Properties = parseProperties(ctx, inner.Properties, ctx.G.MediaProperties)
+	m.Source = ctx.C.SourcesByID[inner.Source]
 
 	if m.Source != nil {
 		m.Source.addMedia(m)
