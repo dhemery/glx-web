@@ -58,7 +58,7 @@ func (p *Place) resolve(a archive, l *slog.Logger) {
 	inner := p.Place
 	p.Parent = a.c.PlacesByID[p.ParentID]
 	p.Properties = parseProperties(a, inner.Properties, a.g.PlaceProperties, l)
-	p.Type = newVocabularyValue(inner.Type, a.g.PlaceTypes, l)
+	p.Type = newVocabularyValue(inner.Type, a.g.PlaceTypes, l.With("entity_field", "type"))
 
 	if p.Parent != nil {
 		p.Parent.addChild(p)

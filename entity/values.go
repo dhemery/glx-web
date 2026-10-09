@@ -48,7 +48,7 @@ func parsePrimitiveValue(raw any, valueType string, l *slog.Logger) Stringer {
 		return BoolValue(v)
 	default:
 		// TODO(errors): Maybe return error instead.
-		l.Warn("value discarded: cannot parse raw type", "raw_type", fmt.Sprintf("%T", raw))
+		l.Warn("cannot parse primitive value", "raw_type", fmt.Sprintf("%T", raw))
 		return nil
 	}
 }
@@ -70,13 +70,12 @@ func (v VocabularyValue) String() string {
 	return v.Definition.Label
 }
 
-// TODO(validate): Vocabulary key with no entry in entity fields
-// TODO(validate): Vocabulary key with no entry in property values
-// TODO(errors): StringValue and error.
 func newVocabularyValue(key string, vocabulary map[string]*glx.VocabularyEntry, l *slog.Logger) VocabularyValue {
 	def, ok := vocabulary[key]
 	if !ok {
-		l.Warn("vocabulary value incomplete: no vocabulary entry", "value", key)
+		// TODO(errors): Handle unknown vocabulary value.
+		// Maybe return STringValue.
+		l.Error("unknown vocabulary value", "value", key)
 	}
 	return VocabularyValue{Value: key, Definition: def}
 }

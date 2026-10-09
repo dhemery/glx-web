@@ -65,11 +65,13 @@ func parseProperties(a archive, rawProperties map[string]any, defs map[string]*g
 	return properties
 }
 
+// TODO(errors): If parsePropertyValueValue can fail, parseProperty must handle
+// the possibility of a Property with no values.
 func parseProperty(a archive, rawProperty any, def *glx.PropertyDefinition, l *slog.Logger) Property {
 	if def == nil {
-		// TODO(validate): Property with no definition.
-		// TODO(errors): Return Property and error, and discard the property.
-		l.Warn("property incomplete: no definition")
+		// TODO(errors): Handle unknown property.
+		// Maybe assign a synthetic definition and coerce the value to string.
+		l.Error("unknown property")
 		return Property{}
 	}
 
@@ -120,7 +122,7 @@ func parsePropertyValueDate(raw any, l *slog.Logger) glxdate.Date {
 
 	s, ok := raw.(string)
 	if !ok {
-		l.Warn("date discarded: cannot parse raw type",
+		l.Warn("cannot parse date",
 			"element", "property date", "raw_type", fmt.Sprintf("%T", raw))
 
 		return glxdate.Date{}
@@ -140,7 +142,7 @@ func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinitio
 
 	rawFieldsMap, ok := rawFields.(map[string]any)
 	if !ok {
-		l.Warn("all fields discarded: cannot parse raw type", "raw_type", fmt.Sprintf("%T", rawFieldsMap))
+		l.Warn("cannot parse fields", "raw_type", fmt.Sprintf("%T", rawFieldsMap))
 		return propertyFields
 	}
 
@@ -164,20 +166,24 @@ func parsePropertyValueFields(rawFields any, defs map[string]*glx.FieldDefinitio
 func parsePropertyValueValue(a archive, raw any, def *glx.PropertyDefinition, l *slog.Logger) Stringer {
 	l = l.With("element", "property value")
 
-	// TODO(validate): Property definition with no type.
-	// TODO(validate): Property definition with more than one type.
-	// TODO(errors): Catch error in each case and return nil.
 	switch {
 	case def.ValueType != "":
 		return parsePrimitiveValue(raw, def.ValueType, l)
 	case def.ReferenceType != "":
-		// TODO(validate): raw property reference value not a string
-		id := raw.(string)
+		id, ok := raw.(string)
+		if !ok {
+			// GLX validation guarantees raw is a string.
+			// TODO(errors): Fails when raw == nil.
+			l.Error("cannot parse reference", "raw_type", raw)
+			return nil
+		}
 		return a.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
 		key := raw.(string)
 		return newVocabularyValue(key, a.vocabulary(def.VocabularyType), l)
 	}
 
+	// GLX validation guarantees exactly one type field has a value.
+	l.Error("discarded property value: property definition has no type")
 	return nil
 }
