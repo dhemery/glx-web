@@ -1,0 +1,6 @@
+persons\[cannot-parse-string\].Properties.name.Value: cannot parse.*as string: using string value.*instead
+-- cannot-parse-string.glx --
+persons:
+  cannot-parse-string:
+    properties:
+      name: 3
