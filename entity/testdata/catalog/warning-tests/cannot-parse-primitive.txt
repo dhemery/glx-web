@@ -1,0 +1,7 @@
+persons\[cannot-parse-primitive\].Properties.name.Value: cannot parse
+-- cannot-parse-primitive.glx --
+persons:
+  cannot-parse-primitive:
+    properties:
+      name:
+        value: [array, instead, of, primitive, type]

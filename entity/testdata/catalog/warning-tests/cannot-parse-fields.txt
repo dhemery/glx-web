@@ -1,0 +1,8 @@
+persons\[cannot-parse-fields\].Properties.name.Fields: cannot parse.*discarding all fields
+-- cannot-parse-fields.glx --
+persons:
+  cannot-parse-fields:
+    properties:
+      name:
+        value: Jeff Stringer
+        fields: "string instead of map of fields"

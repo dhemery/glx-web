@@ -1,0 +1,10 @@
+persons\[unknown-field\].Properties.name.Fields.monkey: unknown field
+-- unknown-fields.glx --
+persons:
+  unknown-field:
+    properties:
+      name:
+        value: J. Fred Muggs
+        fields:
+          monkey: "undefined field"
+
