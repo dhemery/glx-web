@@ -1,0 +1,7 @@
+persons\[invalid-reference-type\].Properties.residence.Value: cannot parse.*reference value: using string value
+-- invalid-reference-type.glx --
+persons:
+  invalid-reference-type:
+    properties:
+      # true (beol) is not a valid reference.
+      residence: true

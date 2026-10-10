@@ -177,8 +177,8 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 		id, ok := raw.(string)
 		if !ok {
 			s := fmt.Sprint(raw)
-			ctx.Warnf("cannot parse %s reference type %T: using string value %q",
-				def.ReferenceType, raw, s)
+			ctx.Warnf("cannot parse %T as %s reference value: using string value %q",
+				raw, def.ReferenceType, s)
 			return StringValue(s)
 		}
 		return ctx.Catalog.entity(id, def.ReferenceType)
