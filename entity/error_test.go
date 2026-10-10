@@ -34,9 +34,19 @@ persons:
   person-bad-primitive-type:
     properties:
       occupation:
-        value: [yellow, blue]
-`,
+        value: [yellow, blue]`,
 		want: `persons\[person-bad-primitive-type\].Properties.occupation.Value: cannot parse primitive value type`,
+	},
+	"unknown-field": {
+		content: `
+persons:
+  person-unknown-field:
+    properties:
+      name:
+        value: Person Unknown Field
+        fields:
+          monkey: "monkey field value"`,
+		want: `persons\[person-unknown-field\].Properties.name.Fields.monkey: unknown field`,
 	},
 }
 
