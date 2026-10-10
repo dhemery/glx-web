@@ -35,8 +35,6 @@ func (s StringValue) String() string {
 
 func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 	switch valueType {
-	case "date":
-		return parseDate(ctx, raw)
 	case "boolean":
 		b, ok := raw.(bool)
 		if !ok {
@@ -46,6 +44,15 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 				raw, valueType)
 		}
 		return BoolValue(b)
+	case "date":
+		return parseDate(ctx, raw)
+	case "integer":
+		i, ok := raw.(int)
+		if !ok {
+			ctx.Warnf("cannot parse %T as %s: using 0 instead",
+				raw, valueType)
+		}
+		return IntValue(i)
 	}
 
 	switch v := raw.(type) {
