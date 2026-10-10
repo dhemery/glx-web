@@ -176,15 +176,21 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 	case def.ReferenceType != "":
 		id, ok := raw.(string)
 		if !ok {
-			coerced := fmt.Sprint(raw)
-			ctx.Warnf("cannot parse %s reference type %T: creating property with string value %q",
-				def.ReferenceType, raw, coerced)
-			return StringValue(coerced)
+			s := fmt.Sprint(raw)
+			ctx.Warnf("cannot parse %s reference type %T: using string value %q instead",
+				def.ReferenceType, raw, s)
+			return StringValue(s)
 		}
 		return ctx.Catalog.entity(id, def.ReferenceType)
 	case def.VocabularyType != "":
-		key := raw.(string)
-		return newVocabularyValue(ctx, key, vocabulary(ctx.GLX, def.VocabularyType))
+		term, ok := raw.(string)
+		if !ok {
+			s := fmt.Sprint(raw)
+			ctx.Warnf("cannot parse %T as %s vocabulary value: using string value %q instead",
+				raw, def.VocabularyType, s)
+			return StringValue(s)
+		}
+		return newVocabularyValue(ctx, term, vocabulary(ctx.GLX, def.VocabularyType))
 	default:
 		// GLX validation guarantees exactly one type field has a value.
 	}

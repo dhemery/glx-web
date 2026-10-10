@@ -1,0 +1,7 @@
+persons\[bad-vocabulary-value-type\].Properties.sex.Value: cannot parse.*vocabulary value: using string value.*instead
+-- cannot-parse-property-vocabulary-value.glx --
+persons:
+  bad-vocabulary-value-type:
+    properties:
+      # false (boolean) is not a valid vocabulary value.
+      sex: false
