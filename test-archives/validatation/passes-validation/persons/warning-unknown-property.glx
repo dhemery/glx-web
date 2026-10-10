@@ -1,5 +1,0 @@
-persons:
-    warning-unknown-property:
-        properties:
-            monkey:
-                value: "monkey property value"

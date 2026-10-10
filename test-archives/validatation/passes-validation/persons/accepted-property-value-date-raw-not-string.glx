@@ -1,5 +1,0 @@
-persons:
-    accepted-property-value-date-raw-not-string:
-        properties:
-            residence:
-                - date: true

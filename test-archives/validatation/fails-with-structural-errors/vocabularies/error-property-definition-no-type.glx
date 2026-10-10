@@ -1,4 +1,0 @@
-person_properties:
-    error_no_type:
-        label: "No Type"
-        description: "A property definition with no type"

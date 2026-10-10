@@ -1,7 +1,0 @@
-events:
-    error_property-reference-value-raw-not-string:
-        participants:
-            - role: subject
-              person: property-raw-not-string
-        type: birth
-        place: 3
