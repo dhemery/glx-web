@@ -51,7 +51,7 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 			ctx.Warnf("cannot parse %T as %s: using 0", raw, valueType)
 		}
 		return IntValue(i)
-	case "string":
+	case "string", "":
 		s, ok := raw.(string)
 		if !ok {
 			s = fmt.Sprint(raw)

@@ -76,7 +76,6 @@ func synthesizePropertyDefinition(name string) *glx.PropertyDefinition {
 	return &glx.PropertyDefinition{
 		Label:       name,
 		Description: "Property definition synthesized by glx-web",
-		ValueType:   "string",
 	}
 }
 
@@ -134,7 +133,6 @@ func synthesizeFieldDefinition(name string) *glx.FieldDefinition {
 	return &glx.FieldDefinition{
 		Label:       name,
 		Description: "Field definition synthesized by glx-web",
-		ValueType:   "string",
 	}
 }
 
@@ -161,7 +159,7 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 				def.Label)
 			rawFieldValue = fmt.Sprint(rawFieldValue)
 		}
-		value := parsePrimitiveValue(ctx, rawFieldValue, def.ValueType)
+		value := parsePrimitiveValue(fctx, rawFieldValue, def.ValueType)
 		propertyFields[name] = PropertyField{Definition: def, Value: value}
 	}
 
