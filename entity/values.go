@@ -38,7 +38,7 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 	case "boolean":
 		b, ok := raw.(bool)
 		if !ok {
-			// Use true to avoid setting Person.living to false.
+			// Use true to avoid setting a Person's "living" property to false.
 			b = true
 			ctx.Warnf("cannot parse %T as %s: using true instead", raw, valueType)
 		}
@@ -54,14 +54,14 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 	case "string":
 		s, ok := raw.(string)
 		if !ok {
-			ctx.Warnf("cannot parse %T as %s: using string value %q instead", raw, valueType, s)
 			s = fmt.Sprint(raw)
+			ctx.Warnf("cannot parse %T as %s: using string value %q instead", raw, valueType, s)
 		}
 		return StringValue(s)
 	}
 
 	s := fmt.Sprint(raw)
-	ctx.Warnf("unknown value type %s: using string value %q instead", valueType, s)
+	ctx.Warnf("unknown value type %q: using string value %q instead", valueType, s)
 	return StringValue(s)
 }
 

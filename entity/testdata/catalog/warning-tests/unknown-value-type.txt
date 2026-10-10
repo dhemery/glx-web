@@ -1,0 +1,12 @@
+persons\[a-person\].Properties.unknown_value_type.Value: unknown value type "rabbit": using string value.*instead
+-- unknown-value-type.glx --
+persons:
+  a-person:
+    properties:
+      unknown_value_type: 42
+person_properties:
+  unknown_value_type:
+    label: "Unknown Value Type"
+    description: "A property with an unknown value type"
+    value_type: rabbit
+
