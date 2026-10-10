@@ -1,4 +1,4 @@
-persons\[cannot-parse-primitive\].Properties.name.Value: cannot parse
+persons\[cannot-parse-primitive\].Properties.name.Value: cannot parse.*as string: using string value.*instead
 -- cannot-parse-primitive.glx --
 persons:
   cannot-parse-primitive:

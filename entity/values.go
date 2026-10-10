@@ -48,8 +48,8 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 		return BoolValue(v)
 	default:
 		coerced := fmt.Sprint(raw)
-		ctx.Warnf("cannot parse primitive value type %T: using string value %q instead",
-			raw, coerced)
+		ctx.Warnf("cannot parse %T as %s: using string value %q instead",
+			raw, valueType, coerced)
 		return StringValue(coerced)
 	}
 }
@@ -58,7 +58,7 @@ func parseDate(ctx *context, raw any) glxdate.Date {
 	s, ok := raw.(string)
 	if !ok {
 		s = fmt.Sprint(raw)
-		ctx.Warnf("cannot parse %T: parsing string value %q instead",
+		ctx.Warnf("cannot parse %T as date: parsing string value %q instead",
 			raw, s)
 	}
 	return parseDateString(s)
