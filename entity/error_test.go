@@ -20,13 +20,23 @@ type errorTest struct {
 }
 
 var errorTests = map[string]errorTest{
-	"warning-unknown-property.glx": {
+	"unknown-property": {
 		content: `
 persons:
-  person-id:
+  person-unknown-property:
     properties:
       monkey: "monkey value"`,
-		want: `persons\[person-id\].Properties.monkey: unknown property`,
+		want: `persons\[person-unknown-property\].Properties.monkey: unknown property`,
+	},
+	"primitive-value-wrong-type": {
+		content: `
+persons:
+  person-bad-primitive-type:
+    properties:
+      occupation:
+        value: [yellow, blue]
+`,
+		want: `persons\[person-bad-primitive-type\].Properties.occupation.Value: cannot parse primitive value type`,
 	},
 }
 
@@ -36,11 +46,13 @@ func TestErrorHandling(t *testing.T) {
 
 	for name, tc := range errorTests {
 		t.Run(name, func(t *testing.T) {
-
 			files := map[string][]byte{}
-			// Prepare the standard vocabularies.
+
+			// Add the standard vocabularies.
 			maps.Copy(files, vocabs)
-			files[name] = []byte(strings.TrimSpace(tc.content))
+
+			// Add the test content.
+			files[name+".glx"] = []byte(strings.TrimSpace(tc.content))
 
 			glxfile, dups, err := serializer.DeserializeMultiFileFromMap(files)
 			if err != nil {
@@ -57,7 +69,7 @@ func TestErrorHandling(t *testing.T) {
 
 			want := regexp.MustCompile(tc.want)
 			if !want.MatchString(got) {
-				t.Errorf("\n          got: %s\nwant match of: %s", got, tc.want)
+				t.Errorf("\n error output: %s\nwant match of: %s", got, tc.want)
 			}
 		})
 	}

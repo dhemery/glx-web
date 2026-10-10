@@ -75,6 +75,8 @@ func synthesizeVocabularyEntry(term string) *glx.VocabularyEntry {
 	}
 }
 
+// TODO(errors): What to do about an optional vocabulary value? A second method
+// that returns *VocabularyValue?
 func newVocabularyValue(ctx *context, term string, vocabulary map[string]*glx.VocabularyEntry) VocabularyValue {
 	def, ok := vocabulary[term]
 	if !ok {
