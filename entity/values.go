@@ -37,6 +37,15 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 	switch valueType {
 	case "date":
 		return parseDate(ctx, raw)
+	case "boolean":
+		b, ok := raw.(bool)
+		if !ok {
+			// Use true to avoid setting Person.living to false.
+			b = true
+			ctx.Warnf("cannot parse %T as %s: using true instead",
+				raw, valueType)
+		}
+		return BoolValue(b)
 	}
 
 	switch v := raw.(type) {
@@ -44,14 +53,12 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 		return StringValue(v)
 	case int:
 		return IntValue(v)
-	case bool:
-		return BoolValue(v)
-	default:
-		coerced := fmt.Sprint(raw)
-		ctx.Warnf("cannot parse %T as %s: using string value %q instead",
-			raw, valueType, coerced)
-		return StringValue(coerced)
 	}
+
+	coerced := fmt.Sprint(raw)
+	ctx.Warnf("cannot parse %T as %s: using string value %q instead",
+		raw, valueType, coerced)
+	return StringValue(coerced)
 }
 
 func parseDate(ctx *context, raw any) glxdate.Date {

@@ -1,0 +1,6 @@
+persons\[cannot-parse-bool\].Properties.living.Value: cannot parse.*as boolean: using true instead
+-- cannot-parse-bool.glx --
+persons:
+  cannot-parse-bool:
+    properties:
+      living: "not a bool"
