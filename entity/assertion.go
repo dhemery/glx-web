@@ -39,7 +39,7 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 		Assertion:  inner,
 		EntityType: glx.EntityTypeAssertions,
 		id:         id,
-		Date:       parseDateString(inner.Date.String()),
+		Date:       parseDate(inner.Date.String()),
 	}
 }
 

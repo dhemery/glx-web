@@ -1,0 +1,6 @@
+citations\[bad-date\].Properties.accessed.Value: cannot parse.*parsing string value.*instead
+-- bad-date.glx --
+citations:
+  bad-date:
+    properties:
+      accessed: 3

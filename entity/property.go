@@ -127,7 +127,7 @@ func parsePropertyValueDate(ctx *context, raw any) glxdate.Date {
 		return glxdate.Date{}
 	}
 
-	return parseDate(ctx, raw)
+	return parseDateRaw(ctx, raw)
 }
 
 func synthesizeFieldDefinition(name string) *glx.FieldDefinition {

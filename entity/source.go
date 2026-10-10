@@ -42,7 +42,7 @@ func newSource(id string, inner *glx.Source) *Source {
 		Source:     inner,
 		EntityType: glx.EntityTypeSources,
 		id:         id,
-		Date:       parseDateString(inner.Date.String()),
+		Date:       parseDate(inner.Date.String()),
 	}
 }
 

@@ -38,7 +38,7 @@ func newEvent(id string, inner *glx.Event) *Event {
 		Event:      inner,
 		EntityType: glx.EntityTypeEvents,
 		id:         id,
-		Date:       parseDateString(inner.Date.String()),
+		Date:       parseDate(inner.Date.String()),
 	}
 }
 
