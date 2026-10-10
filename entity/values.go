@@ -34,11 +34,13 @@ func (s StringValue) String() string {
 }
 
 func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
+	switch valueType {
+	case "date":
+		return parseDate(ctx, raw)
+	}
+
 	switch v := raw.(type) {
 	case string:
-		if valueType == "date" {
-			return parseDate(v)
-		}
 		return StringValue(v)
 	case int:
 		return IntValue(v)
@@ -52,7 +54,17 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 	}
 }
 
-func parseDate(s string) glxdate.Date {
+func parseDate(ctx *context, raw any) glxdate.Date {
+	s, ok := raw.(string)
+	if !ok {
+		s = fmt.Sprint(raw)
+		ctx.Warnf("cannot parse %T: parsing string value %q instead",
+			raw, s)
+	}
+	return parseDateString(s)
+}
+
+func parseDateString(s string) glxdate.Date {
 	date, _ := glxdate.Parse(s)
 	return date
 }

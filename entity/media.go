@@ -42,7 +42,7 @@ func newMedia(id string, inner *glx.Media) *Media {
 		Media:      inner,
 		EntityType: glx.EntityTypeMedia,
 		id:         id,
-		Date:       parseDate(inner.Date.String()),
+		Date:       parseDateString(inner.Date.String()),
 	}
 }
 

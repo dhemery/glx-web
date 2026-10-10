@@ -127,14 +127,7 @@ func parsePropertyValueDate(ctx *context, raw any) glxdate.Date {
 		return glxdate.Date{}
 	}
 
-	s, ok := raw.(string)
-	if !ok {
-		coerced := fmt.Sprint(raw)
-		ctx.Warnf("cannot parse type %T: parsing string value %q", raw, coerced)
-		return parseDate(coerced)
-	}
-
-	return parseDate(s)
+	return parseDate(ctx, raw)
 }
 
 func synthesizeFieldDefinition(name string) *glx.FieldDefinition {
