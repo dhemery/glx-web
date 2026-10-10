@@ -63,7 +63,7 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 		def := defs[name]
 		if def == nil {
 			def = synthesizePropertyDefinition(name)
-			pctx.Warnf("unknown property: using synthesized property definition with label %q",
+			pctx.Warnf("unknown property: using synthesized string property definition with label %q",
 				def.Label)
 		}
 		properties[name] = parseProperty(pctx, rawProperty, def)
@@ -157,7 +157,7 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 		def, ok := defs[name]
 		if !ok {
 			def = synthesizeFieldDefinition(name)
-			fctx.Warnf("unknown field: using synthesized field definition with label %q",
+			fctx.Warnf("unknown field: using synthesized string field definition with label %q",
 				def.Label)
 			rawFieldValue = fmt.Sprint(rawFieldValue)
 		}
@@ -177,7 +177,7 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 		id, ok := raw.(string)
 		if !ok {
 			s := fmt.Sprint(raw)
-			ctx.Warnf("cannot parse %s reference type %T: using string value %q instead",
+			ctx.Warnf("cannot parse %s reference type %T: using string value %q",
 				def.ReferenceType, raw, s)
 			return StringValue(s)
 		}
@@ -186,7 +186,7 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 		term, ok := raw.(string)
 		if !ok {
 			s := fmt.Sprint(raw)
-			ctx.Warnf("cannot parse %T as %s vocabulary value: using string value %q instead",
+			ctx.Warnf("cannot parse %T as %s vocabulary value: using string value %q",
 				raw, def.VocabularyType, s)
 			return StringValue(s)
 		}

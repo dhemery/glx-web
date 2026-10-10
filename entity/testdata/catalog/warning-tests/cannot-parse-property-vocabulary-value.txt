@@ -1,4 +1,4 @@
-persons\[bad-vocabulary-value-type\].Properties.sex.Value: cannot parse.*vocabulary value: using string value.*instead
+persons\[bad-vocabulary-value-type\].Properties.sex.Value: cannot parse.*vocabulary value: using string value.*
 -- cannot-parse-property-vocabulary-value.glx --
 persons:
   bad-vocabulary-value-type:

@@ -1,4 +1,4 @@
-persons\[cannot-parse-date\].Properties.name.Date: cannot parse .*as date: parsing string value.*instead
+persons\[cannot-parse-date\].Properties.name.Date: cannot parse .*as date: parsing string value.*
 -- cannot-parse-date.glx --
 persons:
   cannot-parse-date:

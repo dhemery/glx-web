@@ -1,4 +1,4 @@
-persons\[a-person\].Properties.unknown_value_type.Value: unknown value type "rabbit": using string value.*instead
+persons\[a-person\].Properties.unknown_value_type.Value: unknown value type "rabbit": using string value.*
 -- unknown-value-type.glx --
 persons:
   a-person:

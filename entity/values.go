@@ -40,7 +40,7 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 		if !ok {
 			// Use true to avoid setting a Person's "living" property to false.
 			b = true
-			ctx.Warnf("cannot parse %T as %s: using true instead", raw, valueType)
+			ctx.Warnf("cannot parse %T as %s: using true", raw, valueType)
 		}
 		return BoolValue(b)
 	case "date":
@@ -48,20 +48,20 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 	case "integer":
 		i, ok := raw.(int)
 		if !ok {
-			ctx.Warnf("cannot parse %T as %s: using 0 instead", raw, valueType)
+			ctx.Warnf("cannot parse %T as %s: using 0", raw, valueType)
 		}
 		return IntValue(i)
 	case "string":
 		s, ok := raw.(string)
 		if !ok {
 			s = fmt.Sprint(raw)
-			ctx.Warnf("cannot parse %T as %s: using string value %q instead", raw, valueType, s)
+			ctx.Warnf("cannot parse %T as %s: using string value %q", raw, valueType, s)
 		}
 		return StringValue(s)
 	}
 
 	s := fmt.Sprint(raw)
-	ctx.Warnf("unknown value type %q: using string value %q instead", valueType, s)
+	ctx.Warnf("unknown value type %q: using string value %q", valueType, s)
 	return StringValue(s)
 }
 
@@ -69,7 +69,7 @@ func parseDateRaw(ctx *context, raw any) glxdate.Date {
 	s, ok := raw.(string)
 	if !ok {
 		s = fmt.Sprint(raw)
-		ctx.Warnf("cannot parse %T as date: parsing string value %q instead", raw, s)
+		ctx.Warnf("cannot parse %T as date: parsing string value %qinstead", raw, s)
 	}
 	return parseDate(s)
 }
@@ -104,7 +104,7 @@ func newVocabularyValue(ctx *context, term string, vocabulary map[string]*glx.Vo
 	if !ok {
 
 		def = synthesizeVocabularyEntry(term)
-		ctx.Warnf("unknown vocabulary term %q: using synthesized vocabulary value with label %q",
+		ctx.Warnf("unknown vocabulary term %q: subtituting synthesized vocabulary value with label %q",
 			term, def.Label)
 	}
 	return VocabularyValue{Value: term, Definition: def}
