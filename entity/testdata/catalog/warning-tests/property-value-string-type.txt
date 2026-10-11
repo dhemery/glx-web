@@ -1,0 +1,7 @@
+persons\[someone\].Properties.name.Value: cannot parse.*as string: using string value.*
+-- test.glx --
+persons:
+  someone:
+    properties:
+      # name is a string-valued property.
+      name: 3

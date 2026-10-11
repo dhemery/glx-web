@@ -1,0 +1,9 @@
+persons\[someone\].Properties.name.Date: cannot parse .*as date: parsing string value.*
+-- cannot-parse-date.glx --
+persons:
+  someone:
+    properties:
+      name:
+        value: Someone
+        # date requires a string.
+        date: [array, instead, of, string]

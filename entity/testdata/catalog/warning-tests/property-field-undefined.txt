@@ -1,0 +1,10 @@
+persons\[someone\].Properties.name.Fields.monkey: unknown field
+-- test.glx --
+persons:
+  someone:
+    properties:
+      name:
+        value: someone
+        fields:
+          monkey: "undefined field"
+

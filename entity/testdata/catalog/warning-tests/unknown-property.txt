@@ -1,6 +1,0 @@
-persons\[unknown-property\].Properties.monkey: unknown property
--- unknown-property.glx --
-persons:
-  unknown-property:
-    properties:
-      monkey: "undefined property"

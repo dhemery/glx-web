@@ -1,0 +1,7 @@
+persons\[someone\].Properties.residence.Value: cannot parse.*reference value: using string value
+-- test.glx --
+persons:
+  someone:
+    properties:
+      # residence has a "places" reference_type, and so requires a string.
+      residence: true

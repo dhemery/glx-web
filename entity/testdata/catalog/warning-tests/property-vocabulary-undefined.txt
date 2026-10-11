@@ -1,0 +1,11 @@
+persons\[someone\].Properties.some_custom_property.Value: unknown value type "rabbit": using string value.*
+-- test.glx --
+person_properties:
+  some_custom_property:
+    label: "Costom Property"
+    value_type: rabbit
+persons:
+  someone:
+    properties:
+      some_custom_property: 42
+

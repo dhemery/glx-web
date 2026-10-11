@@ -1,0 +1,6 @@
+persons\[someone\].Properties.monkey: unknown property
+-- test.glx --
+persons:
+  someone:
+    properties:
+      monkey: "undefined property"

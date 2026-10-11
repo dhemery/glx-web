@@ -1,8 +1,0 @@
-persons\[cannot-parse-date\].Properties.name.Date: cannot parse .*as date: parsing string value.*
--- cannot-parse-date.glx --
-persons:
-  cannot-parse-date:
-    properties:
-      name:
-        value: A Name
-        date: [array, instead, of, string]

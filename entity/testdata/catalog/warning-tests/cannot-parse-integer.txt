@@ -1,7 +1,0 @@
-places\[cannot-parse-integer\].Properties.population.Value: cannot parse.*as integer: using 0
--- cannot-parse-integer.glx --
-places:
-  cannot-parse-integer:
-    name: A Place
-    properties:
-      population: "string instead of integer"
