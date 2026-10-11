@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json/jsontext"
 	"encoding/json/v2"
+	"fmt"
 	"io/fs"
 	"maps"
 	"path/filepath"
@@ -163,15 +164,18 @@ var catalogMarshalOptions = json.JoinOptions(
 		json.JoinMarshalers(
 			json.MarshalToFunc(marshalDate),
 			json.MarshalToFunc(marshalPropertyDefinition),
-			json.MarshalToFunc(marshalFieldDefinition)),
+			json.MarshalToFunc(marshalFieldDefinition),
+			json.MarshalToFunc(marshalVocabularyEntry),
+			json.MarshalToFunc(marshalIntValue),
+		),
 	),
 )
 
-func marshalDate(e *jsontext.Encoder, d glxdate.Date) error {
-	return e.WriteToken(jsontext.String(d.Raw()))
+func marshalDate(out *jsontext.Encoder, d glxdate.Date) error {
+	return out.WriteToken(jsontext.String(d.Raw()))
 }
 
-func marshalPropertyDefinition(e *jsontext.Encoder, d *glx.PropertyDefinition) error {
+func marshalPropertyDefinition(out *jsontext.Encoder, d *glx.PropertyDefinition) error {
 	v := struct {
 		Label          string `json:"label"`
 		ValueType      string `json:"value_type"`
@@ -183,10 +187,10 @@ func marshalPropertyDefinition(e *jsontext.Encoder, d *glx.PropertyDefinition) e
 		ReferenceType:  d.ReferenceType,
 		VocabularyType: d.VocabularyType,
 	}
-	return json.MarshalEncode(e, &v)
+	return json.MarshalEncode(out, &v)
 }
 
-func marshalFieldDefinition(e *jsontext.Encoder, d *glx.FieldDefinition) error {
+func marshalFieldDefinition(out *jsontext.Encoder, d *glx.FieldDefinition) error {
 	v := struct {
 		Label     string `json:"label"`
 		ValueType string `json:"value_type"`
@@ -194,5 +198,17 @@ func marshalFieldDefinition(e *jsontext.Encoder, d *glx.FieldDefinition) error {
 		Label:     d.Label,
 		ValueType: d.ValueType,
 	}
-	return json.MarshalEncode(e, &v)
+	return json.MarshalEncode(out, &v)
+}
+
+func marshalVocabularyEntry(out *jsontext.Encoder, e *glx.VocabularyEntry) error {
+	return out.WriteToken(jsontext.String(e.Label))
+
+}
+
+// Marshal IntValue as a formatted string instead of a number. Using string
+// prevents json.Unmarshal from unmarshaling the value as float64. The special
+// format allows Diff to match the IntValue type as well as the value.
+func marshalIntValue(out *jsontext.Encoder, v entity.IntValue) error {
+	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue(%d)", v)))
 }

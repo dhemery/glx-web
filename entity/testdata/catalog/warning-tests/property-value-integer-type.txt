@@ -3,6 +3,21 @@ places\[someplace\].Properties.population.Value: cannot parse.*as integer: using
 places:
   someplace:
     name: Someplace
+    type: county
     properties:
       # population is an integer property.
       population: "string instead of integer"
+-- want-catalog.yaml --
+places:
+  someplace:
+    type:
+      definition: County
+      value: county
+    properties:
+      population:
+        definition:
+          label: Population
+          value_type: integer
+        values:
+          # using 0
+          - value: IntValue(0)
