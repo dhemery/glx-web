@@ -1,7 +1,8 @@
-package entity
+package entity_test
 
 import (
 	"bytes"
+	"encoding/json/jsontext"
 	"encoding/json/v2"
 	"io/fs"
 	"maps"
@@ -9,35 +10,21 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/dhemery/glx-web/internal/marshal"
+	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
+	"github.com/genealogix/glx/go-glx/glxdate"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/tools/txtar"
 	"gopkg.in/yaml.v3"
 )
 
-// JSON marshal options to represent the catalog with only the details we want
-// to compare. Certain details of GLX vocabularies (e.g. Description) are
-// verbose and are not useful for checking the results of NewCatalog.
-var catalogMarshalOptions = json.JoinOptions(
-	json.FormatNilMapAsNull(true),
-	json.FormatNilSliceAsNull(true),
-	json.OmitZeroStructFields(true),
-	json.WithMarshalers(
-		json.JoinMarshalers(
-			json.MarshalToFunc(marshal.Date),
-			json.MarshalToFunc(marshal.PropertyDefinition),
-			json.MarshalToFunc(marshal.FieldDefinition)),
-	),
-)
-
-// TestNewCatalogWarnings tests that [NewCatalog] emits warnings about
+// TestNewCatalogWarnings tests that [entity.NewCatalog] handles the
 // troublesome conditions not prevented by glx validation. Each test case is a
 // [txtar.Archive] read from testdata, contianing a comment, one or more GLX
-// files, and a want.yaml file. The GLX files are looaded into a [glx.GLXFile]
-// to pass to NewCatalog. The comment is a regexp pattern that the output
-// written by NewCatalog must match. The want.yaml file is a YAML
-// representation of the desired catalog.
+// files, and a want-catalog.yaml file. The GLX files are looaded into a
+// [glx.GLXFile] to pass to NewCatalog. The comment is a regexp pattern that
+// the output written by NewCatalog must match. The want-catalog.yaml file is a
+// YAML representation of the desired catalog structure.
 func TestNewCatalogWarnings(t *testing.T) {
 	for name, tc := range textArchives(t, "testdata/catalog/warning-tests/*") {
 		t.Run(filepath.Base(name), func(t *testing.T) {
@@ -49,7 +36,7 @@ func TestNewCatalogWarnings(t *testing.T) {
 			glxfile := glxFile(t, fsys)
 
 			output := &bytes.Buffer{}
-			cat := NewCatalog(glxfile, output)
+			cat := entity.NewCatalog(glxfile, output)
 
 			gotOutput := output.Bytes()
 
@@ -58,30 +45,35 @@ func TestNewCatalogWarnings(t *testing.T) {
 				t.Errorf("\n error output: %s\nwant match of: %s", gotOutput, tc.Comment)
 			}
 
-			wantCatObject := unmarshalYAML(t, fsys, "want-catalog.yaml")
-			gotCatObject := catAsObject(t, cat)
+			// Marshal and unmarshal the catalog to convert it to a
+			// map[string]any that can be compared to wantCatalog.
+			gotCatalog := asObject(t, cat, catalogMarshalOptions)
+			wantCatalog := unmarshalYAML(t, fsys, "want-catalog.yaml")
 
-			if diff := cmp.Diff(wantCatObject, gotCatObject); diff != "" {
+			if diff := cmp.Diff(wantCatalog, gotCatalog); diff != "" {
 				t.Error(diff)
 			}
 		})
 	}
 }
 
-func catAsObject(t *testing.T, cat *Catalog) any {
+// Convert in to an object by marshaling and unmarshaling. We're using JSON
+// because it gives more control over marshaling.
+func asObject(t *testing.T, in any, marshalOpts json.Options) any {
 	t.Helper()
-	j, err := json.Marshal(cat, catalogMarshalOptions)
+	j, err := json.Marshal(in, marshalOpts)
 	if err != nil {
-		t.Fatal("marshaling catalog:", err)
+		t.Fatal("marshaling:", err)
 	}
 
 	var out any
 	if err := json.Unmarshal(j, &out); err != nil {
-		t.Fatal("unmarshaling catalog:", err)
+		t.Fatal("unmarshaling:", err)
 	}
 	return out
 }
 
+// Unmarshal the named YAML file.
 func unmarshalYAML(t *testing.T, fsys fs.FS, name string) any {
 	t.Helper()
 	j, err := fs.ReadFile(fsys, name)
@@ -158,4 +150,49 @@ func textArchives(t *testing.T, pattern string) map[string]*txtar.Archive {
 	}
 
 	return tests
+}
+
+// JSON marshal options to reduce the JSON to only the details we want to
+// compare. Certain details of GLX vocabularies (e.g. Description) are verbose
+// and are not useful for validating the results of NewCatalog.
+var catalogMarshalOptions = json.JoinOptions(
+	json.FormatNilMapAsNull(true),
+	json.FormatNilSliceAsNull(true),
+	json.OmitZeroStructFields(true),
+	json.WithMarshalers(
+		json.JoinMarshalers(
+			json.MarshalToFunc(marshalDate),
+			json.MarshalToFunc(marshalPropertyDefinition),
+			json.MarshalToFunc(marshalFieldDefinition)),
+	),
+)
+
+func marshalDate(e *jsontext.Encoder, d glxdate.Date) error {
+	return e.WriteToken(jsontext.String(d.Raw()))
+}
+
+func marshalPropertyDefinition(e *jsontext.Encoder, d *glx.PropertyDefinition) error {
+	v := struct {
+		Label          string `json:"label"`
+		ValueType      string `json:"value_type"`
+		ReferenceType  string `json:"reference_type"`
+		VocabularyType string `json:"vocabulary_type"`
+	}{
+		Label:          d.Label,
+		ValueType:      d.ValueType,
+		ReferenceType:  d.ReferenceType,
+		VocabularyType: d.VocabularyType,
+	}
+	return json.MarshalEncode(e, &v)
+}
+
+func marshalFieldDefinition(e *jsontext.Encoder, d *glx.FieldDefinition) error {
+	v := struct {
+		Label     string `json:"label"`
+		ValueType string `json:"value_type"`
+	}{
+		Label:     d.Label,
+		ValueType: d.ValueType,
+	}
+	return json.MarshalEncode(e, &v)
 }

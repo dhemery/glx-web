@@ -9,7 +9,7 @@ type Person struct {
 	entity      `json:"-"`
 	*glx.Person `json:"-"`
 
-	Properties map[string]Property `json:"properties" yaml:"properties"`
+	Properties map[string]Property `json:"properties"`
 
 	// Assertions about this person.
 	Assertions AssertionList `json:"-"`
