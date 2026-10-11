@@ -7,8 +7,8 @@ import (
 )
 
 type entity struct {
-	glx.EntityType
-	id string
+	glx.EntityType `json:"-"`
+	id             string
 }
 
 func (e entity) ID() string {

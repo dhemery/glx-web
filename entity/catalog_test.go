@@ -2,48 +2,124 @@ package entity
 
 import (
 	"bytes"
+	"encoding/json/v2"
+	"io/fs"
 	"maps"
 	"path/filepath"
 	"regexp"
 	"testing"
 
+	"github.com/dhemery/glx-web/internal/marshal"
 	"github.com/genealogix/glx/go-glx"
+	"github.com/google/go-cmp/cmp"
 	"golang.org/x/tools/txtar"
+	"gopkg.in/yaml.v3"
+)
+
+// JSON marshal options to represent the catalog with only the details we want
+// to compare. Certain details of GLX vocabularies (e.g. Description) are
+// verbose and are not useful for checking the results of NewCatalog.
+var catalogMarshalOptions = json.JoinOptions(
+	json.FormatNilMapAsNull(true),
+	json.FormatNilSliceAsNull(true),
+	json.OmitZeroStructFields(true),
+	json.WithMarshalers(
+		json.JoinMarshalers(
+			json.MarshalToFunc(marshal.Date),
+			json.MarshalToFunc(marshal.PropertyDefinition),
+			json.MarshalToFunc(marshal.FieldDefinition)),
+	),
 )
 
 // TestNewCatalogWarnings tests that [NewCatalog] emits warnings about
 // troublesome conditions not prevented by glx validation. Each test case is a
-// [txtar.Archive] read from testdata. Its Files are GLX files to load into a
-// [glx.GLXFile] to pass to NewCatalog. Its Comment is a regexp pattern that
-// the output written by NewCatalog must match.
+// [txtar.Archive] read from testdata, contianing a comment, one or more GLX
+// files, and a want.yaml file. The GLX files are looaded into a [glx.GLXFile]
+// to pass to NewCatalog. The comment is a regexp pattern that the output
+// written by NewCatalog must match. The want.yaml file is a YAML
+// representation of the desired catalog.
 func TestNewCatalogWarnings(t *testing.T) {
 	for name, tc := range textArchives(t, "testdata/catalog/warning-tests/*") {
 		t.Run(filepath.Base(name), func(t *testing.T) {
-			glxfile := glxFile(t, tc.Files)
+			fsys, err := txtar.FS(tc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			glxfile := glxFile(t, fsys)
 
 			output := &bytes.Buffer{}
-			_ = NewCatalog(glxfile, output)
+			cat := NewCatalog(glxfile, output)
 
-			got := output.Bytes()
+			gotOutput := output.Bytes()
 
-			want := regexp.MustCompile(string(bytes.TrimSpace(tc.Comment)))
-			if !want.Match(got) {
-				t.Errorf("\n error output: %s\nwant match of: %s", got, tc.Comment)
+			wantOutput := regexp.MustCompile(string(bytes.TrimSpace(tc.Comment)))
+			if !wantOutput.Match(gotOutput) {
+				t.Errorf("\n error output: %s\nwant match of: %s", gotOutput, tc.Comment)
+			}
+
+			wantCatObject := unmarshalYAML(t, fsys, "want-catalog.yaml")
+			gotCatObject := catAsObject(t, cat)
+
+			if diff := cmp.Diff(wantCatObject, gotCatObject); diff != "" {
+				t.Error(diff)
 			}
 		})
 	}
 }
 
-func glxFile(t *testing.T, ff []txtar.File) *glx.GLXFile {
+func catAsObject(t *testing.T, cat *Catalog) any {
 	t.Helper()
+	j, err := json.Marshal(cat, catalogMarshalOptions)
+	if err != nil {
+		t.Fatal("marshaling catalog:", err)
+	}
+
+	var out any
+	if err := json.Unmarshal(j, &out); err != nil {
+		t.Fatal("unmarshaling catalog:", err)
+	}
+	return out
+}
+
+func unmarshalYAML(t *testing.T, fsys fs.FS, name string) any {
+	t.Helper()
+	j, err := fs.ReadFile(fsys, name)
+	if err != nil {
+		t.Fatalf("reading %s: %s", name, err)
+	}
+
+	var out any
+	if err := yaml.Unmarshal(j, &out); err != nil {
+		t.Fatalf("unmarshaling %s: %s", name, err)
+	}
+	return out
+}
+
+func glxFile(t *testing.T, fsys fs.FS) *glx.GLXFile {
+	const pattern = "*.glx"
+	t.Helper()
+	fnames, err := fs.Glob(fsys, pattern)
+	if err != nil {
+		t.Fatalf("globbing %q: %s", pattern, err)
+	}
+
+	if len(fnames) == 0 {
+		t.Fatalf("no files matching %q", pattern)
+	}
+
 	files := map[string][]byte{}
 
 	// Add the standard vocabularies.
 	maps.Copy(files, glx.StandardVocabularies())
 
 	// Add files from the test case.
-	for _, f := range ff {
-		files[f.Name] = f.Data
+	for _, fname := range fnames {
+		content, err := fs.ReadFile(fsys, fname)
+		if err != nil {
+			t.Fatal(err)
+		}
+		files[fname] = content
 	}
 
 	serializer := glx.NewSerializer(nil)
@@ -63,11 +139,11 @@ func textArchives(t *testing.T, pattern string) map[string]*txtar.Archive {
 	t.Helper()
 	fnames, err := filepath.Glob(pattern)
 	if err != nil {
-		t.Fatalf("globbing %s: %s", pattern, err)
+		t.Fatalf("globbing %q: %s", pattern, err)
 	}
 
 	if len(fnames) == 0 {
-		t.Fatal("no files matching", pattern)
+		t.Fatalf("no files matching %q", pattern)
 	}
 
 	tests := make(map[string]*txtar.Archive, len(fnames))

@@ -11,8 +11,8 @@ import (
 // Property holds the values of a property of an entity. Each Property holds a
 // slice of values even if the GLX property is defined as single-valued.
 type Property struct {
-	Definition *glx.PropertyDefinition // The GLX definition of the property.
-	Values     []PropertyValue
+	Definition *glx.PropertyDefinition `json:"definition,omitzero"` // The GLX definition of the property.
+	Values     []PropertyValue         `json:"values,omitzero,omitempty"`
 }
 
 // String returns the first value of p as a string.
@@ -29,9 +29,9 @@ func (p Property) Value() PropertyValue {
 // PropertyValue has a date and fields even if the property's definition does
 // not specify them.
 type PropertyValue struct {
-	Value  Stringer
-	Date   glxdate.Date // The date when the value applied.
-	Fields map[string]PropertyField
+	Value  Stringer                 `json:"value,omitzero,omitempty"`
+	Date   glxdate.Date             `json:"date,omitzero"` // The date when the value applied.
+	Fields map[string]PropertyField `json:"fields,omitzero,omitempty"`
 }
 
 // Field returns the named field of v.
@@ -46,8 +46,8 @@ func (v PropertyValue) String() string {
 
 // PropertyField represents a field in a property of an entity.
 type PropertyField struct {
-	Definition *glx.FieldDefinition // The GLX definition of the field.
-	Value      Stringer
+	Definition *glx.FieldDefinition `json:"definition"` // The GLX definition of the field.
+	Value      Stringer             `json:"value"`
 }
 
 // String returns the string representation of the value of f.
@@ -76,6 +76,7 @@ func synthesizePropertyDefinition(name string) *glx.PropertyDefinition {
 	return &glx.PropertyDefinition{
 		Label:       name,
 		Description: "Property definition synthesized by glx-web",
+		ValueType:   "string",
 	}
 }
 

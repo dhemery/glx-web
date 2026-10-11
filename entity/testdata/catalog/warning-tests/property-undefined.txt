@@ -4,3 +4,13 @@ persons:
   someone:
     properties:
       monkey: "undefined property"
+-- want-catalog.yaml --
+persons:
+  someone:
+    properties:
+      monkey:
+        definition:
+          label: monkey
+          value_type: string
+        values:
+          - value: "undefined property"

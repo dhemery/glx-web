@@ -10,15 +10,15 @@ import (
 
 // Catalog is a collection of entities compiled from a GLX archive.
 type Catalog struct {
-	AssertionsByID    map[string]*Assertion
-	CitationsByID     map[string]*Citation
-	EventsByID        map[string]*Event
-	MediaByID         map[string]*Media
-	PersonsByID       map[string]*Person
-	PlacesByID        map[string]*Place
-	RelationshipsByID map[string]*Relationship
-	RepositoriesByID  map[string]*Repository
-	SourcesByID       map[string]*Source
+	AssertionsByID    map[string]*Assertion    `json:"assertions,omitempty"`
+	CitationsByID     map[string]*Citation     `json:"citations,omitempty"`
+	EventsByID        map[string]*Event        `json:"events,omitempty"`
+	MediaByID         map[string]*Media        `json:"media,omitempty"`
+	PersonsByID       map[string]*Person       `json:"persons,omitempty"`
+	PlacesByID        map[string]*Place        `json:"places,omitempty"`
+	RelationshipsByID map[string]*Relationship `json:"relationships,omitempty"`
+	RepositoriesByID  map[string]*Repository   `json:"repositories,omitempty"`
+	SourcesByID       map[string]*Source       `json:"sources,omitempty"`
 }
 
 func (c *Catalog) Assertions() AssertionList {

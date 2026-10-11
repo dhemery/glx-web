@@ -81,8 +81,8 @@ func parseDate(s string) glxdate.Date {
 
 // VocabularyValue represents a value from a GLX vocabulary.
 type VocabularyValue struct {
-	Definition *glx.VocabularyEntry // The GLX vocabulary's definition of the value.
-	Value      string
+	Definition *glx.VocabularyEntry `json:"definition"` // The GLX vocabulary's definition of the value.
+	Value      string               `json:"value"`
 }
 
 // String returns v's label.
