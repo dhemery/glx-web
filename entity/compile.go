@@ -52,7 +52,10 @@ func (c *context) String() string {
 	return strings.Join(parts, ".")
 }
 
-func (c *context) Warnf(format string, a ...any) {
-	warning := fmt.Sprintf(format, a...)
+func (c *context) Warn(warning string) {
 	fmt.Fprintf(c.Output, "%s: %s\n", c, warning)
+}
+
+func (c *context) Warnf(format string, a ...any) {
+	c.Warn(fmt.Sprintf(format, a...))
 }

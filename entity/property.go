@@ -130,14 +130,6 @@ func parsePropertyValueDate(ctx *context, raw any) glxdate.Date {
 	return parseDateRaw(ctx, raw)
 }
 
-func synthesizeFieldDefinition(name string) *glx.FieldDefinition {
-	return &glx.FieldDefinition{
-		Label:       name,
-		Description: "Field definition synthesized by glx-web",
-		ValueType:   "string",
-	}
-}
-
 func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.FieldDefinition) map[string]PropertyField {
 	propertyFields := make(map[string]PropertyField)
 
@@ -156,10 +148,8 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 
 		def, ok := defs[name]
 		if !ok {
-			def = synthesizeFieldDefinition(name)
-			fctx.Warnf("unknown field: using synthesized string field definition with label %q",
-				def.Label)
-			rawFieldValue = fmt.Sprint(rawFieldValue)
+			fctx.Warnf("ignoring unknown field")
+			continue
 		}
 		value := parsePrimitiveValue(fctx, rawFieldValue, def.ValueType)
 		propertyFields[name] = PropertyField{Definition: def, Value: value}

@@ -1,4 +1,4 @@
-persons\[someone\].Properties.name.Fields.monkey: unknown field
+persons\[someone\].Properties.name.Fields.monkey: ignoring unknown field
 -- test.glx --
 persons:
   someone:
@@ -17,10 +17,3 @@ persons:
                     value_type: string
                 values:
                 -   value: StringValue{"Someone"}
-                    fields:
-                        # TODO(spec): Probably better to drop the undefined field.
-                        monkey:
-                            definition:
-                                label: monkey
-                                value_type: string
-                            value: StringValue{"undefined field"}
