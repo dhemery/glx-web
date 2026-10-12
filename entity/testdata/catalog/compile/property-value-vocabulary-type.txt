@@ -5,3 +5,15 @@ persons:
     properties:
       # sex has a vocabulary type (sex_types) and so requires a string value.
       sex: false
+-- want-catalog.yaml --
+persons:
+    someone:
+        properties:
+            sex:
+                definition:
+                    label: Sex
+                    vocabulary_type: sex_types
+                values:
+                    # TODO(dale): Probably better to drop the value, and
+                    # consequently the property.
+                -   value: StringValue{"false"}
