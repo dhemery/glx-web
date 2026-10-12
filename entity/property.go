@@ -134,6 +134,7 @@ func synthesizeFieldDefinition(name string) *glx.FieldDefinition {
 	return &glx.FieldDefinition{
 		Label:       name,
 		Description: "Field definition synthesized by glx-web",
+		ValueType:   "string",
 	}
 }
 

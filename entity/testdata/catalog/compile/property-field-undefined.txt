@@ -4,7 +4,23 @@ persons:
   someone:
     properties:
       name:
-        value: someone
+        value: Someone
         fields:
           monkey: "undefined field"
-
+-- want-catalog.yaml --
+persons:
+    someone:
+        properties:
+            name:
+                definition:
+                    label: Name
+                    value_type: string
+                values:
+                -   value: StringValue{"Someone"}
+                    fields:
+                        # TODO(dale): Probably better to drop the undefined field.
+                        monkey:
+                            definition:
+                                label: monkey
+                                value_type: string
+                            value: StringValue{"undefined field"}
