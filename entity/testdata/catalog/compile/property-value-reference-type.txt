@@ -5,3 +5,15 @@ persons:
     properties:
       # residence has a "places" reference_type, and so requires a string.
       residence: true
+-- want-catalog.yaml --
+persons:
+  someone:
+    properties:
+      residence:
+        definition:
+          label: Residence
+          reference_type: places
+        values:
+            # TODO(errors): This is the wrong thing to do. Better to drop the
+            # value and consequently the property.
+          - value: StringValue{"true"}

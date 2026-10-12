@@ -7,3 +7,13 @@ persons:
         value: Someone
         # fields requires map[string]any
         fields: "string instead of map of fields"
+-- want-catalog.yaml --
+persons:
+  someone:
+    properties:
+      name:
+        definition:
+            label: Name
+            value_type: string
+        values:
+          - value: StringValue{"Someone"}
