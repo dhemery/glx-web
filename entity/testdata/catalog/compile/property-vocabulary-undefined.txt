@@ -2,10 +2,20 @@ persons\[someone\].Properties.some_custom_property.Value: unknown value type "ra
 -- test.glx --
 person_properties:
   some_custom_property:
-    label: "Costom Property"
+    label: "Custom Property"
     value_type: rabbit
 persons:
   someone:
     properties:
       some_custom_property: 42
-
+-- want-catalog.yaml --
+persons:
+    someone:
+        properties:
+            # TODO(dale): Probably better to drop the property.
+            some_custom_property:
+                definition:
+                    label: Custom Property
+                    value_type: rabbit
+                values:
+                -   value: StringValue{"42"}
