@@ -7,3 +7,15 @@ persons:
         value: Someone
         # date requires a string.
         date: [array, instead, of, string]
+-- want-catalog.yaml --
+persons:
+    someone:
+        properties:
+            name:
+                definition:
+                    label: Name
+                    value_type: string
+                values:
+                -   value: Someone
+                    # TODO(dale): Probably better to drop the date if glxdate.Parse returns error
+                    date: "[array instead of string]"
