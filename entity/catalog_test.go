@@ -167,6 +167,7 @@ var catalogMarshalOptions = json.JoinOptions(
 	json.WithMarshalers(
 		json.JoinMarshalers(
 			// Entities
+			json.MarshalToFunc(marshalCitation),
 			json.MarshalToFunc(marshalPerson),
 			json.MarshalToFunc(marshalPlace),
 
@@ -186,6 +187,15 @@ var catalogMarshalOptions = json.JoinOptions(
 
 func marshalBoolValue(out *jsontext.Encoder, in entity.BoolValue) error {
 	return out.WriteToken(jsontext.String(fmt.Sprintf("BoolValue{%t}", in)))
+}
+
+func marshalCitation(out *jsontext.Encoder, in *entity.Citation) error {
+	v := struct {
+		Properties map[string]entity.Property `json:"properties"`
+	}{
+		Properties: in.Properties,
+	}
+	return json.MarshalEncode(out, &v)
 }
 
 func marshalDate(out *jsontext.Encoder, in glxdate.Date) error {

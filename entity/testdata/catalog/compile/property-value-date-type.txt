@@ -5,3 +5,14 @@ citations:
     properties:
       # accessed is a date-valued property, and so requires a string.
       accessed: 3
+-- want-catalog.yaml --
+citations:
+    some-citation:
+        properties:
+            accessed:
+                definition:
+                    label: Accessed Date
+                    value_type: date
+                values:
+                # TODO(spec): Probably better to drop the date if glxdate.Parse returns error
+                -   value: "3"
