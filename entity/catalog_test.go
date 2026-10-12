@@ -184,21 +184,21 @@ var catalogMarshalOptions = json.JoinOptions(
 	),
 )
 
-func marshalBoolValue(out *jsontext.Encoder, b entity.BoolValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("BoolValue{%t}", b)))
+func marshalBoolValue(out *jsontext.Encoder, in entity.BoolValue) error {
+	return out.WriteToken(jsontext.String(fmt.Sprintf("BoolValue{%t}", in)))
 }
 
-func marshalDate(out *jsontext.Encoder, d glxdate.Date) error {
-	return out.WriteToken(jsontext.String(d.Raw()))
+func marshalDate(out *jsontext.Encoder, in glxdate.Date) error {
+	return out.WriteToken(jsontext.String(in.Raw()))
 }
 
-func marshalFieldDefinition(out *jsontext.Encoder, d *glx.FieldDefinition) error {
+func marshalFieldDefinition(out *jsontext.Encoder, in *glx.FieldDefinition) error {
 	v := struct {
 		Label     string `json:"label"`
 		ValueType string `json:"value_type"`
 	}{
-		Label:     d.Label,
-		ValueType: d.ValueType,
+		Label:     in.Label,
+		ValueType: in.ValueType,
 	}
 	return json.MarshalEncode(out, &v)
 }
@@ -206,8 +206,8 @@ func marshalFieldDefinition(out *jsontext.Encoder, d *glx.FieldDefinition) error
 // Marshal IntValue as a formatted string instead of a number. Using string
 // prevents json.Unmarshal from unmarshaling the value as float64. The special
 // format allows Diff to match the IntValue type as well as the value.
-func marshalIntValue(out *jsontext.Encoder, v entity.IntValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue(%d)", v)))
+func marshalIntValue(out *jsontext.Encoder, in entity.IntValue) error {
+	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue(%d)", in)))
 }
 
 func marshalPerson(out *jsontext.Encoder, in *entity.Person) error {
@@ -231,17 +231,17 @@ func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
 	return json.MarshalEncode(out, &v)
 }
 
-func marshalPropertyDefinition(out *jsontext.Encoder, d *glx.PropertyDefinition) error {
+func marshalPropertyDefinition(out *jsontext.Encoder, in *glx.PropertyDefinition) error {
 	v := struct {
 		Label          string `json:"label"`
 		ValueType      string `json:"value_type"`
 		ReferenceType  string `json:"reference_type"`
 		VocabularyType string `json:"vocabulary_type"`
 	}{
-		Label:          d.Label,
-		ValueType:      d.ValueType,
-		ReferenceType:  d.ReferenceType,
-		VocabularyType: d.VocabularyType,
+		Label:          in.Label,
+		ValueType:      in.ValueType,
+		ReferenceType:  in.ReferenceType,
+		VocabularyType: in.VocabularyType,
 	}
 	return json.MarshalEncode(out, &v)
 }
