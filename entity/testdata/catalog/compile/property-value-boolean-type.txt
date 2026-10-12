@@ -5,3 +5,13 @@ persons:
     properties:
       # living is a boolean property.
       living: "not a bool"
+-- want-catalog.yaml --
+persons:
+  someone:
+    properties:
+      living:
+        definition:
+          label: Living
+          value_type: boolean
+        values:
+          - value: BoolValue{true}
