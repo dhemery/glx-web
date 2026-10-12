@@ -162,17 +162,69 @@ var catalogMarshalOptions = json.JoinOptions(
 	json.OmitZeroStructFields(true),
 	json.WithMarshalers(
 		json.JoinMarshalers(
+			// Entities
+			json.MarshalToFunc(marshalPerson),
+			json.MarshalToFunc(marshalPlace),
+
+			// Primitive Values
+			json.MarshalToFunc(marshalBoolValue),
 			json.MarshalToFunc(marshalDate),
-			json.MarshalToFunc(marshalPropertyDefinition),
-			json.MarshalToFunc(marshalFieldDefinition),
-			json.MarshalToFunc(marshalVocabularyEntry),
 			json.MarshalToFunc(marshalIntValue),
+			json.MarshalToFunc(marshalStringValue),
+
+			// GLX types
+			json.MarshalToFunc(marshalFieldDefinition),
+			json.MarshalToFunc(marshalPropertyDefinition),
+			json.MarshalToFunc(marshalVocabularyEntry),
 		),
 	),
 )
 
+func marshalBoolValue(out *jsontext.Encoder, b entity.BoolValue) error {
+	return out.WriteToken(jsontext.String(fmt.Sprintf("BoolValue{%t}", b)))
+}
+
 func marshalDate(out *jsontext.Encoder, d glxdate.Date) error {
 	return out.WriteToken(jsontext.String(d.Raw()))
+}
+
+func marshalFieldDefinition(out *jsontext.Encoder, d *glx.FieldDefinition) error {
+	v := struct {
+		Label     string `json:"label"`
+		ValueType string `json:"value_type"`
+	}{
+		Label:     d.Label,
+		ValueType: d.ValueType,
+	}
+	return json.MarshalEncode(out, &v)
+}
+
+// Marshal IntValue as a formatted string instead of a number. Using string
+// prevents json.Unmarshal from unmarshaling the value as float64. The special
+// format allows Diff to match the IntValue type as well as the value.
+func marshalIntValue(out *jsontext.Encoder, v entity.IntValue) error {
+	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue(%d)", v)))
+}
+
+func marshalPerson(out *jsontext.Encoder, in *entity.Person) error {
+	v := struct {
+		Properties map[string]entity.Property `json:"properties"`
+	}{
+		Properties: in.Properties,
+	}
+	return json.MarshalEncode(out, &v)
+}
+
+func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
+	v := struct {
+		Parent     *entity.Place              `json:"parent"`
+		Properties map[string]entity.Property `json:"properties"`
+		Type       entity.VocabularyValue     `json:"type"`
+	}{
+		Properties: in.Properties,
+		Type:       in.Type,
+	}
+	return json.MarshalEncode(out, &v)
 }
 
 func marshalPropertyDefinition(out *jsontext.Encoder, d *glx.PropertyDefinition) error {
@@ -190,25 +242,16 @@ func marshalPropertyDefinition(out *jsontext.Encoder, d *glx.PropertyDefinition)
 	return json.MarshalEncode(out, &v)
 }
 
-func marshalFieldDefinition(out *jsontext.Encoder, d *glx.FieldDefinition) error {
+func marshalStringValue(out *jsontext.Encoder, in entity.StringValue) error {
+	return out.WriteToken(jsontext.String(fmt.Sprintf("StringValue{%q}", in)))
+}
+
+func marshalVocabularyEntry(out *jsontext.Encoder, in *glx.VocabularyEntry) error {
 	v := struct {
-		Label     string `json:"label"`
-		ValueType string `json:"value_type"`
+		Label string `json:"label"`
 	}{
-		Label:     d.Label,
-		ValueType: d.ValueType,
+		Label: in.Label,
 	}
+
 	return json.MarshalEncode(out, &v)
-}
-
-func marshalVocabularyEntry(out *jsontext.Encoder, e *glx.VocabularyEntry) error {
-	return out.WriteToken(jsontext.String(e.Label))
-
-}
-
-// Marshal IntValue as a formatted string instead of a number. Using string
-// prevents json.Unmarshal from unmarshaling the value as float64. The special
-// format allows Diff to match the IntValue type as well as the value.
-func marshalIntValue(out *jsontext.Encoder, v entity.IntValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue(%d)", v)))
 }

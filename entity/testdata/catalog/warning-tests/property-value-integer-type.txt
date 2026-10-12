@@ -11,7 +11,8 @@ places:
 places:
   someplace:
     type:
-      definition: County
+      definition:
+        label: County
       value: county
     properties:
       population:

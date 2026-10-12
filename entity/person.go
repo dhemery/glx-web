@@ -6,17 +6,17 @@ import (
 
 // Person represents a GLX person entity.
 type Person struct {
-	entity      `json:"-"`
-	*glx.Person `json:"-"`
+	entity
+	*glx.Person
 
-	Properties map[string]Property `json:"properties"`
+	Properties map[string]Property
 
 	// Assertions about this person.
-	Assertions AssertionList `json:"-"`
+	Assertions AssertionList
 	// Events this person participated in.
-	Events EventList `json:"-"`
+	Events EventList
 	// Relationships this person participated in.
-	Relationships RelationshipList `json:"-"`
+	Relationships RelationshipList
 }
 
 // DisplayName returns a display name extracted from p's properties.

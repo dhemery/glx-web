@@ -5,20 +5,20 @@ import (
 )
 
 type Place struct {
-	entity     `json:"-"`
-	*glx.Place `json:"-"`
+	entity
+	*glx.Place
 
-	Parent     *Place              `json:"parent"`
-	Properties map[string]Property `json:"properties"`
-	Type       VocabularyValue     `json:"type"`
+	Parent     *Place
+	Properties map[string]Property
+	Type       VocabularyValue
 
 	// Assertions about this place.
-	Assertions AssertionList `json:"-"`
+	Assertions AssertionList
 	// Places that identify this place as their parent.
-	ChildPlaces PlaceList `json:"-"`
+	ChildPlaces PlaceList
 	// Events identified as happening specifically in this place. This does
 	// not include events in the "child" places of this place.
-	Events EventList `json:"-"`
+	Events EventList
 }
 
 // FullName returns p's Name followed by the FullName of its parent Place, if

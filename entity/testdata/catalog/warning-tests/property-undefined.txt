@@ -13,4 +13,4 @@ persons:
           label: monkey
           value_type: string
         values:
-          - value: "undefined property"
+          - value: StringValue{"undefined property"}
