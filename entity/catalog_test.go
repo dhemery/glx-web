@@ -19,15 +19,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// TestNewCatalogWarnings tests that [entity.NewCatalog] handles the
-// troublesome conditions not prevented by glx validation. Each test case is a
-// [txtar.Archive] read from testdata, contianing a comment, one or more GLX
-// files, and a want-catalog.yaml file. The GLX files are looaded into a
-// [glx.GLXFile] to pass to NewCatalog. The comment is a regexp pattern that
-// the output written by NewCatalog must match. The want-catalog.yaml file is a
-// YAML representation of the desired catalog structure.
-func TestNewCatalogWarnings(t *testing.T) {
-	for name, tc := range textArchives(t, "testdata/catalog/warning-tests/*") {
+// TestCatalogCompile tests how [entity.NewCatalog] compiles GLX archives. Each
+// test case is a [txtar.Archive] read from testdata, contianing a comment, one
+// or more GLX files, and a want-catalog.yaml file. The GLX files are looaded
+// into a [glx.GLXFile] to pass to NewCatalog. The comment is a regexp pattern
+// that the output written by NewCatalog must match. The want-catalog.yaml file
+// is a YAML representation of the desired catalog structure. This YAML
+// representation is simplified to omit certain details that are not needed to
+// varify catalog structure.
+func TestCatalogCompile(t *testing.T) {
+	for name, tc := range textArchives(t, "testdata/catalog/compile/*") {
 		t.Run(filepath.Base(name), func(t *testing.T) {
 			fsys, err := txtar.FS(tc)
 			if err != nil {
@@ -47,7 +48,8 @@ func TestNewCatalogWarnings(t *testing.T) {
 			}
 
 			// Marshal and unmarshal the catalog to convert it to a
-			// map[string]any that can be compared to wantCatalog.
+			// map[string]any that can be compared to the structure
+			// represented by want-catalog.yaml.
 			gotCatalog := asObject(t, cat, catalogMarshalOptions)
 			wantCatalog := unmarshalYAML(t, fsys, "want-catalog.yaml")
 
@@ -58,11 +60,11 @@ func TestNewCatalogWarnings(t *testing.T) {
 	}
 }
 
-// Convert in to an object by marshaling and unmarshaling. We're using JSON
-// because it gives more control over marshaling.
-func asObject(t *testing.T, in any, marshalOpts json.Options) any {
+// Convert in to an object by marshaling and unmarshaling. We're using instead
+// of YAML because JSOM gives more control over marshaling.
+func asObject(t *testing.T, in any, opts json.Options) any {
 	t.Helper()
-	j, err := json.Marshal(in, marshalOpts)
+	j, err := json.Marshal(in, opts)
 	if err != nil {
 		t.Fatal("marshaling:", err)
 	}
@@ -153,9 +155,11 @@ func textArchives(t *testing.T, pattern string) map[string]*txtar.Archive {
 	return tests
 }
 
-// JSON marshal options to reduce the JSON to only the details we want to
-// compare. Certain details of GLX vocabularies (e.g. Description) are verbose
-// and are not useful for validating the results of NewCatalog.
+// JSON marshal options to reduce the JSON representation of the catalog to
+// only the details we want to compare. The resulting HSON omits each entity's
+// back-references and inner GLX entity. It also omits details of GLX
+// vocabularies (e.g. Description) that are useful for validating catalog
+// structure.
 var catalogMarshalOptions = json.JoinOptions(
 	json.FormatNilMapAsNull(true),
 	json.FormatNilSliceAsNull(true),
