@@ -14,6 +14,6 @@ persons:
           label: Residence
           reference_type: places
         values:
-            # TODO(errors): This is the wrong thing to do. Better to drop the
+            # TODO(spec): This is the wrong thing to do. Better to drop the
             # value and consequently the property.
           - value: StringValue{"true"}

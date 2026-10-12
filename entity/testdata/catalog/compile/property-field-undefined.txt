@@ -18,7 +18,7 @@ persons:
                 values:
                 -   value: StringValue{"Someone"}
                     fields:
-                        # TODO(dale): Probably better to drop the undefined field.
+                        # TODO(spec): Probably better to drop the undefined field.
                         monkey:
                             definition:
                                 label: monkey

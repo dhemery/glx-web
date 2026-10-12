@@ -12,7 +12,7 @@ persons:
 persons:
     someone:
         properties:
-            # TODO(dale): Probably better to drop the property.
+            # TODO(spec): Probably better to drop the property.
             some_custom_property:
                 definition:
                     label: Custom Property

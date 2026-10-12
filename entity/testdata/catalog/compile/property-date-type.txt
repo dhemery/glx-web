@@ -17,5 +17,5 @@ persons:
                     value_type: string
                 values:
                 -   value: StringValue{"Someone"}
-                    # TODO(dale): Probably better to drop the date if glxdate.Parse returns error
+                    # TODO(spec): Probably better to drop the date if glxdate.Parse returns error
                     date: "[array instead of string]"
