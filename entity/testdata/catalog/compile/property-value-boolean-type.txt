@@ -1,20 +1,20 @@
+If the raw value for a boolean-valued property is not a boolean,
+warn and discard the value.
+
+If the invalid raw is the only value for the property, as in this test,
+discard the property.
+
 -- test.glx --
 persons:
-  someone:
-    properties:
-      # living is a boolean property.
-      living: "not a bool"
+    someone:
+        properties:
+            # living is a boolean property.
+            living: "not a bool"
 
 -- want-error --
-persons\[someone\].Properties.living.Value: cannot parse.*as boolean: using true
+persons\[someone\].Properties.living.Value: cannot parse string as boolean
 
 -- want-catalog.yaml --
 persons:
-  someone:
-    properties:
-      living:
-        definition:
-          label: Living
-          value_type: boolean
-        values:
-          - value: BoolValue{true}
+    someone:
+        properties: {}

@@ -18,8 +18,9 @@ places\[someplace\].Properties.population.Value: cannot parse string as integer
 
 -- want-catalog.yaml --
 places:
-  someplace:
-    type:
-      definition:
-        label: County
-      value: county
+    someplace:
+        type:
+            definition:
+                label: County
+            value: county
+        properties: {}

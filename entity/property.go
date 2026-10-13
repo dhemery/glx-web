@@ -66,6 +66,7 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 			pctx.Warnf("unknown property: using synthesized string property definition with label %q",
 				def.Label)
 		}
+
 		property := parseProperty(pctx, rawProperty, def)
 		if len(property.Values) > 0 {
 			properties[name] = property

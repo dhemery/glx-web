@@ -38,9 +38,8 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 	case "boolean":
 		b, ok := raw.(bool)
 		if !ok {
-			// Use true to avoid setting a Person's "living" property to false.
-			b = true
-			ctx.Warnf("cannot parse %T as %s: using true", raw, valueType)
+			ctx.Warn((&ErrCannotParse{"boolean", raw}).Error())
+			return nil
 		}
 		return BoolValue(b)
 	case "date":

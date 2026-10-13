@@ -282,7 +282,7 @@ func marshalPerson(out *jsontext.Encoder, in *entity.Person) error {
 func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
 	v := struct {
 		Parent     *entity.Place              `json:"parent"`
-		Properties map[string]entity.Property `json:"properties,omitempty"`
+		Properties map[string]entity.Property `json:"properties"`
 		Type       entity.VocabularyValue     `json:"type"`
 	}{
 		Properties: in.Properties,
