@@ -1,20 +1,14 @@
 -- test.glx --
 persons:
-  someone:
-    properties:
-      # name is a string-valued property.
-      name: 3
+    someone:
+        properties:
+            # name is a string-valued property.
+            name: 3
 
 -- want-error --
-persons\[someone\].Properties.name.Value: cannot parse.*as string: using string value.*
+persons\[someone\].Properties.name.Value: cannot parse.*as string
 
 -- want-catalog.yaml --
 persons:
-  someone:
-    properties:
-      name:
-        definition:
-          label: Name
-          value_type: string
-        values:
-          - value: StringValue{"3"}
+    someone:
+        properties: {}
