@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"github.com/dhemery/glx-web/entity"
 	"github.com/dhemery/glx-web/internal/load"
 	"github.com/dhemery/glx-web/internal/render"
+	"github.com/genealogix/glx/go-glx"
 	"github.com/spf13/cobra"
 )
 
@@ -91,6 +93,11 @@ func build() error {
 
 	templates, err := load.Templates(absTemplateDir)
 	if err != nil {
+		if validationError, ok := errors.AsType[*glx.StructuredValidationError](err); ok {
+			for _, e := range validationError.Errors {
+				fmt.Fprintln(os.Stderr, e)
+			}
+		}
 		return err
 	}
 

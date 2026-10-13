@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json/jsontext"
 	"encoding/json/v2"
+	"errors"
 	"fmt"
 	"io/fs"
 	"maps"
@@ -120,6 +121,11 @@ func glxFile(t *testing.T, fsys fs.FS) *glx.GLXFile {
 	serializer := glx.NewSerializer(nil)
 	glxfile, dups, err := serializer.DeserializeMultiFileFromMap(files)
 	if err != nil {
+		if validationError, ok := errors.AsType[*glx.StructuredValidationError](err); ok {
+			for _, e := range validationError.Errors {
+				t.Error(e)
+			}
+		}
 		t.Fatal("deserializing GLX archive:", err)
 	}
 
