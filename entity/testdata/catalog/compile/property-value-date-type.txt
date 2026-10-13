@@ -1,21 +1,20 @@
+If the raw value for a date-valued property is not a string,
+warn and discard the property value.
+
+If the invalid raw is the only value for the property, as in this test,
+discard the property.
+
 -- test.glx --
 citations:
   some-citation:
     properties:
-      # accessed is a date-valued property, and so requires a string.
+      # accessed is a date-valued property and 3 is not a string.
       accessed: 3
 
 -- want-error --
-citations\[some-citation\].Properties.accessed.Value: cannot parse.*parsing string value.*
+citations\[some-citation\].Properties.accessed.Value: cannot parse.*
 
 -- want-catalog.yaml --
 citations:
-    some-citation:
-        properties:
-            accessed:
-                definition:
-                    label: Accessed Date
-                    value_type: date
-                values:
-                # TODO(spec): Probably better to drop the date if glxdate.Parse returns error
-                -   value: "3"
+    # empty object because the only property was discarded
+    some-citation: {}

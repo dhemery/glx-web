@@ -1,3 +1,6 @@
+If the raw value for a temporal property value is not a string,
+warn and discard the date.
+
 -- cannot-parse-date.glx --
 persons:
   someone:
@@ -8,7 +11,7 @@ persons:
         date: [array, instead, of, string]
 
 -- want-error --
-persons\[someone\].Properties.name.Date: cannot parse .*as date: parsing string value.*
+persons\[someone\].Properties.name.Date: cannot parse .*as date
 
 -- want-catalog.yaml --
 persons:
@@ -20,5 +23,3 @@ persons:
                     value_type: string
                 values:
                 -   value: StringValue{"Someone"}
-                    # TODO(spec): Probably better to drop the date if glxdate.Parse returns error
-                    date: "[array instead of string]"

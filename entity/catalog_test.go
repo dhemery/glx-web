@@ -38,18 +38,14 @@ func TestCatalogCompile(t *testing.T) {
 
 			glxfile := glxFile(t, fsys)
 
-			output := &bytes.Buffer{}
-			cat := entity.NewCatalog(glxfile, output)
+			errout := &bytes.Buffer{}
+			cat := entity.NewCatalog(glxfile, errout)
 
-			gotOutput := output.Bytes()
+			gotErrOut := errout.Bytes()
 
-			wantErrorPattern, err := fs.ReadFile(fsys, "want-error")
-			if err != nil {
-				t.Fatal(err)
-			}
-			wantOutput := regexp.MustCompile(string(bytes.TrimSpace(wantErrorPattern)))
-			if !wantOutput.Match(gotOutput) {
-				t.Errorf("\n error output: %s\nwant match of: %s", gotOutput, tc.Comment)
+			wantError := readWantError(t, fsys)
+			if !wantError.Match(gotErrOut) {
+				t.Errorf("\n error output: %s\nwant match of: %s", gotErrOut, wantError)
 			}
 
 			// Marshal and unmarshal the catalog to convert it to a
@@ -63,6 +59,18 @@ func TestCatalogCompile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func readWantError(t *testing.T, fsys fs.FS) *regexp.Regexp {
+	text, err := fs.ReadFile(fsys, "want-error")
+	if err != nil {
+		t.Fatal(err)
+	}
+	re, err := regexp.Compile(string(bytes.TrimSpace(text)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return re
 }
 
 // Convert in to an object by marshaling and unmarshaling. We're using instead

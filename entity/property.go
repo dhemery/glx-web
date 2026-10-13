@@ -66,7 +66,10 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 			pctx.Warnf("unknown property: using synthesized string property definition with label %q",
 				def.Label)
 		}
-		properties[name] = parseProperty(pctx, rawProperty, def)
+		property := parseProperty(pctx, rawProperty, def)
+		if len(property.Values) > 0 {
+			properties[name] = property
+		}
 	}
 
 	return properties
@@ -89,16 +92,29 @@ func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) P
 		for i, rawPropertyValue := range v {
 			pvictx := ctx.Sub(strconv.Itoa(i))
 			propertyValue := parsePropertyValue(pvictx, asPropertyMap(rawPropertyValue), def)
+			if propertyValue.Value == nil {
+				continue
+			}
 			property.Values = append(property.Values, propertyValue)
 		}
 	case map[string]any:
 		// Assume the map is a property value map and parse it.
-		property.Values = append(property.Values, parsePropertyValue(ctx, v, def))
+		pv := parsePropertyValue(ctx, v, def)
+		if pv.Value == nil {
+			property.Definition = nil
+			return property
+		}
+		property.Values = append(property.Values, pv)
 	default:
 		// Assume raw property is a scalar property value. Wrap it in a
 		// property value map and parse it.
 		rawValueMap := map[string]any{"value": v}
-		property.Values = append(property.Values, parsePropertyValue(ctx, rawValueMap, def))
+		pv := parsePropertyValue(ctx, rawValueMap, def)
+		if pv.Value == nil {
+			property.Definition = nil
+			return property
+		}
+		property.Values = append(property.Values, pv)
 	}
 
 	return property
@@ -127,7 +143,11 @@ func parsePropertyValueDate(ctx *context, raw any) glxdate.Date {
 		return glxdate.Date{}
 	}
 
-	return parseDateRaw(ctx, raw)
+	d, err := parseDateRaw(raw)
+	if err != nil {
+		ctx.Warn(err.Error())
+	}
+	return d
 }
 
 func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.FieldDefinition) map[string]PropertyField {
