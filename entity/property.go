@@ -172,7 +172,11 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 			fctx.Warnf("ignoring unknown field")
 			continue
 		}
-		value := parsePrimitiveValue(fctx, rawFieldValue, def.ValueType)
+		value, err := parsePrimitiveValue(rawFieldValue, def.ValueType)
+		if err != nil {
+			fctx.Warn(err.Error())
+			continue
+		}
 		propertyFields[name] = PropertyField{Definition: def, Value: value}
 	}
 
@@ -183,7 +187,12 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 	// TODO(errors): Handle raw == nil, which can happen if a property value has no "value" key.
 	switch {
 	case def.ValueType != "":
-		return parsePrimitiveValue(ctx, raw, def.ValueType)
+		value, err := parsePrimitiveValue(raw, def.ValueType)
+		if err != nil {
+			ctx.Warn(err.Error())
+			return nil
+		}
+		return value
 	case def.ReferenceType != "":
 		id, ok := raw.(string)
 		if !ok {

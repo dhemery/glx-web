@@ -33,40 +33,31 @@ func (s StringValue) String() string {
 	return string(s)
 }
 
-func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
+func parsePrimitiveValue(raw any, valueType string) (Stringer, error) {
 	switch valueType {
 	case "boolean":
 		b, ok := raw.(bool)
 		if !ok {
-			ctx.Warn((&ErrCannotParse{"boolean", raw}).Error())
-			return nil
+			return nil, &ErrCannotParse{"boolean", raw}
 		}
-		return BoolValue(b)
+		return BoolValue(b), nil
 	case "date":
-		d, err := parseDateRaw(raw)
-		if err != nil {
-			ctx.Warn(err.Error())
-			return nil
-		}
-		return d
+		return parseDateRaw(raw)
 	case "integer":
 		i, ok := raw.(int)
 		if !ok {
-			ctx.Warn((&ErrCannotParse{"integer", raw}).Error())
-			return nil
+			return nil, &ErrCannotParse{"integer", raw}
 		}
-		return IntValue(i)
+		return IntValue(i), nil
 	case "string", "":
 		s, ok := raw.(string)
 		if !ok {
-			ctx.Warn((&ErrCannotParse{"string", raw}).Error())
-			return nil
+			return nil, &ErrCannotParse{"string", raw}
 		}
-		return StringValue(s)
+		return StringValue(s), nil
 	}
 
-	ctx.Warn((&ErrUnknown{"value_type", valueType}).Error())
-	return nil
+	return nil, &ErrUnknown{"value_type", valueType}
 }
 
 type ErrCannotParse struct {
