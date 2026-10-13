@@ -64,8 +64,8 @@ func (r *Relationship) compile(ctx *context) {
 
 	inner := r.Relationship
 	r.EndEvent = rctx.Catalog.EventsByID[inner.EndEvent]
-	r.Participants = newParticipants(rctx.Sub("Participants"), inner.Participants, rctx.GLX.RelationshipProperties)
-	r.Properties = parseProperties(rctx.Sub("Properties"), inner.Properties, rctx.GLX.RelationshipProperties)
+	r.Participants = parseParticipants(rctx, inner.Participants, rctx.GLX.RelationshipProperties)
+	r.Properties = parseProperties(rctx, inner.Properties, rctx.GLX.RelationshipProperties)
 	r.StartEvent = rctx.Catalog.EventsByID[inner.StartEvent]
 	// Ignore error. GLX validation guarantees that the type is present and valid.
 	r.Type, _ = newVocabularyValue(inner.Type, rctx.GLX.RelationshipTypes)

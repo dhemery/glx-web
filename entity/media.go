@@ -52,7 +52,7 @@ func (m *Media) compile(ctx *context) {
 	inner := m.Media
 	// Ignore error. GLX validation guarantees that the type, if any, is valid.
 	m.Type, _ = newVocabularyValue(inner.Type, mctx.GLX.MediaTypes)
-	m.Properties = parseProperties(mctx.Sub("Properties"), inner.Properties, mctx.GLX.MediaProperties)
+	m.Properties = parseProperties(mctx, inner.Properties, mctx.GLX.MediaProperties)
 	m.Source = mctx.Catalog.SourcesByID[inner.Source]
 
 	if m.Source != nil {

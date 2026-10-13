@@ -55,7 +55,7 @@ func (c *Citation) compile(ctx *context) {
 
 	inner := c.Citation
 	c.Media = cctx.Catalog.media(inner.Media)
-	c.Properties = parseProperties(cctx.Sub("Properties"), inner.Properties, cctx.GLX.CitationProperties)
+	c.Properties = parseProperties(cctx, inner.Properties, cctx.GLX.CitationProperties)
 	c.Repository = cctx.Catalog.RepositoriesByID[c.RepositoryID]
 	c.Source = cctx.Catalog.SourcesByID[c.SourceID]
 

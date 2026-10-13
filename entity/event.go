@@ -46,9 +46,9 @@ func (e *Event) compile(ctx *context) {
 	ectx := ctx.ForEntity(e.entity)
 
 	inner := e.Event
-	e.Participants = newParticipants(ectx.Sub("Participants"), inner.Participants, ectx.GLX.EventProperties)
+	e.Participants = parseParticipants(ectx, inner.Participants, ectx.GLX.EventProperties)
 	e.Place = ectx.Catalog.PlacesByID[e.PlaceID]
-	e.Properties = parseProperties(ectx.Sub("Poperties"), inner.Properties, ectx.GLX.EventProperties)
+	e.Properties = parseProperties(ectx, inner.Properties, ectx.GLX.EventProperties)
 	// Ignoring error. GLX validation guarantees that the type is present and valid.
 	e.Type, _ = newVocabularyValue(inner.Type, ectx.GLX.EventTypes)
 

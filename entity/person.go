@@ -70,7 +70,7 @@ func (p *Person) compile(ctx *context) {
 	pctx := ctx.ForEntity(p.entity)
 
 	inner := p.Person
-	p.Properties = parseProperties(pctx.Sub("Properties"), inner.Properties, pctx.GLX.PersonProperties)
+	p.Properties = parseProperties(pctx, inner.Properties, pctx.GLX.PersonProperties)
 }
 
 func (p *Person) addAssertion(a *Assertion) {

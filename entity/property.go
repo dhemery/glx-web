@@ -56,10 +56,11 @@ func (f PropertyField) String() string {
 }
 
 func parseProperties(ctx *context, rawProperties map[string]any, defs map[string]*glx.PropertyDefinition) map[string]Property {
-	properties := make(map[string]Property)
+	ppctx := ctx.Sub("Properties")
 
+	properties := make(map[string]Property)
 	for name, rawProperty := range rawProperties {
-		pctx := ctx.Sub(name)
+		pctx := ppctx.Sub(name)
 		def := defs[name]
 		if def == nil {
 			def = synthesizePropertyDefinition(name)

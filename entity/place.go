@@ -55,7 +55,7 @@ func (p *Place) compile(ctx *context) {
 
 	inner := p.Place
 	p.Parent = pctx.Catalog.PlacesByID[p.ParentID]
-	p.Properties = parseProperties(pctx.Sub("Properties"), inner.Properties, pctx.GLX.PlaceProperties)
+	p.Properties = parseProperties(pctx, inner.Properties, pctx.GLX.PlaceProperties)
 	// Ignore error. GLX validation guarantees that the type, if any, is valid.
 	p.Type, _ = newVocabularyValue(inner.Type, pctx.GLX.PlaceTypes)
 

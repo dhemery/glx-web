@@ -29,19 +29,21 @@ func (l ParticipantList) Sort() ParticipantList {
 	return sortValues(l)
 }
 
-func newParticipants(ctx *context, inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition) ParticipantList {
-	roleDefs := ctx.GLX.ParticipantRoles
+func parseParticipants(ctx *context, inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition) ParticipantList {
+	ppctx := ctx.Sub("Participants")
+
+	roleDefs := ppctx.GLX.ParticipantRoles
 	var participants ParticipantList
 
 	for i, p := range inner {
-		pctx := ctx.Sub(strconv.Itoa(i))
-		participants = append(participants, newParticipant(pctx, &p, roleDefs, propertyDefs))
+		pctx := ppctx.Sub(strconv.Itoa(i))
+		participants = append(participants, parseParticipant(pctx, &p, roleDefs, propertyDefs))
 	}
 
 	return participants
 }
 
-func newParticipant(ctx *context, inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition) *Participant {
+func parseParticipant(ctx *context, inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition) *Participant {
 	if inner == nil {
 		return nil
 	}

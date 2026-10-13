@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/genealogix/glx/go-glx"

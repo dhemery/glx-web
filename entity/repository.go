@@ -45,7 +45,7 @@ func (r *Repository) compile(ctx *context) {
 
 	inner := r.Repository
 
-	r.Properties = parseProperties(rctx.Sub("Properties"), inner.Properties, rctx.GLX.RepositoryProperties)
+	r.Properties = parseProperties(rctx, inner.Properties, rctx.GLX.RepositoryProperties)
 	// Ignore error. GLX validation guarantees that the type, if any, is valid.
 	r.Type, _ = newVocabularyValue(inner.Type, rctx.GLX.RepositoryTypes)
 }
