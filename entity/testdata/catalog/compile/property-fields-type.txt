@@ -1,4 +1,3 @@
-persons\[someone\].Properties.name.Fields: cannot parse.*discarding all fields
 -- test.glx --
 persons:
   someone:
@@ -7,6 +6,10 @@ persons:
         value: Someone
         # fields requires map[string]any
         fields: "string instead of map of fields"
+
+-- want-error --
+persons\[someone\].Properties.name.Fields: cannot parse.*discarding all fields
+
 -- want-catalog.yaml --
 persons:
   someone:

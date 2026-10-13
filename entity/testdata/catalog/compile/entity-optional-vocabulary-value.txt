@@ -1,4 +1,3 @@
-^$
 -- test.glx --
 # Characterization test.
 events:
@@ -11,6 +10,10 @@ assertions:
         # TODO(dale): Is this okay? Maybe the assertion was written before the
         # property was added the event properties vocabulary.
         property: monkey
+
+-- want-error --
+^$
+
 -- want-catalog.yaml --
 assertions:
     test-assertion:

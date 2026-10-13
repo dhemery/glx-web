@@ -1,4 +1,3 @@
-places\[someplace\].Properties.population.Value: cannot parse.*as integer: using 0
 -- test.glx --
 places:
   someplace:
@@ -7,6 +6,10 @@ places:
     properties:
       # population is an integer property.
       population: "string instead of integer"
+
+-- want-error --
+places\[someplace\].Properties.population.Value: cannot parse.*as integer: using 0
+
 -- want-catalog.yaml --
 places:
   someplace:

@@ -1,10 +1,13 @@
-persons\[someone\].Properties.sex.Value: cannot parse.*vocabulary value: using string value.*
 -- test.glx --
 persons:
   someone:
     properties:
       # sex has a vocabulary type (sex_types) and so requires a string value.
       sex: false
+
+-- want-error --
+persons\[someone\].Properties.sex.Value: cannot parse.*vocabulary value: using string value.*
+
 -- want-catalog.yaml --
 persons:
     someone:

@@ -1,4 +1,3 @@
-persons\[someone\].Properties.name.Date: cannot parse .*as date: parsing string value.*
 -- cannot-parse-date.glx --
 persons:
   someone:
@@ -7,6 +6,10 @@ persons:
         value: Someone
         # date requires a string.
         date: [array, instead, of, string]
+
+-- want-error --
+persons\[someone\].Properties.name.Date: cannot parse .*as date: parsing string value.*
+
 -- want-catalog.yaml --
 persons:
     someone:

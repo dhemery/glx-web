@@ -1,4 +1,3 @@
-persons\[someone\].Properties.name.Fields.monkey: ignoring unknown field
 -- test.glx --
 persons:
   someone:
@@ -7,6 +6,10 @@ persons:
         value: Someone
         fields:
           monkey: "undefined field"
+
+-- want-error --
+persons\[someone\].Properties.name.Fields.monkey: ignoring unknown field
+
 -- want-catalog.yaml --
 persons:
     someone:

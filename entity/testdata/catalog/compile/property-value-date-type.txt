@@ -1,10 +1,13 @@
-citations\[some-citation\].Properties.accessed.Value: cannot parse.*parsing string value.*
 -- test.glx --
 citations:
   some-citation:
     properties:
       # accessed is a date-valued property, and so requires a string.
       accessed: 3
+
+-- want-error --
+citations\[some-citation\].Properties.accessed.Value: cannot parse.*parsing string value.*
+
 -- want-catalog.yaml --
 citations:
     some-citation:

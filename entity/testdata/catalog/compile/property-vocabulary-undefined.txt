@@ -1,4 +1,3 @@
-persons\[someone\].Properties.some_custom_property.Value: unknown value type "rabbit": using string value.*
 -- test.glx --
 person_properties:
   some_custom_property:
@@ -8,6 +7,10 @@ persons:
   someone:
     properties:
       some_custom_property: 42
+
+-- want-error --
+persons\[someone\].Properties.some_custom_property.Value: unknown value type "rabbit": using string value.*
+
 -- want-catalog.yaml --
 persons:
     someone:

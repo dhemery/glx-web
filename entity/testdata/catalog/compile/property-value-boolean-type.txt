@@ -1,10 +1,13 @@
-persons\[someone\].Properties.living.Value: cannot parse.*as boolean: using true
 -- test.glx --
 persons:
   someone:
     properties:
       # living is a boolean property.
       living: "not a bool"
+
+-- want-error --
+persons\[someone\].Properties.living.Value: cannot parse.*as boolean: using true
+
 -- want-catalog.yaml --
 persons:
   someone:

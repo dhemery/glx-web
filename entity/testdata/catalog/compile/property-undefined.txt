@@ -1,9 +1,12 @@
-persons\[someone\].Properties.monkey: unknown property
 -- test.glx --
 persons:
   someone:
     properties:
       monkey: "undefined property"
+
+-- want-error --
+persons\[someone\].Properties.monkey: unknown property
+
 -- want-catalog.yaml --
 persons:
   someone:

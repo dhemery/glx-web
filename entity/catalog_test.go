@@ -43,7 +43,11 @@ func TestCatalogCompile(t *testing.T) {
 
 			gotOutput := output.Bytes()
 
-			wantOutput := regexp.MustCompile(string(bytes.TrimSpace(tc.Comment)))
+			wantErrorPattern, err := fs.ReadFile(fsys, "want-error")
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantOutput := regexp.MustCompile(string(bytes.TrimSpace(wantErrorPattern)))
 			if !wantOutput.Match(gotOutput) {
 				t.Errorf("\n error output: %s\nwant match of: %s", gotOutput, tc.Comment)
 			}

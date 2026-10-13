@@ -1,10 +1,13 @@
-persons\[someone\].Properties.name.Value: cannot parse.*as string: using string value.*
 -- test.glx --
 persons:
   someone:
     properties:
       # name is a string-valued property.
       name: 3
+
+-- want-error --
+persons\[someone\].Properties.name.Value: cannot parse.*as string: using string value.*
+
 -- want-catalog.yaml --
 persons:
   someone:
