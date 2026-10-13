@@ -240,7 +240,7 @@ func marshalEvent(out *jsontext.Encoder, in *entity.Event) error {
 		Date       glxdate.Date               `json:"date"`
 		Properties map[string]entity.Property `json:"properties,omitempty"`
 		Place      string                     `json:"place"`
-		Type       entity.VocabularyValue     `json:"type"`
+		Type       *entity.VocabularyValue    `json:"type,omitzero"`
 	}{
 		Date:       in.Date,
 		Properties: in.Properties,
@@ -283,7 +283,7 @@ func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
 	v := struct {
 		Parent     *entity.Place              `json:"parent"`
 		Properties map[string]entity.Property `json:"properties"`
-		Type       entity.VocabularyValue     `json:"type"`
+		Type       *entity.VocabularyValue    `json:"type,omitzero"`
 	}{
 		Properties: in.Properties,
 		Type:       in.Type,

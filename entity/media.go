@@ -13,7 +13,7 @@ type Media struct {
 	Properties map[string]Property
 	// The source documented by this media.
 	Source *Source
-	Type   VocabularyValue
+	Type   *VocabularyValue
 
 	// Assertions that directly cite this media as evidence. Assertions
 	// that reference this media only indirectly through citations or
@@ -50,7 +50,8 @@ func (m *Media) compile(ctx *context) {
 	mctx := ctx.ForEntity(m.entity)
 
 	inner := m.Media
-	m.Type = newVocabularyValue(mctx.Sub("Type"), inner.Type, mctx.GLX.MediaTypes)
+	// Ignore error. GLX validation guarantees that the type, if any, is valid.
+	m.Type, _ = newVocabularyValue(inner.Type, mctx.GLX.MediaTypes)
 	m.Properties = parseProperties(mctx.Sub("Properties"), inner.Properties, mctx.GLX.MediaProperties)
 	m.Source = mctx.Catalog.SourcesByID[inner.Source]
 

@@ -12,7 +12,7 @@ persons:
             some_custom_property: 42
 
 -- want-error --
-persons\[someone\].Properties.some_custom_property.Value: unknown value_type "rabbit"
+persons\[someone\].Properties.some_custom_property.Value: unknown value type "rabbit"
 
 -- want-catalog.yaml --
 persons:

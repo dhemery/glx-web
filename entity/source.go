@@ -13,7 +13,7 @@ type Source struct {
 	Media      []*Media
 	Properties map[string]Property
 	Repository *Repository
-	Type       VocabularyValue
+	Type       *VocabularyValue
 
 	// Assertions that directly cite this source as evidence. Assertions
 	// that cite this source only indirectly via citations or media are not
@@ -53,7 +53,8 @@ func (s *Source) compile(ctx *context) {
 	s.Media = sctx.Catalog.media(inner.Media)
 	s.Properties = parseProperties(sctx.Sub("Properties"), inner.Properties, sctx.GLX.SourceProperties)
 	s.Repository = sctx.Catalog.RepositoriesByID[s.RepositoryID]
-	s.Type = newVocabularyValue(sctx.Sub("Type"), inner.Type, sctx.GLX.SourceTypes)
+	// TODO(validation): Does GLX validation guarantee valid if present?
+	s.Type, _ = newVocabularyValue(inner.Type, sctx.GLX.SourceTypes)
 
 	for _, m := range s.Media {
 		m.addSource(s)

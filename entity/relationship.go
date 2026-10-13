@@ -14,7 +14,7 @@ type Relationship struct {
 	Participants ParticipantList
 	Properties   map[string]Property
 	StartEvent   *Event
-	Type         VocabularyValue
+	Type         *VocabularyValue
 
 	// Assertions about this relationship.
 	Assertions AssertionList
@@ -67,7 +67,8 @@ func (r *Relationship) compile(ctx *context) {
 	r.Participants = newParticipants(rctx.Sub("Participants"), inner.Participants, rctx.GLX.RelationshipProperties)
 	r.Properties = parseProperties(rctx.Sub("Properties"), inner.Properties, rctx.GLX.RelationshipProperties)
 	r.StartEvent = rctx.Catalog.EventsByID[inner.StartEvent]
-	r.Type = newVocabularyValue(rctx.Sub("Type"), inner.Type, rctx.GLX.RelationshipTypes)
+	// Ignore error. GLX validation guarantees that the type is present and valid.
+	r.Type, _ = newVocabularyValue(inner.Type, rctx.GLX.RelationshipTypes)
 
 	for _, p := range r.Participants {
 		p.Person.addRelationship(r)

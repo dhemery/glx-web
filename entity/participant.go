@@ -10,7 +10,7 @@ type Participant struct {
 	*glx.Participant
 	Person     *Person
 	Properties map[string]Property
-	Role       VocabularyValue
+	Role       *VocabularyValue
 }
 
 // String returns a description of p
@@ -45,10 +45,12 @@ func newParticipant(ctx *context, inner *glx.Participant, roleDefs map[string]*g
 	if inner == nil {
 		return nil
 	}
+	// TODO(validation): Does GLX validation guarantee a valid value?
+	role, _ := newVocabularyValue(inner.Role, roleDefs)
 	return &Participant{
 		Participant: inner,
 		Person:      ctx.Catalog.PersonsByID[inner.Person],
 		Properties:  parseProperties(ctx, inner.Properties, propertyDefs),
-		Role:        newVocabularyValue(ctx, inner.Role, roleDefs),
+		Role:        role,
 	}
 }

@@ -57,7 +57,7 @@ func parsePrimitiveValue(raw any, valueType string) (Stringer, error) {
 		return StringValue(s), nil
 	}
 
-	return nil, &ErrUnknown{"value_type", valueType}
+	return nil, &ErrUnknown{"value type", valueType}
 }
 
 type ErrCannotParse struct {
@@ -97,27 +97,18 @@ type VocabularyValue struct {
 	Value      string               `json:"value"`
 }
 
-// String returns v's label.
-func (v VocabularyValue) String() string {
+// String returns v's label, or "" if it is undefined.
+func (v *VocabularyValue) String() string {
+	if v == nil {
+		return ""
+	}
 	return v.Definition.Label
 }
 
-func synthesizeVocabularyEntry(term string) *glx.VocabularyEntry {
-	return &glx.VocabularyEntry{
-		Label:       term,
-		Description: "Vocabulary entry synthesized by glx-web",
-	}
-}
-
-// TODO(errors): What to do about an optional vocabulary value? A second method
-// that returns *VocabularyValue?
-func newVocabularyValue(ctx *context, term string, vocabulary map[string]*glx.VocabularyEntry) VocabularyValue {
+func newVocabularyValue(term string, vocabulary map[string]*glx.VocabularyEntry) (*VocabularyValue, error) {
 	def, ok := vocabulary[term]
 	if !ok {
-
-		def = synthesizeVocabularyEntry(term)
-		ctx.Warnf("unknown vocabulary term %q: subtituting synthesized vocabulary value with label %q",
-			term, def.Label)
+		return nil, &ErrUnknown{"vocabulary value", term}
 	}
-	return VocabularyValue{Value: term, Definition: def}
+	return &VocabularyValue{Value: term, Definition: def}, nil
 }

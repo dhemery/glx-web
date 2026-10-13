@@ -13,7 +13,7 @@ type Event struct {
 	Participants ParticipantList
 	Place        *Place
 	Properties   map[string]Property
-	Type         VocabularyValue
+	Type         *VocabularyValue
 
 	// Assertions about this event.
 	Assertions AssertionList
@@ -49,7 +49,8 @@ func (e *Event) compile(ctx *context) {
 	e.Participants = newParticipants(ectx.Sub("Participants"), inner.Participants, ectx.GLX.EventProperties)
 	e.Place = ectx.Catalog.PlacesByID[e.PlaceID]
 	e.Properties = parseProperties(ectx.Sub("Poperties"), inner.Properties, ectx.GLX.EventProperties)
-	e.Type = newVocabularyValue(ectx.Sub("Type"), inner.Type, ectx.GLX.EventTypes)
+	// Ignoring error. GLX validation guarantees that the type is present and valid.
+	e.Type, _ = newVocabularyValue(inner.Type, ectx.GLX.EventTypes)
 
 	for _, p := range e.Participants {
 		p.Person.addEvent(e)

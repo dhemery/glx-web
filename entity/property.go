@@ -210,7 +210,12 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 				raw, def.VocabularyType, s)
 			return StringValue(s)
 		}
-		return newVocabularyValue(ctx, term, vocabulary(ctx.GLX, def.VocabularyType))
+		vv, err := newVocabularyValue(term, vocabulary(ctx.GLX, def.VocabularyType))
+		if err != nil {
+			ctx.Warnf("%s: %s", def.VocabularyType, err)
+			return nil
+		}
+		return vv
 	default:
 		// GLX validation guarantees exactly one type field has a value.
 	}
