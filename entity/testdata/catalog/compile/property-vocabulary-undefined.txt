@@ -1,24 +1,20 @@
+If the value type for a custom property is invalid,
+discard the property.
+
 -- test.glx --
 person_properties:
-  some_custom_property:
-    label: "Custom Property"
-    value_type: rabbit
+    some_custom_property:
+        label: "Custom Property"
+        value_type: rabbit
 persons:
-  someone:
-    properties:
-      some_custom_property: 42
+    someone:
+        properties:
+            some_custom_property: 42
 
 -- want-error --
-persons\[someone\].Properties.some_custom_property.Value: unknown value type "rabbit": using string value.*
+persons\[someone\].Properties.some_custom_property.Value: unknown value_type "rabbit"
 
 -- want-catalog.yaml --
 persons:
     someone:
-        properties:
-            # TODO(spec): Probably better to drop the property.
-            some_custom_property:
-                definition:
-                    label: Custom Property
-                    value_type: rabbit
-                values:
-                -   value: StringValue{"42"}
+        properties: {}

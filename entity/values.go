@@ -65,9 +65,8 @@ func parsePrimitiveValue(ctx *context, raw any, valueType string) Stringer {
 		return StringValue(s)
 	}
 
-	s := fmt.Sprint(raw)
-	ctx.Warnf("unknown value type %q: using string value %q", valueType, s)
-	return StringValue(s)
+	ctx.Warn((&ErrUnknown{"value_type", valueType}).Error())
+	return nil
 }
 
 type ErrCannotParse struct {
@@ -77,6 +76,15 @@ type ErrCannotParse struct {
 
 func (e *ErrCannotParse) Error() string {
 	return fmt.Sprintf("cannot parse %T as %s", e.Got, e.Want)
+}
+
+type ErrUnknown struct {
+	Kind string
+	Name string
+}
+
+func (e *ErrUnknown) Error() string {
+	return fmt.Sprintf("unknown %s %q", e.Kind, e.Name)
 }
 
 func parseDateRaw(raw any) (glxdate.Date, error) {
