@@ -1,0 +1,24 @@
+^$
+-- test.glx --
+# Characterization test.
+events:
+    test-event:
+        type: birth
+assertions:
+    test-assertion:
+        subject:
+            event: test-event
+        # TODO(dale): Is this okay? Maybe the assertion was written before the
+        # property was added the event properties vocabulary.
+        property: monkey
+-- want-catalog.yaml --
+assertions:
+    test-assertion:
+        subject: test-event
+        property: monkey
+events:
+    test-event:
+        type:
+            definition:
+                label: Birth
+            value: birth

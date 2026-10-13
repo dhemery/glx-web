@@ -91,6 +91,7 @@ type subject interface {
 }
 
 type entityReference interface {
+	ID() string
 	PagePath() string
 	String() string
 }
