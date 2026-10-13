@@ -52,10 +52,28 @@ func (c *context) String() string {
 	return strings.Join(parts, ".")
 }
 
-func (c *context) Warn(warning string) {
+func (c *context) Warn(warning any) {
 	fmt.Fprintf(c.Output, "%s: %s\n", c, warning)
 }
 
 func (c *context) Warnf(format string, a ...any) {
 	c.Warn(fmt.Sprintf(format, a...))
+}
+
+type errParse struct {
+	want string // The expected type.
+	got  any    // The raw value.
+}
+
+func (e errParse) Error() string {
+	return fmt.Sprintf("cannot parse %T as %s", e.got, e.want)
+}
+
+type errUnknown struct {
+	kind string // The kind of unknown thing.
+	name string // The unknown name.
+}
+
+func (e errUnknown) Error() string {
+	return fmt.Sprintf("unknown %s %q", e.kind, e.name)
 }

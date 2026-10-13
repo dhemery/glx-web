@@ -38,7 +38,7 @@ func parsePrimitiveValue(raw any, valueType string) (Stringer, error) {
 	case "boolean":
 		b, ok := raw.(bool)
 		if !ok {
-			return nil, &ErrCannotParse{"boolean", raw}
+			return nil, errParse{"boolean", raw}
 		}
 		return BoolValue(b), nil
 	case "date":
@@ -46,42 +46,24 @@ func parsePrimitiveValue(raw any, valueType string) (Stringer, error) {
 	case "integer":
 		i, ok := raw.(int)
 		if !ok {
-			return nil, &ErrCannotParse{"integer", raw}
+			return nil, errParse{"integer", raw}
 		}
 		return IntValue(i), nil
 	case "string", "":
 		s, ok := raw.(string)
 		if !ok {
-			return nil, &ErrCannotParse{"string", raw}
+			return nil, errParse{"string", raw}
 		}
 		return StringValue(s), nil
 	}
 
-	return nil, &ErrUnknown{"value type", valueType}
-}
-
-type ErrCannotParse struct {
-	Want string
-	Got  any
-}
-
-func (e *ErrCannotParse) Error() string {
-	return fmt.Sprintf("cannot parse %T as %s", e.Got, e.Want)
-}
-
-type ErrUnknown struct {
-	Kind string
-	Name string
-}
-
-func (e *ErrUnknown) Error() string {
-	return fmt.Sprintf("unknown %s %q", e.Kind, e.Name)
+	return nil, errUnknown{"value type", valueType}
 }
 
 func parseDateRaw(raw any) (glxdate.Date, error) {
 	s, ok := raw.(string)
 	if !ok {
-		return glxdate.Date{}, &ErrCannotParse{"date", raw}
+		return glxdate.Date{}, errParse{"date", raw}
 	}
 	return parseDate(s), nil
 }
@@ -108,7 +90,7 @@ func (v *VocabularyValue) String() string {
 func newVocabularyValue(term string, vocabulary map[string]*glx.VocabularyEntry) (*VocabularyValue, error) {
 	def, ok := vocabulary[term]
 	if !ok {
-		return nil, &ErrUnknown{"vocabulary value", term}
+		return nil, errUnknown{"vocabulary value", term}
 	}
 	return &VocabularyValue{Value: term, Definition: def}, nil
 }

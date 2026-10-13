@@ -146,7 +146,7 @@ func parsePropertyValueDate(ctx *context, raw any) glxdate.Date {
 
 	d, err := parseDateRaw(raw)
 	if err != nil {
-		ctx.Warn(err.Error())
+		ctx.Warn(err)
 	}
 	return d
 }
@@ -174,7 +174,7 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 		}
 		value, err := parsePrimitiveValue(rawFieldValue, def.ValueType)
 		if err != nil {
-			fctx.Warn(err.Error())
+			fctx.Warn(err)
 			continue
 		}
 		propertyFields[name] = PropertyField{Definition: def, Value: value}
@@ -189,7 +189,7 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 	case def.ValueType != "":
 		value, err := parsePrimitiveValue(raw, def.ValueType)
 		if err != nil {
-			ctx.Warn(err.Error())
+			ctx.Warn(err)
 			return nil
 		}
 		return value
