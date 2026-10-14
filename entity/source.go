@@ -53,7 +53,7 @@ func (s *Source) compile(ctx *context) {
 	s.Media = sctx.Catalog.media(inner.Media)
 	s.Properties = parseProperties(sctx, inner.Properties, sctx.GLX.SourceProperties)
 	s.Repository = sctx.Catalog.RepositoriesByID[s.RepositoryID]
-	// TODO(validation): Does GLX validation guarantee valid if present?
+	// Ignore error. GLX validates the Type value if present.
 	s.Type, _ = newVocabularyValue(inner.Type, sctx.GLX.SourceTypes)
 
 	for _, m := range s.Media {

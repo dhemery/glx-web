@@ -16,7 +16,11 @@ type Assertion struct {
 	Sources     SourceList
 	Subject     entityReference
 
-	// TODO(feature): Resolve value if the property has a reference type or vocabulary type
+	// TODO(feature): Find a way to resolve entity and vocabulary
+	// references in Value. Maybe a single struct that captures every
+	// possible assertion structure, like how glx.EntityRef has a field for
+	// each type of subject, and glx.PropertyDefinition has a field for
+	// each kind of value type.
 }
 
 // String returns a string representation of a.
