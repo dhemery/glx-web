@@ -3,8 +3,6 @@ package entity
 import (
 	"fmt"
 	"io"
-	"slices"
-	"strings"
 
 	"github.com/genealogix/glx/go-glx"
 )
@@ -26,30 +24,31 @@ type context struct {
 	GLX     *glx.GLXFile // Underlying GLX File.
 	Catalog *Catalog     // Catalog being compiled.
 	Entity  entity       // Entity being compiled.
-	Path    []string     // Path to the current element within entity.
+	Path    string       // Path to the current element within entity.
 	Output  io.Writer    // Writer for warnings.
 }
 
 func (c *context) ForEntity(e entity) *context {
 	out := *c
 	out.Entity = e
-	out.Path = []string{}
+	out.Path = ""
 	return &out
 }
 
 func (c *context) Sub(p string) *context {
 	out := *c
-	out.Path = append(slices.Clone(c.Path), p)
+	out.Path = out.Path + "." + p
+	return &out
+}
+
+func (c *context) Subi(i int) *context {
+	out := *c
+	out.Path = fmt.Sprintf("%s[%d]", c.Path, i)
 	return &out
 }
 
 func (c *context) String() string {
-	parts := make([]string, 0, len(c.Path)+1)
-
-	parts = append(parts, c.Entity.Plural()+"["+c.Entity.id+"]")
-	parts = append(parts, c.Path...)
-
-	return strings.Join(parts, ".")
+	return fmt.Sprintf("%s[%s]%s", c.Entity.Plural(), c.Entity.id, c.Path)
 }
 
 func (c *context) Warn(warning any) {

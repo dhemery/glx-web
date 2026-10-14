@@ -2,7 +2,6 @@ package entity
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
@@ -82,7 +81,7 @@ func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) P
 	case []any:
 		// Convert each element to a property value map and parse it.
 		for i, rawPropertyValue := range v {
-			pvictx := ctx.Sub(strconv.Itoa(i))
+			pvictx := ctx.Subi(i)
 			propertyValue := parsePropertyValue(pvictx, asPropertyMap(rawPropertyValue), def)
 			if propertyValue.Value == nil {
 				continue

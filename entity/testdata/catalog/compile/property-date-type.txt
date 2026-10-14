@@ -11,7 +11,7 @@ persons:
                 date: [array, instead, of, string]
 
 -- want-error --
-persons\[someone\].Properties.name.0: temporal date discarded: expected date string, got
+persons\[someone\].Properties.name\[0\]: temporal date discarded: expected date string, got
 
 -- want-catalog.yaml --
 persons:
