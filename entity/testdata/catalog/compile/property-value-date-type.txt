@@ -12,7 +12,7 @@ citations:
       accessed: 3
 
 -- want-error --
-citations\[some-citation\].Properties.accessed.Value: property value discarded: expected date string, got int
+citations\[some-citation\].Properties.accessed: property value discarded: expected date string, got int
 
 -- want-catalog.yaml --
 citations:

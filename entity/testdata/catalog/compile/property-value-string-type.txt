@@ -6,7 +6,7 @@ persons:
             name: 3
 
 -- want-error --
-persons\[someone\].Properties.name.Value: property value discarded: expected string, got int
+persons\[someone\].Properties.name: property value discarded: expected string, got int
 
 -- want-catalog.yaml --
 persons:

@@ -8,7 +8,7 @@ persons:
           monkey: "undefined field"
 
 -- want-error --
-persons\[someone\].Properties.name.Fields: field discarded: unknown field "monkey"
+persons\[someone\].Properties.name: field discarded: unknown field "monkey"
 
 -- want-catalog.yaml --
 persons:

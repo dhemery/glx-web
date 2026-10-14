@@ -122,14 +122,14 @@ func asPropertyMap(raw any) map[string]any {
 func parsePropertyValue(ctx *context, rawPropertyValue map[string]any, def *glx.PropertyDefinition) PropertyValue {
 	var propertyValue PropertyValue
 
-	value, err := parsePropertyValueValue(ctx.Sub("Value"), rawPropertyValue["value"], def)
+	value, err := parsePropertyValueValue(ctx, rawPropertyValue["value"], def)
 	if err != nil {
-		ctx.Sub("Value").Warnf("property value discarded: %s", err)
+		ctx.Warnf("property value discarded: %s", err)
 		return propertyValue
 	}
 	propertyValue.Value = value
-	propertyValue.Date = parsePropertyValueDate(ctx.Sub("Date"), rawPropertyValue["date"])
-	propertyValue.Fields = parsePropertyValueFields(ctx.Sub("Fields"), rawPropertyValue["fields"], def.Fields)
+	propertyValue.Date = parsePropertyValueDate(ctx, rawPropertyValue["date"])
+	propertyValue.Fields = parsePropertyValueFields(ctx, rawPropertyValue["fields"], def.Fields)
 
 	return propertyValue
 }

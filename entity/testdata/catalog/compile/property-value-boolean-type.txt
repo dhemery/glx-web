@@ -12,7 +12,7 @@ persons:
             living: "string instead of bool"
 
 -- want-error --
-persons\[someone\].Properties.living.Value: property value discarded: expected boolean, got string
+persons\[someone\].Properties.living: property value discarded: expected boolean, got string
 
 -- want-catalog.yaml --
 persons:

@@ -8,7 +8,7 @@ persons:
         fields: "string instead of map of fields"
 
 -- want-error --
-persons\[someone\].Properties.name.Fields: all fields discarded: expected object, got string
+persons\[someone\].Properties.name: all fields discarded: expected object, got string
 
 -- want-catalog.yaml --
 persons:

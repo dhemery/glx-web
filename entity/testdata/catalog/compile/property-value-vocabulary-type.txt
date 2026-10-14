@@ -6,7 +6,7 @@ persons:
       sex: false
 
 -- want-error --
-persons\[someone\].Properties.sex.Value: property value discarded: expected string for "sex_types" vocabulary lookup, got bool
+persons\[someone\].Properties.sex: property value discarded: expected string for "sex_types" vocabulary lookup, got bool
 
 -- want-catalog.yaml --
 persons:

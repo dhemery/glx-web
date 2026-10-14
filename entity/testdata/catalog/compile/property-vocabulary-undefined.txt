@@ -13,7 +13,7 @@ persons:
             some_custom_property: 42
 
 -- want-error --
-persons\[someone\].Properties.some_custom_property.Value: property value discarded: unknown value type "rabbit"
+persons\[someone\].Properties.some_custom_property: property value discarded: unknown value type "rabbit"
 
 -- want-catalog.yaml --
 persons:

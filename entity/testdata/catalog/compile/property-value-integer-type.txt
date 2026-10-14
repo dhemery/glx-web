@@ -14,7 +14,7 @@ places:
             population: "string instead of integer"
 
 -- want-error --
-places\[someplace\].Properties.population.Value: property value discarded: expected integer, got string
+places\[someplace\].Properties.population: property value discarded: expected integer, got string
 
 -- want-catalog.yaml --
 places:
