@@ -60,15 +60,13 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 
 	properties := make(map[string]Property)
 	for name, rawProperty := range rawProperties {
-		pctx := ppctx.Sub(name)
 		def := defs[name]
 		if def == nil {
-			def = synthesizePropertyDefinition(name)
-			pctx.Warnf("unknown property: using synthesized string property definition with label %q",
-				def.Label)
+			ppctx.Warnf("property discarded: %s", errUnknown{"property", name})
+			continue
 		}
 
-		property := parseProperty(pctx, rawProperty, def)
+		property := parseProperty(ppctx.Sub(name), rawProperty, def)
 		if len(property.Values) > 0 {
 			properties[name] = property
 		}
@@ -77,16 +75,8 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 	return properties
 }
 
-func synthesizePropertyDefinition(name string) *glx.PropertyDefinition {
-	return &glx.PropertyDefinition{
-		Label:       name,
-		Description: "Property definition synthesized by glx-web",
-		ValueType:   "string",
-	}
-}
-
 func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) Property {
-	property := Property{Definition: def}
+	var property Property
 
 	switch v := rawProperty.(type) {
 	case []any:
@@ -103,7 +93,6 @@ func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) P
 		// Assume the map is a property value map and parse it.
 		pv := parsePropertyValue(ctx, v, def)
 		if pv.Value == nil {
-			property.Definition = nil
 			return property
 		}
 		property.Values = append(property.Values, pv)
@@ -113,12 +102,12 @@ func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) P
 		rawValueMap := map[string]any{"value": v}
 		pv := parsePropertyValue(ctx, rawValueMap, def)
 		if pv.Value == nil {
-			property.Definition = nil
 			return property
 		}
 		property.Values = append(property.Values, pv)
 	}
 
+	property.Definition = def
 	return property
 }
 
@@ -166,21 +155,19 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 
 	rawFieldsMap, ok := rawFields.(map[string]any)
 	if !ok {
-		ctx.Warnf("cannot parse type %T: discarding all fields", rawFieldsMap)
+		ctx.Warnf("all fields discarded: %s", errParse{"object", rawFields})
 		return propertyFields
 	}
 
 	for name, rawFieldValue := range rawFieldsMap {
-		fctx := ctx.Sub(name)
-
 		def, ok := defs[name]
 		if !ok {
-			fctx.Warnf("ignoring unknown field")
+			ctx.Warnf("field discarded: %s", errUnknown{"field", name})
 			continue
 		}
 		value, err := parsePrimitiveValue(rawFieldValue, def.ValueType)
 		if err != nil {
-			fctx.Warn(err)
+			ctx.Warnf("field discarded: %s", err)
 			continue
 		}
 		propertyFields[name] = PropertyField{Definition: def, Value: value}
@@ -190,7 +177,8 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 }
 
 func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition) (Stringer, error) {
-	// TODO(errors): Handle raw == nil, which can happen if a property value has no "value" key.
+	// TODO(dale): Can raw be nil? GLX validation prevents nil "value" for
+	// temporal properties. What about single-value or other multi-value?
 	switch {
 	case def.ValueType != "":
 		return parsePrimitiveValue(raw, def.ValueType)
@@ -209,7 +197,6 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 		return newVocabularyValue(term, vocabulary(ctx.GLX, def.VocabularyType))
 	default:
 		// GLX validation guarantees exactly one type field has a value.
+		return nil, nil
 	}
-
-	return nil, nil
 }

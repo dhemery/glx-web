@@ -1,5 +1,10 @@
+TODO: Is it okay for an assertion to refer to a property that does not yet
+exist? A researcher might want to write an assertion first, and defer defining
+the property until the conclusion is recorded.
+
+On the other hand, how to present an undefined property to a template?
+
 -- test.glx --
-# Characterization test.
 events:
     test-event:
         type: birth
@@ -7,8 +12,6 @@ assertions:
     test-assertion:
         subject:
             event: test-event
-        # TODO(dale): Is this okay? Maybe the assertion was written before the
-        # property was added the event properties vocabulary.
         property: monkey
 
 -- want-error --
