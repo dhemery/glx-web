@@ -6,17 +6,9 @@ persons:
       residence: true
 
 -- want-error --
-persons\[someone\].Properties.residence.Value: cannot parse.*reference value: using string value
+persons\[someone\].Properties.residence.Value: property value discarded: expected string for "places" reference lookup, got bool
 
 -- want-catalog.yaml --
 persons:
   someone:
-    properties:
-      residence:
-        definition:
-          label: Residence
-          reference_type: places
-        values:
-            # TODO(spec): This is the wrong thing to do. Better to drop the
-            # value and consequently the property.
-          - value: StringValue{"true"}
+    properties: {}

@@ -9,10 +9,10 @@ persons:
     someone:
         properties:
             # living is a boolean property.
-            living: "not a bool"
+            living: "string instead of bool"
 
 -- want-error --
-persons\[someone\].Properties.living.Value: cannot parse string as boolean
+persons\[someone\].Properties.living.Value: property value discarded: expected boolean, got string
 
 -- want-catalog.yaml --
 persons:

@@ -133,9 +133,14 @@ func asPropertyMap(raw any) map[string]any {
 func parsePropertyValue(ctx *context, rawPropertyValue map[string]any, def *glx.PropertyDefinition) PropertyValue {
 	var propertyValue PropertyValue
 
+	value, err := parsePropertyValueValue(ctx.Sub("Value"), rawPropertyValue["value"], def)
+	if err != nil {
+		ctx.Sub("Value").Warnf("property value discarded: %s", err)
+		return propertyValue
+	}
+	propertyValue.Value = value
 	propertyValue.Date = parsePropertyValueDate(ctx.Sub("Date"), rawPropertyValue["date"])
 	propertyValue.Fields = parsePropertyValueFields(ctx.Sub("Fields"), rawPropertyValue["fields"], def.Fields)
-	propertyValue.Value = parsePropertyValueValue(ctx.Sub("Value"), rawPropertyValue["value"], def)
 
 	return propertyValue
 }
@@ -147,7 +152,7 @@ func parsePropertyValueDate(ctx *context, raw any) glxdate.Date {
 
 	d, err := parseDateRaw(raw)
 	if err != nil {
-		ctx.Warn(err)
+		ctx.Warnf("temporal date discarded: %s", err)
 	}
 	return d
 }
@@ -184,42 +189,27 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 	return propertyFields
 }
 
-func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition) Stringer {
+func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition) (Stringer, error) {
 	// TODO(errors): Handle raw == nil, which can happen if a property value has no "value" key.
 	switch {
 	case def.ValueType != "":
-		value, err := parsePrimitiveValue(raw, def.ValueType)
-		if err != nil {
-			ctx.Warn(err)
-			return nil
-		}
-		return value
+		return parsePrimitiveValue(raw, def.ValueType)
 	case def.ReferenceType != "":
 		id, ok := raw.(string)
 		if !ok {
-			s := fmt.Sprint(raw)
-			ctx.Warnf("cannot parse %T as %s reference value: using string value %q",
-				raw, def.ReferenceType, s)
-			return StringValue(s)
+			return nil, errParse{fmt.Sprintf("string for %q reference lookup", def.ReferenceType), raw}
 		}
-		return ctx.Catalog.entity(id, def.ReferenceType)
+		// TODO: Warn if no such entity.
+		return ctx.Catalog.entity(id, def.ReferenceType), nil
 	case def.VocabularyType != "":
 		term, ok := raw.(string)
 		if !ok {
-			s := fmt.Sprint(raw)
-			ctx.Warnf("cannot parse %T as %s vocabulary value: using string value %q",
-				raw, def.VocabularyType, s)
-			return StringValue(s)
+			return nil, errParse{fmt.Sprintf("string for %q vocabulary lookup", def.VocabularyType), raw}
 		}
-		vv, err := newVocabularyValue(term, vocabulary(ctx.GLX, def.VocabularyType))
-		if err != nil {
-			ctx.Warnf("%s: %s", def.VocabularyType, err)
-			return nil
-		}
-		return vv
+		return newVocabularyValue(term, vocabulary(ctx.GLX, def.VocabularyType))
 	default:
 		// GLX validation guarantees exactly one type field has a value.
 	}
 
-	return nil
+	return nil, nil
 }

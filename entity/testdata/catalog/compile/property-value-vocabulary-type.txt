@@ -6,17 +6,9 @@ persons:
       sex: false
 
 -- want-error --
-persons\[someone\].Properties.sex.Value: cannot parse.*vocabulary value: using string value.*
+persons\[someone\].Properties.sex.Value: property value discarded: expected string for "sex_types" vocabulary lookup, got bool
 
 -- want-catalog.yaml --
 persons:
     someone:
-        properties:
-            sex:
-                definition:
-                    label: Sex
-                    vocabulary_type: sex_types
-                values:
-                    # TODO(spec): Probably better to drop the value, and
-                    # consequently the property.
-                -   value: StringValue{"false"}
+        properties: {}

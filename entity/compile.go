@@ -61,12 +61,12 @@ func (c *context) Warnf(format string, a ...any) {
 }
 
 type errParse struct {
-	want string // The expected type.
+	want string // The expected type with optional explanation.
 	got  any    // The raw value.
 }
 
 func (e errParse) Error() string {
-	return fmt.Sprintf("cannot parse %T as %s", e.got, e.want)
+	return fmt.Sprintf("expected %s, got %T", e.want, e.got)
 }
 
 type errUnknown struct {

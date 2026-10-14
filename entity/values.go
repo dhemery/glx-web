@@ -62,7 +62,7 @@ func parsePrimitiveValue(raw any, valueType string) (Stringer, error) {
 func parseDateRaw(raw any) (glxdate.Date, error) {
 	s, ok := raw.(string)
 	if !ok {
-		return glxdate.Date{}, errParse{"date", raw}
+		return glxdate.Date{}, errParse{"date string", raw}
 	}
 	return parseDate(s), nil
 }
