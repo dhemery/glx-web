@@ -1,9 +1,6 @@
 If the raw value for an integer-valued property is not an integer,
 warn and discard the value.
 
-If the invalid raw is the only value for the property, as in this test,
-discard the property.
-
 -- test.glx --
 places:
     someplace:
@@ -14,7 +11,7 @@ places:
             population: "string instead of integer"
 
 -- want-error --
-places\[someplace\].Properties.population: property value discarded: expected integer, got string
+places\[someplace\].Properties.population: value discarded: expected integer, got string
 
 -- want-catalog.yaml --
 places:

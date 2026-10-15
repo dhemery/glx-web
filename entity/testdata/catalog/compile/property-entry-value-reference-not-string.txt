@@ -1,3 +1,6 @@
+if the raw value for a reference-type property is not a string,
+warn and discard the value.
+
 -- test.glx --
 persons:
   someone:
@@ -6,7 +9,7 @@ persons:
       residence: true
 
 -- want-error --
-persons\[someone\].Properties.residence: property value discarded: expected string for "places" reference lookup, got bool
+persons\[someone\].Properties.residence: value discarded: expected string for "places" reference lookup, got bool
 
 -- want-catalog.yaml --
 persons:

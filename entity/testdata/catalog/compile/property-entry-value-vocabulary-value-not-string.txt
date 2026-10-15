@@ -1,3 +1,6 @@
+If the raw value for a vocabulary-valued property is not a string,
+warn and discard the value.
+
 -- test.glx --
 persons:
   someone:
@@ -6,7 +9,7 @@ persons:
       sex: false
 
 -- want-error --
-persons\[someone\].Properties.sex: property value discarded: expected string for "sex_types" vocabulary lookup, got bool
+persons\[someone\].Properties.sex: value discarded: expected string for "sex_types" vocabulary lookup, got bool
 
 -- want-catalog.yaml --
 persons:

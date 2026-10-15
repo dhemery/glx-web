@@ -1,3 +1,6 @@
+If the raw fields for a property entry is not an object,
+warn and discard all fields.
+
 -- test.glx --
 persons:
   someone:

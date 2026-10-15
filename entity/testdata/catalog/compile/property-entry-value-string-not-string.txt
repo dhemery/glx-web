@@ -1,3 +1,6 @@
+If the raw value for a string-valued property is not a string,
+warn and discard the value.
+
 -- test.glx --
 persons:
     someone:
@@ -6,7 +9,7 @@ persons:
             name: 3
 
 -- want-error --
-persons\[someone\].Properties.name: property value discarded: expected string, got int
+persons\[someone\].Properties.name: value discarded: expected string, got int
 
 -- want-catalog.yaml --
 persons:

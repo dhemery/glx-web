@@ -1,9 +1,6 @@
 If the raw value for a boolean-valued property is not a boolean,
 warn and discard the value.
 
-If the invalid raw is the only value for the property, as in this test,
-discard the property.
-
 -- test.glx --
 persons:
     someone:
@@ -12,7 +9,7 @@ persons:
             living: "string instead of bool"
 
 -- want-error --
-persons\[someone\].Properties.living: property value discarded: expected boolean, got string
+persons\[someone\].Properties.living: value discarded: expected boolean, got string
 
 -- want-catalog.yaml --
 persons:

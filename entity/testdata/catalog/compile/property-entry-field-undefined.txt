@@ -1,3 +1,6 @@
+If a property entry field is unknown,
+warn and discard the field.
+
 -- test.glx --
 persons:
   someone:

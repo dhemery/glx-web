@@ -8,42 +8,42 @@ import (
 )
 
 // Property holds the values of a property of an entity. Each Property holds a
-// slice of values even if the GLX property is defined as single-valued.
+// slice of entries even if the GLX property is defined as single-valued.
 type Property struct {
 	Definition *glx.PropertyDefinition `json:"definition,omitzero"` // The GLX definition of the property.
-	Values     []PropertyValue         `json:"values,omitzero,omitempty"`
+	Entries    []PropertyEntry         `json:"values,omitzero,omitempty"`
 }
 
-// String returns the first value of p as a string.
+// String returns the string value of the first entry of p.
 func (p Property) String() string {
 	return p.Value().String()
 }
 
-// Value returns the first value of p.
-func (p Property) Value() PropertyValue {
-	return p.Values[0]
+// Value returns the first entry of p.
+func (p Property) Value() PropertyEntry {
+	return p.Entries[0]
 }
 
-// PropertyValue holds a single value of a property of an entity. Each
-// PropertyValue has a date and fields even if the property's definition does
+// PropertyEntry holds a single entry of a property of an entity. Each
+// PropertyEntry has a date and fields even if the property's definition does
 // not specify them.
-type PropertyValue struct {
+type PropertyEntry struct {
 	Value  Stringer                 `json:"value,omitzero,omitempty"`
 	Date   glxdate.Date             `json:"date,omitzero"` // The date when the value applied.
 	Fields map[string]PropertyField `json:"fields,omitzero,omitempty"`
 }
 
-// Field returns the named field of v.
-func (v PropertyValue) Field(name string) PropertyField {
-	return v.Fields[name]
+// Field returns the named field of e.
+func (e PropertyEntry) Field(name string) PropertyField {
+	return e.Fields[name]
 }
 
-// String returns the string representation of the value of v.
-func (v PropertyValue) String() string {
-	return v.Value.String()
+// String returns the string representation of the value of e.
+func (e PropertyEntry) String() string {
+	return e.Value.String()
 }
 
-// PropertyField represents a field in a property of an entity.
+// PropertyField represents a field in a property entry.
 type PropertyField struct {
 	Definition *glx.FieldDefinition `json:"definition"` // The GLX definition of the field.
 	Value      Stringer             `json:"value"`
@@ -66,7 +66,7 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 		}
 
 		property := parseProperty(ppctx.Sub(name), rawProperty, def)
-		if len(property.Values) > 0 {
+		if len(property.Entries) > 0 {
 			properties[name] = property
 		}
 	}
@@ -80,37 +80,36 @@ func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) P
 	switch v := rawProperty.(type) {
 	case []any:
 		// Convert each element to a property value map and parse it.
-		for i, rawPropertyValue := range v {
-			pvictx := ctx.Subi(i)
-			propertyValue := parsePropertyValue(pvictx, asPropertyMap(rawPropertyValue), def)
-			if propertyValue.Value == nil {
+		for i, rawEntry := range v {
+			entry := parseEntry(ctx.Subi(i), asEntryMap(rawEntry), def)
+			if entry.Value == nil {
 				continue
 			}
-			property.Values = append(property.Values, propertyValue)
+			property.Entries = append(property.Entries, entry)
 		}
 	case map[string]any:
 		// Assume the map is a property value map and parse it.
-		pv := parsePropertyValue(ctx, v, def)
-		if pv.Value == nil {
+		entry := parseEntry(ctx, v, def)
+		if entry.Value == nil {
 			return property
 		}
-		property.Values = append(property.Values, pv)
+		property.Entries = append(property.Entries, entry)
 	default:
 		// Assume raw property is a scalar property value. Wrap it in a
-		// property value map and parse it.
-		rawValueMap := map[string]any{"value": v}
-		pv := parsePropertyValue(ctx, rawValueMap, def)
-		if pv.Value == nil {
+		// property entry map and parse it.
+		rawEntryMap := map[string]any{"value": v}
+		entry := parseEntry(ctx, rawEntryMap, def)
+		if entry.Value == nil {
 			return property
 		}
-		property.Values = append(property.Values, pv)
+		property.Entries = append(property.Entries, entry)
 	}
 
 	property.Definition = def
 	return property
 }
 
-func asPropertyMap(raw any) map[string]any {
+func asEntryMap(raw any) map[string]any {
 	if rawMap, ok := raw.(map[string]any); ok {
 		return rawMap
 	}
@@ -118,34 +117,34 @@ func asPropertyMap(raw any) map[string]any {
 	return map[string]any{"value": raw}
 }
 
-func parsePropertyValue(ctx *context, rawPropertyValue map[string]any, def *glx.PropertyDefinition) PropertyValue {
-	var propertyValue PropertyValue
+func parseEntry(ctx *context, rawEntry map[string]any, def *glx.PropertyDefinition) PropertyEntry {
+	var entry PropertyEntry
 
-	value, err := parsePropertyValueValue(ctx, rawPropertyValue["value"], def)
+	value, err := parseEntryValue(ctx, rawEntry["value"], def)
 	if err != nil {
-		ctx.Warnf("property value discarded: %s", err)
-		return propertyValue
+		ctx.Warnf("value discarded: %s", err)
+		return entry
 	}
-	propertyValue.Value = value
-	propertyValue.Date = parsePropertyValueDate(ctx, rawPropertyValue["date"])
-	propertyValue.Fields = parsePropertyValueFields(ctx, rawPropertyValue["fields"], def.Fields)
+	entry.Value = value
+	entry.Date = parseEntryDate(ctx, rawEntry["date"])
+	entry.Fields = parseEntryFields(ctx, rawEntry["fields"], def.Fields)
 
-	return propertyValue
+	return entry
 }
 
-func parsePropertyValueDate(ctx *context, raw any) glxdate.Date {
-	if raw == nil {
+func parseEntryDate(ctx *context, rawDate any) glxdate.Date {
+	if rawDate == nil {
 		return glxdate.Date{}
 	}
 
-	d, err := parseDateRaw(raw)
+	d, err := parseRawDate(rawDate)
 	if err != nil {
-		ctx.Warnf("temporal date discarded: %s", err)
+		ctx.Warnf("date discarded: %s", err)
 	}
 	return d
 }
 
-func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.FieldDefinition) map[string]PropertyField {
+func parseEntryFields(ctx *context, rawFields any, defs map[string]*glx.FieldDefinition) map[string]PropertyField {
 	propertyFields := make(map[string]PropertyField)
 
 	if rawFields == nil {
@@ -158,13 +157,13 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 		return propertyFields
 	}
 
-	for name, rawFieldValue := range rawFieldsMap {
+	for name, rawValue := range rawFieldsMap {
 		def, ok := defs[name]
 		if !ok {
 			ctx.Warnf("field discarded: %s", errUnknown{"field", name})
 			continue
 		}
-		value, err := parsePrimitiveValue(rawFieldValue, def.ValueType)
+		value, err := parsePrimitiveValue(rawValue, def.ValueType)
 		if err != nil {
 			ctx.Warnf("field discarded: %s", err)
 			continue
@@ -175,28 +174,34 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 	return propertyFields
 }
 
-func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition) (Stringer, error) {
-	// TODO(validation): Can raw be nil? GLX validation prevents nil
-	// "value" for temporal properties. What about single-value or other
-	// multi-value?
+func parseEntryValue(ctx *context, rawValue any, def *glx.PropertyDefinition) (Stringer, error) {
+	// TODO(validation): Spec says that a property entry can hava a value,
+	// fields, or both. GLX validation requires a value for temporal
+	// properties, but not for single- or multi-valued properties.
 	switch {
 	case def.ValueType != "":
-		return parsePrimitiveValue(raw, def.ValueType)
+		return parsePrimitiveValue(rawValue, def.ValueType)
 	case def.ReferenceType != "":
-		id, ok := raw.(string)
+		id, ok := rawValue.(string)
 		if !ok {
-			return nil, errParse{fmt.Sprintf("string for %q reference lookup", def.ReferenceType), raw}
+			return nil, errParse{
+				want: fmt.Sprintf("string for %q reference lookup", def.ReferenceType),
+				got:  rawValue,
+			}
 		}
 		// TODO(validation): Return error if no such entity.
 		return ctx.Catalog.entity(id, def.ReferenceType), nil
 	case def.VocabularyType != "":
-		term, ok := raw.(string)
+		term, ok := rawValue.(string)
 		if !ok {
-			return nil, errParse{fmt.Sprintf("string for %q vocabulary lookup", def.VocabularyType), raw}
+			return nil, errParse{
+				want: fmt.Sprintf("string for %q vocabulary lookup", def.VocabularyType),
+				got:  rawValue,
+			}
 		}
 		return newVocabularyValue(term, vocabulary(ctx.GLX, def.VocabularyType))
 	default:
-		// GLX validation guarantees exactly one type field has a value.
+		// GLX validation guarantees that exactly one type field of def has a value.
 		return nil, nil
 	}
 }

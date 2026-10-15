@@ -161,7 +161,7 @@
 // and other details.
 //
 // Each Property's values
-// are represented as a list of [entity.PropertyValue].
+// are represented as a list of [entity.PropertyEntry].
 // The values are presented as a list
 // even if the entity's GLX file gives only one value,
 // and even if the property's definition specifies a single value
@@ -203,9 +203,9 @@
 // are represented as [glxdate.Date]:
 //   - Entity fields of type "date",
 //     such as [entity.Event.Date].
-//   - Each [entity.PropertyValue.Date],
+//   - Each [entity.PropertyEntry.Date],
 //     the date when the property value applied.
-//   - Each [entity.PropertyValue.Value]
+//   - Each [entity.PropertyEntry.Value]
 //     in properties of type "date".
 //
 // # Configuration

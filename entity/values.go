@@ -29,26 +29,26 @@ func (s StringValue) String() string {
 	return string(s)
 }
 
-func parsePrimitiveValue(raw any, valueType string) (Stringer, error) {
+func parsePrimitiveValue(rawValue any, valueType string) (Stringer, error) {
 	switch valueType {
 	case "boolean":
-		b, ok := raw.(bool)
+		b, ok := rawValue.(bool)
 		if !ok {
-			return nil, errParse{"boolean", raw}
+			return nil, errParse{"boolean", rawValue}
 		}
 		return BoolValue(b), nil
 	case "date":
-		return parseDateRaw(raw)
+		return parseRawDate(rawValue)
 	case "integer":
-		i, ok := raw.(int)
+		i, ok := rawValue.(int)
 		if !ok {
-			return nil, errParse{"integer", raw}
+			return nil, errParse{"integer", rawValue}
 		}
 		return IntValue(i), nil
 	case "string", "":
-		s, ok := raw.(string)
+		s, ok := rawValue.(string)
 		if !ok {
-			return nil, errParse{"string", raw}
+			return nil, errParse{"string", rawValue}
 		}
 		return StringValue(s), nil
 	}
@@ -56,10 +56,10 @@ func parsePrimitiveValue(raw any, valueType string) (Stringer, error) {
 	return nil, errUnknown{"value type", valueType}
 }
 
-func parseDateRaw(raw any) (glxdate.Date, error) {
-	s, ok := raw.(string)
+func parseRawDate(rawDate any) (glxdate.Date, error) {
+	s, ok := rawDate.(string)
 	if !ok {
-		return glxdate.Date{}, errParse{"date string", raw}
+		return glxdate.Date{}, errParse{"date string", rawDate}
 	}
 	return parseDate(s), nil
 }
