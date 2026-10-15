@@ -8,7 +8,7 @@ events:
         participants:
         -   role: subject
             # No person
--- want-error --
+-- want-errors --
 events\[event-e\].Participants\[0\]: discarding participant: person must not be empty
 -- want-catalog.yaml --
 events:

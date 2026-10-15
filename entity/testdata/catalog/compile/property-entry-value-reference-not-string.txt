@@ -3,17 +3,18 @@ warn and discard the value.
 
 -- test.glx --
 persons:
-  someone:
-    properties:
-      # residence has a "places" reference_type, and so requires a string.
-      residence: true
+    someone:
+        properties:
+            # residence has a "places" reference_type, and so requires a string.
+            residence: true
 
--- want-error --
+-- want-errors --
 persons\[someone\].Properties.residence: value discarded: expected string for "places" reference lookup, got bool
 persons\[someone\].Properties.residence: entry discarded: has neither value nor fields
 persons\[someone\].Properties.residence: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:
-  someone:
-    properties: {}
+    someone:
+        properties: {}
+

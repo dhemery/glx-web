@@ -8,7 +8,7 @@ persons:
             # name is a string-valued property.
             name: 3
 
--- want-error --
+-- want-errors --
 persons\[someone\].Properties.name: value discarded: expected string, got int
 persons\[someone\].Properties.name: entry discarded: has neither value nor fields
 persons\[someone\].Properties.name: property discarded: no entries

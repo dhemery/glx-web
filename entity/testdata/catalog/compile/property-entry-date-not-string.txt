@@ -10,7 +10,7 @@ persons:
                 # date requires a string.
                 date: [array, instead, of, string]
 
--- want-error --
+-- want-errors --
 persons\[someone\].Properties.name\[0\]: date discarded: expected date string, got
 
 -- want-catalog.yaml --

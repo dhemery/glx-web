@@ -11,7 +11,7 @@ citations:
       # accessed is a date-valued property and 3 is not a string.
       accessed: 3
 
--- want-error --
+-- want-errors --
 citations\[some-citation\].Properties.accessed: value discarded: expected date string, got int
 citations\[some-citation\].Properties.accessed: entry discarded: has neither value nor fields
 citations\[some-citation\].Properties.accessed: property discarded: no entries

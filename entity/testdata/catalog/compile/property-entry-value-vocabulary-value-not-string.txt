@@ -8,7 +8,7 @@ persons:
       # sex has a vocabulary type (sex_types) and so requires a string value.
       sex: false
 
--- want-error --
+-- want-errors --
 persons\[someone\].Properties.sex: value discarded: expected string for "sex_types" vocabulary lookup, got bool
 persons\[someone\].Properties.sex: entry discarded: has neither value nor fields
 persons\[someone\].Properties.sex: property discarded: no entries

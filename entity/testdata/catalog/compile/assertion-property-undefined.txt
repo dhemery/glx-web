@@ -14,7 +14,7 @@ assertions:
             event: test-event
         property: monkey
 
--- want-error --
+-- want-errors --
 
 -- want-catalog.yaml --
 assertions:

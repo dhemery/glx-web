@@ -10,7 +10,7 @@ persons:
         # fields requires map[string]any
         fields: "string instead of map of fields"
 
--- want-error --
+-- want-errors --
 persons\[someone\].Properties.name: all fields discarded: expected object, got string
 
 -- want-catalog.yaml --

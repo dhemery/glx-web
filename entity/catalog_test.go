@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"io/fs"
 	"maps"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/dhemery/glx-web/entity"
@@ -23,53 +23,143 @@ import (
 )
 
 // TestCatalogCompile tests how [entity.NewCatalog] compiles GLX archives. Each
-// test case is a [txtar.Archive] read from testdata, contianing a comment, one
-// or more GLX files, and a want-catalog.yaml file. The GLX files are looaded
-// into a [glx.GLXFile] to pass to NewCatalog. The comment is a regexp pattern
-// that the output written by NewCatalog must match. The want-catalog.yaml file
-// is a YAML representation of the desired catalog structure. This YAML
-// representation is simplified to omit certain details that are not needed to
-// varify catalog structure.
+// test case is a [txtar.Archive] read from testdata. The Archive contains a
+// set of files and a comment descibing the responsibilities being tested. The
+// files are:
+//
+//   - One or more .glx files. These are loaded into a [glx.GLXFile], which is
+//     passed to NewCatalog.
+//   - want-catalog.yaml: A YAML representation of the desired catalog
+//     structure. This YAML representation is simplified to omit certain
+//     details that are not needed to varify catalog structure.
+//   - want-errors: A list of regexp patterns that the output written by
+//     NewCatalog must match. Each non-blank output line must match one
+//     pattern. Each pattern must match one line of output.
 func TestCatalogCompile(t *testing.T) {
-	for name, tc := range textArchives(t, "testdata/catalog/compile/*") {
-		t.Run(filepath.Base(name), func(t *testing.T) {
-			fsys, err := txtar.FS(tc)
+	testFS := os.DirFS(".")
+	testFileNames, err := fileNamesMatching(testFS, "testdata/catalog/compile/*")
+	if err != nil {
+		t.Fatalf("test setup: finding test case files: %s", err)
+	}
+
+	for _, testFileName := range testFileNames {
+		t.Run(filepath.Base(testFileName), func(t *testing.T) {
+			tc, err := readCatalogTestCase(testFS, testFileName)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("test setup: test case: %s", err)
 			}
 
-			glxfile := glxFile(t, fsys)
+			glxFile, err := loadGLXFile(tc.glxFiles)
+			if err != nil {
+				if se, ok := errors.AsType[*glx.StructuredValidationError](err); ok {
+					// Log the specific errors tucked inside.
+					for _, e := range se.Errors {
+						t.Log(e)
+					}
+				}
+				t.Fatalf("test setup: loading GLX archive: %s", err)
+			}
 
-			errout := &bytes.Buffer{}
-			cat := entity.NewCatalog(glxfile, errout)
+			output := &bytes.Buffer{}
+			catalog := entity.NewCatalog(glxFile, output)
 
-			gotErrOut := errout.Bytes()
-
-			matchPatterns(t, fsys, gotErrOut)
+			gotOutputLines := trimmedLines(output.Bytes())
+			unmatchedOutputLines, unmatchedPatterns := matchLines(gotOutputLines, tc.wantOutput)
+			for _, l := range unmatchedOutputLines {
+				t.Errorf("unexpected output: %q", l)
+			}
+			for _, p := range unmatchedPatterns {
+				t.Errorf("unmatched pattern: %q", p)
+			}
 
 			// Marshal and unmarshal the catalog to convert it to a
 			// map[string]any that can be compared to the structure
-			// represented by want-catalog.yaml.
-			gotCatalog := asObject(t, cat, catalogMarshalOptions)
-			wantCatalog := unmarshalYAML(t, fsys, "want-catalog.yaml")
-
-			if diff := cmp.Diff(wantCatalog, gotCatalog); diff != "" {
+			// represented by wantCatalog.
+			gotCatalog, err := asObject(catalog, catalogMarshalOptions)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(tc.wantCatalog, gotCatalog); diff != "" {
 				t.Error(diff)
 			}
 		})
 	}
 }
 
-func matchPatterns(t *testing.T, fsys fs.FS, input []byte) {
-	unmatchedPatterns := readPatterns(t, fsys)
-	trimmed := strings.TrimSpace(string(input))
-	var unmatchedLines []string
-	for line := range strings.Lines(trimmed) {
-		trimmed := strings.TrimSpace(line)
-		if trimmed != "" {
-			unmatchedLines = append(unmatchedLines, trimmed)
-		}
+type catalogTestCase struct {
+	glxFiles    map[string][]byte
+	wantOutput  []*regexp.Regexp
+	wantCatalog any
+}
+
+func readCatalogTestCase(fsys fs.FS, fname string) (*catalogTestCase, error) {
+	b, err := fs.ReadFile(fsys, fname)
+	if err != nil {
+		return nil, err
 	}
+
+	tarFS, err := txtar.FS(txtar.Parse(b))
+	if err != nil {
+		return nil, err
+	}
+
+	glxFileNames, err := fileNamesMatching(tarFS, "*.glx")
+	if err != nil {
+		return nil, err
+	}
+
+	glxFiles := make(map[string][]byte, len(glxFileNames))
+	for _, fname := range glxFileNames {
+		b, err := fs.ReadFile(tarFS, fname)
+		if err != nil {
+			return nil, err
+		}
+		glxFiles[fname] = b
+	}
+
+	outputPatterns, err := fs.ReadFile(tarFS, "want-errors")
+	if err != nil {
+		return nil, err
+	}
+
+	outputMatchers, err := compileRegexps(trimmedLines(outputPatterns))
+	if err != nil {
+		return nil, err
+	}
+
+	catalogYAML, err := fs.ReadFile(tarFS, "want-catalog.yaml")
+	if err != nil {
+		return nil, err
+	}
+
+	var wantCatalog any
+	err = yaml.Unmarshal(catalogYAML, &wantCatalog)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshaling want-catalog.yaml: %w", err)
+	}
+
+	return &catalogTestCase{
+		glxFiles:    glxFiles,
+		wantOutput:  outputMatchers,
+		wantCatalog: wantCatalog,
+	}, err
+}
+
+func fileNamesMatching(fsys fs.FS, pattern string) ([]string, error) {
+	names, err := fs.Glob(fsys, pattern)
+	if err != nil {
+		return nil, fmt.Errorf("globbing %q: %w", pattern, err)
+	}
+
+	if len(names) == 0 {
+		return nil, fmt.Errorf("no files matching %q", pattern)
+	}
+	return names, nil
+}
+
+func matchLines(lines []string, patterns []*regexp.Regexp) ([]string, []*regexp.Regexp) {
+	unmatchedPatterns := slices.Clone(patterns)
+	unmatchedLines := slices.Clone(lines)
 
 	for p, pattern := range slices.Backward(unmatchedPatterns) {
 		for l, line := range slices.Backward(unmatchedLines) {
@@ -80,136 +170,65 @@ func matchPatterns(t *testing.T, fsys fs.FS, input []byte) {
 			}
 		}
 	}
-	for _, l := range unmatchedLines {
-		t.Errorf("unexpected output: %q", l)
-	}
-	for _, p := range unmatchedPatterns {
-		t.Errorf("unmatched pattern: %q", p)
-	}
+	return unmatchedLines, unmatchedPatterns
 }
 
-func readPatterns(t *testing.T, fsys fs.FS) []*regexp.Regexp {
-	text, err := fs.ReadFile(fsys, "want-error")
-	if err != nil {
-		t.Fatal(err)
-	}
+func compileRegexps(patterns []string) ([]*regexp.Regexp, error) {
+	var rr []*regexp.Regexp
 
-	text = bytes.TrimSpace(text)
-
-	var res []*regexp.Regexp
-	for line := range bytes.Lines(text) {
-		trimmed := bytes.TrimSpace(line)
-		if len(trimmed) == 0 {
-			continue
-		}
-		re, err := regexp.Compile(string(trimmed))
+	for _, pattern := range patterns {
+		r, err := regexp.Compile(pattern)
 		if err != nil {
-			t.Fatal(err)
+			return nil, err
 		}
-		res = append(res, re)
+		rr = append(rr, r)
 	}
 
-	return res
+	return rr, nil
+}
+
+func trimmedLines(bb []byte) []string {
+	var lines []string
+	for line := range bytes.Lines(bytes.TrimSpace(bb)) {
+		trimmed := string(bytes.TrimSpace(line))
+		if trimmed != "" {
+			lines = append(lines, trimmed)
+		}
+	}
+	return lines
 }
 
 // Convert in to an object by marshaling and unmarshaling. We're using instead
 // of YAML because JSOM gives more control over marshaling.
-func asObject(t *testing.T, in any, opts json.Options) any {
-	t.Helper()
+func asObject(in any, opts json.Options) (any, error) {
 	j, err := json.Marshal(in, opts)
 	if err != nil {
-		t.Fatal("marshaling:", err)
+		return nil, fmt.Errorf("marshaling: %w", err)
 	}
 
 	var out any
 	if err := json.Unmarshal(j, &out); err != nil {
-		t.Fatal("unmarshaling:", err)
+		return nil, fmt.Errorf("unmarshaling: %w", err)
 	}
-	return out
+	return out, nil
 }
 
-// Unmarshal the named YAML file.
-func unmarshalYAML(t *testing.T, fsys fs.FS, name string) any {
-	t.Helper()
-	j, err := fs.ReadFile(fsys, name)
-	if err != nil {
-		t.Fatalf("reading %s: %s", name, err)
-	}
-
-	var out any
-	if err := yaml.Unmarshal(j, &out); err != nil {
-		t.Fatalf("unmarshaling %s: %s", name, err)
-	}
-	return out
-}
-
-func glxFile(t *testing.T, fsys fs.FS) *glx.GLXFile {
-	const pattern = "*.glx"
-	t.Helper()
-	fnames, err := fs.Glob(fsys, pattern)
-	if err != nil {
-		t.Fatalf("globbing %q: %s", pattern, err)
-	}
-
-	if len(fnames) == 0 {
-		t.Fatalf("no files matching %q", pattern)
-	}
-
-	files := map[string][]byte{}
-
+func loadGLXFile(files map[string][]byte) (*glx.GLXFile, error) {
+	ff := maps.Clone(files)
 	// Add the standard vocabularies.
-	maps.Copy(files, glx.StandardVocabularies())
-
-	// Add files from the test case.
-	for _, fname := range fnames {
-		content, err := fs.ReadFile(fsys, fname)
-		if err != nil {
-			t.Fatal(err)
-		}
-		files[fname] = content
-	}
+	maps.Copy(ff, glx.StandardVocabularies())
 
 	serializer := glx.NewSerializer(nil)
-	glxfile, dups, err := serializer.DeserializeMultiFileFromMap(files)
+	glxfile, dups, err := serializer.DeserializeMultiFileFromMap(ff)
 	if err != nil {
-		if validationError, ok := errors.AsType[*glx.StructuredValidationError](err); ok {
-			for _, e := range validationError.Errors {
-				t.Error(e)
-			}
-		}
-		t.Fatal("deserializing GLX archive:", err)
+		return nil, err
 	}
 
 	if len(dups) > 0 {
-		t.Fatal("duplicates in GLX archive:", dups)
+		return nil, fmt.Errorf("duplicates in GLX archive: %v", dups)
 	}
 
-	return glxfile
-}
-
-func textArchives(t *testing.T, pattern string) map[string]*txtar.Archive {
-	t.Helper()
-	fnames, err := filepath.Glob(pattern)
-	if err != nil {
-		t.Fatalf("globbing %q: %s", pattern, err)
-	}
-
-	if len(fnames) == 0 {
-		t.Fatalf("no files matching %q", pattern)
-	}
-
-	tests := make(map[string]*txtar.Archive, len(fnames))
-
-	for _, fname := range fnames {
-		ar, err := txtar.ParseFile(fname)
-		if err != nil {
-			t.Fatal("reading text archive:", err)
-		}
-
-		tests[fname] = ar
-	}
-
-	return tests
+	return glxfile, nil
 }
 
 // JSON marshal options to reduce the JSON representation of the catalog to

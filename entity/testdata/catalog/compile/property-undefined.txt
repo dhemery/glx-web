@@ -6,7 +6,7 @@ persons:
     properties:
       monkey: "undefined property"
 
--- want-error --
+-- want-errors --
 persons\[someone\].Properties: property discarded: unknown property "monkey"
 
 -- want-catalog.yaml --

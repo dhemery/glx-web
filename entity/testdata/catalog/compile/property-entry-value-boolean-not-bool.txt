@@ -8,7 +8,7 @@ persons:
             # living is a boolean property.
             living: "string instead of bool"
 
--- want-error --
+-- want-errors --
 persons\[someone\].Properties.living: value discarded: expected boolean, got string
 persons\[someone\].Properties.living: entry discarded: has neither value nor fields
 persons\[someone\].Properties.living: property discarded: no entries
