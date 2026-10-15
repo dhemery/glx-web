@@ -10,6 +10,8 @@ persons:
 
 -- want-error --
 persons\[someone\].Properties.name: value discarded: expected string, got int
+persons\[someone\].Properties.name: entry discarded: has neither value nor fields
+persons\[someone\].Properties.name: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:

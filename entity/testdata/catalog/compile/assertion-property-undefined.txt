@@ -15,7 +15,6 @@ assertions:
         property: monkey
 
 -- want-error --
-^$
 
 -- want-catalog.yaml --
 assertions:

@@ -10,6 +10,8 @@ persons:
 
 -- want-error --
 persons\[someone\].Properties.living: value discarded: expected boolean, got string
+persons\[someone\].Properties.living: entry discarded: has neither value nor fields
+persons\[someone\].Properties.living: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:

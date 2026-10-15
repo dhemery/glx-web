@@ -10,6 +10,8 @@ persons:
 
 -- want-error --
 persons\[someone\].Properties.sex: value discarded: expected string for "sex_types" vocabulary lookup, got bool
+persons\[someone\].Properties.sex: entry discarded: has neither value nor fields
+persons\[someone\].Properties.sex: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:

@@ -43,6 +43,11 @@ func (e PropertyEntry) String() string {
 	return e.Value.String()
 }
 
+// An entry is valid if it has either a value or fields.
+func (e PropertyEntry) valid() bool {
+	return e.Value != nil || len(e.Fields) > 0
+}
+
 // PropertyField represents a field in a property entry.
 type PropertyField struct {
 	Definition *glx.FieldDefinition `json:"definition"` // The GLX definition of the field.
@@ -59,54 +64,61 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 
 	properties := make(map[string]Property)
 	for name, rawProperty := range rawProperties {
+		pctx := ppctx.Sub(name)
 		def := defs[name]
 		if def == nil {
 			ppctx.Warnf("property discarded: %s", errUnknown{"property", name})
 			continue
 		}
 
-		property := parseProperty(ppctx.Sub(name), rawProperty, def)
-		if len(property.Entries) > 0 {
-			properties[name] = property
+		property := parseProperty(pctx, rawProperty, def)
+		if len(property.Entries) == 0 {
+			pctx.Warn("property discarded: no entries")
+			continue
 		}
+
+		properties[name] = property
 	}
 
 	return properties
 }
 
+func appendOrWarn(ctx *context, entries []PropertyEntry, entry PropertyEntry) []PropertyEntry {
+	if !entry.valid() {
+		ctx.Warn("entry discarded: has neither value nor fields")
+		return entries
+	}
+	return append(entries, entry)
+}
+
 func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) Property {
-	var property Property
+	var entries []PropertyEntry
 
 	switch v := rawProperty.(type) {
 	case []any:
-		// Convert each element to a property value map and parse it.
+		// Convert each element of rawProperty a property entry map and parse it.
 		for i, rawEntry := range v {
-			entry := parseEntry(ctx.Subi(i), asEntryMap(rawEntry), def)
-			if entry.Value == nil {
-				continue
-			}
-			property.Entries = append(property.Entries, entry)
+			entryCtx := ctx.Subi(i)
+			rawEntryMap := asEntryMap(rawEntry)
+			entry := parseEntry(entryCtx, rawEntryMap, def)
+			entries = appendOrWarn(entryCtx, entries, entry)
 		}
 	case map[string]any:
-		// Assume the map is a property value map and parse it.
+		// Assume rawProperty is a property entry map and parse it.
 		entry := parseEntry(ctx, v, def)
-		if entry.Value == nil {
-			return property
-		}
-		property.Entries = append(property.Entries, entry)
+		entries = appendOrWarn(ctx, entries, entry)
 	default:
-		// Assume raw property is a scalar property value. Wrap it in a
+		// Assume rawProperty is a scalar property value. Wrap it in a
 		// property entry map and parse it.
 		rawEntryMap := map[string]any{"value": v}
 		entry := parseEntry(ctx, rawEntryMap, def)
-		if entry.Value == nil {
-			return property
-		}
-		property.Entries = append(property.Entries, entry)
+		entries = appendOrWarn(ctx, entries, entry)
 	}
 
-	property.Definition = def
-	return property
+	return Property{
+		Definition: def,
+		Entries:    entries,
+	}
 }
 
 func asEntryMap(raw any) map[string]any {

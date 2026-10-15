@@ -10,6 +10,8 @@ persons:
 
 -- want-error --
 persons\[someone\].Properties.residence: value discarded: expected string for "places" reference lookup, got bool
+persons\[someone\].Properties.residence: entry discarded: has neither value nor fields
+persons\[someone\].Properties.residence: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:

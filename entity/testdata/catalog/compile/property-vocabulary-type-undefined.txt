@@ -14,6 +14,8 @@ persons:
 
 -- want-error --
 persons\[someone\].Properties.some_custom_property: value discarded: unknown value type "rabbit"
+persons\[someone\].Properties.some_custom_property: entry discarded: has neither value nor fields
+persons\[someone\].Properties.some_custom_property: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:

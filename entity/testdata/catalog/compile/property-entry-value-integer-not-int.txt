@@ -12,6 +12,8 @@ places:
 
 -- want-error --
 places\[someplace\].Properties.population: value discarded: expected integer, got string
+places\[someplace\].Properties.population: entry discarded: has neither value nor fields
+places\[someplace\].Properties.population: property discarded: no entries
 
 -- want-catalog.yaml --
 places:

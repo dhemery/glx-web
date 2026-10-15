@@ -10,6 +10,8 @@ import (
 	"maps"
 	"path/filepath"
 	"regexp"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/dhemery/glx-web/entity"
@@ -43,10 +45,7 @@ func TestCatalogCompile(t *testing.T) {
 
 			gotErrOut := errout.Bytes()
 
-			wantError := readWantError(t, fsys)
-			if !wantError.Match(gotErrOut) {
-				t.Errorf("\n error output: %s\nwant match of: %s", gotErrOut, wantError)
-			}
+			matchPatterns(t, fsys, gotErrOut)
 
 			// Marshal and unmarshal the catalog to convert it to a
 			// map[string]any that can be compared to the structure
@@ -61,16 +60,56 @@ func TestCatalogCompile(t *testing.T) {
 	}
 }
 
-func readWantError(t *testing.T, fsys fs.FS) *regexp.Regexp {
+func matchPatterns(t *testing.T, fsys fs.FS, input []byte) {
+	unmatchedPatterns := readPatterns(t, fsys)
+	trimmed := strings.TrimSpace(string(input))
+	var unmatchedLines []string
+	for line := range strings.Lines(trimmed) {
+		trimmed := strings.TrimSpace(line)
+		if trimmed != "" {
+			unmatchedLines = append(unmatchedLines, trimmed)
+		}
+	}
+
+	for p, pattern := range slices.Backward(unmatchedPatterns) {
+		for l, line := range slices.Backward(unmatchedLines) {
+			if pattern.MatchString(line) {
+				unmatchedLines = slices.Delete(unmatchedLines, l, l+1)
+				unmatchedPatterns = slices.Delete(unmatchedPatterns, p, p+1)
+				break
+			}
+		}
+	}
+	for _, l := range unmatchedLines {
+		t.Errorf("unexpected output: %q", l)
+	}
+	for _, p := range unmatchedPatterns {
+		t.Errorf("unmatched pattern: %q", p)
+	}
+}
+
+func readPatterns(t *testing.T, fsys fs.FS) []*regexp.Regexp {
 	text, err := fs.ReadFile(fsys, "want-error")
 	if err != nil {
 		t.Fatal(err)
 	}
-	re, err := regexp.Compile(string(bytes.TrimSpace(text)))
-	if err != nil {
-		t.Fatal(err)
+
+	text = bytes.TrimSpace(text)
+
+	var res []*regexp.Regexp
+	for line := range bytes.Lines(text) {
+		trimmed := bytes.TrimSpace(line)
+		if len(trimmed) == 0 {
+			continue
+		}
+		re, err := regexp.Compile(string(trimmed))
+		if err != nil {
+			t.Fatal(err)
+		}
+		res = append(res, re)
 	}
-	return re
+
+	return res
 }
 
 // Convert in to an object by marshaling and unmarshaling. We're using instead
