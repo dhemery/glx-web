@@ -187,7 +187,7 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 		if !ok {
 			return nil, errParse{fmt.Sprintf("string for %q reference lookup", def.ReferenceType), raw}
 		}
-		// TODO(validation): Warn if no such entity.
+		// TODO(validation): Return error if no such entity.
 		return ctx.Catalog.entity(id, def.ReferenceType), nil
 	case def.VocabularyType != "":
 		term, ok := raw.(string)
