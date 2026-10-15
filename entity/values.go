@@ -7,9 +7,6 @@ import (
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
-// TODO(errors): These low-level functions should return error instead of
-// logging. Let the caller log a warning.
-
 type Stringer interface {
 	String() string
 }

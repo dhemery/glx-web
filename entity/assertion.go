@@ -63,12 +63,20 @@ func (a *Assertion) compile(ctx *context) {
 		a.Subject = actx.Catalog.EventsByID[s.Event]
 		roles := actx.GLX.ParticipantRoles
 		props := actx.GLX.EventProperties
-		a.Participant = parseParticipant(actx.Sub("Participant"), inner.Participant, roles, props)
+		participant, err := parseParticipant(ctx, inner.Participant, roles, props)
+		if err != nil {
+			actx.Sub("Participant").Warnf("discarded participant: %s", err)
+		}
+		a.Participant = participant
 	case s.Relationship != "":
 		a.Subject = actx.Catalog.RelationshipsByID[s.Relationship]
 		roles := actx.GLX.ParticipantRoles
 		props := actx.GLX.RelationshipProperties
-		a.Participant = parseParticipant(actx.Sub("Participant"), inner.Participant, roles, props)
+		participant, err := parseParticipant(ctx, inner.Participant, roles, props)
+		if err != nil {
+			actx.Sub("Participant").Warnf("discarded participant: %s", err)
+		}
+		a.Participant = participant
 	case s.Place != "":
 		a.Subject = actx.Catalog.PlacesByID[s.Place]
 	}

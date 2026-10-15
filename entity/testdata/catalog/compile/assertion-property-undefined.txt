@@ -1,6 +1,6 @@
-TODO: Is it okay for an assertion to refer to a property that does not yet
-exist? A researcher might want to write an assertion first, and defer defining
-the property until the conclusion is recorded.
+TODO(feature): Is it okay for an assertion to refer to a property that does not
+yet exist? A researcher might want to write an assertion first, and defer
+defining the property until the conclusion is recorded.
 
 On the other hand, how to present an undefined property to a template?
 
@@ -28,3 +28,5 @@ events:
             definition:
                 label: Birth
             value: birth
+        properties: {}
+        participants: []

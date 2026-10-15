@@ -46,6 +46,7 @@ func (e *Event) compile(ctx *context) {
 	ectx := ctx.ForEntity(e.entity)
 
 	inner := e.Event
+	// TODO(validation): Warn if no participants. Spec requires at least one.
 	e.Participants = parseParticipants(ectx, inner.Participants, ectx.GLX.EventProperties)
 	e.Place = ectx.Catalog.PlacesByID[e.PlaceID]
 	e.Properties = parseProperties(ectx, inner.Properties, ectx.GLX.EventProperties)

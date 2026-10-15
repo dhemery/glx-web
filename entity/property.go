@@ -176,8 +176,9 @@ func parsePropertyValueFields(ctx *context, rawFields any, defs map[string]*glx.
 }
 
 func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition) (Stringer, error) {
-	// TODO(dale): Can raw be nil? GLX validation prevents nil "value" for
-	// temporal properties. What about single-value or other multi-value?
+	// TODO(validation): Can raw be nil? GLX validation prevents nil
+	// "value" for temporal properties. What about single-value or other
+	// multi-value?
 	switch {
 	case def.ValueType != "":
 		return parsePrimitiveValue(raw, def.ValueType)
@@ -186,7 +187,7 @@ func parsePropertyValueValue(ctx *context, raw any, def *glx.PropertyDefinition)
 		if !ok {
 			return nil, errParse{fmt.Sprintf("string for %q reference lookup", def.ReferenceType), raw}
 		}
-		// TODO: Warn if no such entity.
+		// TODO(validation): Warn if no such entity.
 		return ctx.Catalog.entity(id, def.ReferenceType), nil
 	case def.VocabularyType != "":
 		term, ok := raw.(string)

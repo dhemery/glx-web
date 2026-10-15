@@ -1,7 +1,7 @@
 If the value type for a custom property is invalid,
 discard the property.
 
-TODO: Catch this before trying to parse any value.
+TODO(validation): Catch this error before trying to parse any value.
 -- test.glx --
 person_properties:
     some_custom_property:

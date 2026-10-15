@@ -16,5 +16,5 @@ citations\[some-citation\].Properties.accessed: property value discarded: expect
 
 -- want-catalog.yaml --
 citations:
-    # empty object because the only property was discarded
-    some-citation: {}
+    some-citation:
+        properties: {}

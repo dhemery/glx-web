@@ -78,6 +78,9 @@ func (p *Person) addAssertion(a *Assertion) {
 }
 
 func (p *Person) addEvent(e *Event) {
+	if p == nil {
+		return
+	}
 	p.Events = append(p.Events, e)
 }
 

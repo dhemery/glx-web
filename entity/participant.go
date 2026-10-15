@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"strconv"
+	"errors"
 
 	"github.com/genealogix/glx/go-glx"
 )
@@ -33,26 +33,39 @@ func parseParticipants(ctx *context, inner []glx.Participant, propertyDefs map[s
 	ppctx := ctx.Sub("Participants")
 
 	roleDefs := ppctx.GLX.ParticipantRoles
-	var participants ParticipantList
+	participants := ParticipantList{}
 
 	for i, p := range inner {
-		pctx := ppctx.Sub(strconv.Itoa(i))
-		participants = append(participants, parseParticipant(pctx, &p, roleDefs, propertyDefs))
+		pctx := ppctx.Subi(i)
+		participant, err := parseParticipant(pctx, &p, roleDefs, propertyDefs)
+		if err != nil {
+			pctx.Warnf("discarding participant: %s", err)
+			continue
+		}
+		participants = append(participants, participant)
 	}
 
 	return participants
 }
 
-func parseParticipant(ctx *context, inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition) *Participant {
+func parseParticipant(ctx *context, inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition) (*Participant, error) {
 	if inner == nil {
-		return nil
+		// Assertion can pass nil *Participant.
+		return nil, nil
 	}
-	// TODO(validation): Does GLX validation guarantee a valid value?
+
+	if inner.Person == "" {
+		// Spec requires Person, but GLX validation allows empty.
+		return nil, errors.New("person must not be empty")
+	}
+
+	// Role is optional, but GLX validates Role if present.
 	role, _ := newVocabularyValue(inner.Role, roleDefs)
+
 	return &Participant{
 		Participant: inner,
 		Person:      ctx.Catalog.PersonsByID[inner.Person],
 		Properties:  parseProperties(ctx, inner.Properties, propertyDefs),
 		Role:        role,
-	}
+	}, nil
 }
