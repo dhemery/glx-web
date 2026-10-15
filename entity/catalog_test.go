@@ -179,8 +179,7 @@ func textArchives(t *testing.T, pattern string) map[string]*txtar.Archive {
 // vocabularies (e.g. Description) that are useful for validating catalog
 // structure.
 var catalogMarshalOptions = json.JoinOptions(
-	json.FormatNilMapAsNull(true),
-	json.FormatNilSliceAsNull(true),
+	json.OmitZeroStructFields(true),
 	json.WithMarshalers(
 		json.JoinMarshalers(
 			// Entities
@@ -208,8 +207,8 @@ var catalogMarshalOptions = json.JoinOptions(
 
 func marshalAssertion(out *jsontext.Encoder, in *entity.Assertion) error {
 	v := struct {
-		Date        glxdate.Date        `json:"date,omitzero"`
-		Participant *entity.Participant `json:"participant,omitzero"`
+		Date        glxdate.Date        `json:"date"`
+		Participant *entity.Participant `json:"participant"`
 		Property    string              `json:"property"`
 		Subject     string              `json:"subject"`
 	}{
@@ -240,11 +239,11 @@ func marshalDate(out *jsontext.Encoder, in glxdate.Date) error {
 
 func marshalEvent(out *jsontext.Encoder, in *entity.Event) error {
 	v := struct {
-		Date         glxdate.Date               `json:"date,omitzero"`
+		Date         glxdate.Date               `json:"date"`
 		Participants []*entity.Participant      `json:"participants"`
-		Place        string                     `json:"place,omitzero"`
+		Place        string                     `json:"place"`
 		Properties   map[string]entity.Property `json:"properties"`
-		Type         *entity.VocabularyValue    `json:"type,omitzero"`
+		Type         *entity.VocabularyValue    `json:"type"`
 	}{
 		Date:         in.Date,
 		Participants: in.Participants,
@@ -301,9 +300,9 @@ func marshalPerson(out *jsontext.Encoder, in *entity.Person) error {
 
 func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
 	v := struct {
-		Parent     string                     `json:"parent,omitzero"`
+		Parent     string                     `json:"parent"`
 		Properties map[string]entity.Property `json:"properties"`
-		Type       *entity.VocabularyValue    `json:"type,omitzero"`
+		Type       *entity.VocabularyValue    `json:"type"`
 	}{
 		Properties: in.Properties,
 		Type:       in.Type,
@@ -317,9 +316,9 @@ func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
 func marshalPropertyDefinition(out *jsontext.Encoder, in *glx.PropertyDefinition) error {
 	v := struct {
 		Label          string `json:"label"`
-		ValueType      string `json:"value_type,omitempty"`
-		ReferenceType  string `json:"reference_type,omitempty"`
-		VocabularyType string `json:"vocabulary_type,omitempty"`
+		ValueType      string `json:"value_type"`
+		ReferenceType  string `json:"reference_type"`
+		VocabularyType string `json:"vocabulary_type"`
 	}{
 		Label:          in.Label,
 		ValueType:      in.ValueType,
