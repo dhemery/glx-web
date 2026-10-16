@@ -3,17 +3,28 @@ warn and discard the value.
 
 -- test.glx --
 persons:
-    someone:
+    person-with-error:
         properties:
             # name is a string-valued property.
             name: 3
+    person-well-formed:
+        properties:
+            name: Pete Ham
 
 -- want-errors --
-persons\[someone\].Properties.name: value discarded: expected string, got int
-persons\[someone\].Properties.name: entry discarded: has neither value nor fields
-persons\[someone\].Properties.name: property discarded: no entries
+persons\[person-with-error\].Properties.name: value discarded: expected string, got int
+persons\[person-with-error\].Properties.name: entry discarded: has neither value nor fields
+persons\[person-with-error\].Properties.name: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:
-    someone:
+    person-with-error:
         properties: {}
+    person-well-formed:
+        properties:
+            name:
+                definition:
+                    label: Name
+                    value_type: string
+                entries:
+                -   value: StringValue{"Pete Ham"}
