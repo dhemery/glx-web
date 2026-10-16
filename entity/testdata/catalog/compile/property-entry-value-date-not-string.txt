@@ -6,17 +6,28 @@ discard the property.
 
 -- test.glx --
 citations:
-  some-citation:
-    properties:
-      # accessed is a date-valued property and 3 is not a string.
-      accessed: 3
+    citation-with-error:
+        properties:
+            # accessed is a date-valued property and 3 is not a string.
+            accessed: 3
+    citation-well-formed:
+        properties:
+            accessed: "2022-01-19"
 
 -- want-errors --
-citations\[some-citation\].Properties.accessed: value discarded: expected date string, got int
-citations\[some-citation\].Properties.accessed: entry discarded: has neither value nor fields
-citations\[some-citation\].Properties.accessed: property discarded: no entries
+citations\[citation-with-error\].Properties.accessed: value discarded: expected date string, got int
+citations\[citation-with-error\].Properties.accessed: entry discarded: has neither value nor fields
+citations\[citation-with-error\].Properties.accessed: property discarded: no entries
 
 -- want-catalog.yaml --
 citations:
-    some-citation:
-        properties: {}
+    citation-with-error:
+        properties: {} # Ill-formed property discarded.
+    citation-well-formed:
+        properties:
+            accessed:
+                definition:
+                    label: Accessed Date
+                    value_type: date
+                entries:
+                -   value: "2022-01-19"
