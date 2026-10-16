@@ -2,14 +2,25 @@ Discard unknown properties.
 
 -- test.glx --
 persons:
-  someone:
-    properties:
-      monkey: "undefined property"
+    person-with-error:
+        properties:
+            monkey: "undefined property"
+    person-well-formed:
+        properties:
+            living: true
 
 -- want-errors --
-persons\[someone\].Properties: property discarded: unknown property "monkey"
+persons\[person-with-error\].Properties: property discarded: unknown property "monkey"
 
 -- want-catalog.yaml --
 persons:
-  someone:
-    properties: {}
+    person-with-error:
+        properties: {}
+    person-well-formed:
+        properties:
+            living:
+                definition:
+                    label: Living
+                    value_type: boolean
+                entries:
+                -   value: BoolValue{true}
