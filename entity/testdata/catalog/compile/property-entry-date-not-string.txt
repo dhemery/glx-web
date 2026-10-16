@@ -21,5 +21,5 @@ persons:
                 definition:
                     label: Name
                     value_type: string
-                values:
+                entries:
                 -   value: StringValue{"Someone"}

@@ -128,7 +128,7 @@ func (c *Catalog) entity(id string, entityType string) entityReference {
 		return c.CitationsByID[id]
 	case glx.EntityTypePersons.Plural():
 		return c.PersonsByID[id]
-	case glx.EntityTypeMedia.Plural():
+	case glx.EntityTypePlaces.Plural():
 		return c.PlacesByID[id]
 	default:
 		return nil

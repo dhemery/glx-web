@@ -18,6 +18,7 @@ places\[someplace\].Properties.population: property discarded: no entries
 -- want-catalog.yaml --
 places:
     someplace:
+        name: Someplace
         type:
             definition:
                 label: County

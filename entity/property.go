@@ -11,7 +11,7 @@ import (
 // slice of entries even if the GLX property is defined as single-valued.
 type Property struct {
 	Definition *glx.PropertyDefinition `json:"definition,omitzero"` // The GLX definition of the property.
-	Entries    []PropertyEntry         `json:"values,omitzero,omitempty"`
+	Entries    []PropertyEntry         `json:"entries,omitzero,omitempty"`
 }
 
 // String returns the string value of the first entry of p.
@@ -92,7 +92,7 @@ func appendOrWarn(ctx *context, entries []PropertyEntry, entry PropertyEntry) []
 }
 
 func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) Property {
-	var entries []PropertyEntry
+	entries := []PropertyEntry{}
 
 	switch v := rawProperty.(type) {
 	case []any:
@@ -134,8 +134,8 @@ func parseEntry(ctx *context, rawEntry map[string]any, def *glx.PropertyDefiniti
 
 	value, err := parseEntryValue(ctx, rawEntry["value"], def)
 	if err != nil {
-		ctx.Warnf("value discarded: %s", err)
-		return entry
+		value = nil
+		ctx.Warnf("value discarded: %v", err)
 	}
 	entry.Value = value
 	entry.Date = parseEntryDate(ctx, rawEntry["date"])

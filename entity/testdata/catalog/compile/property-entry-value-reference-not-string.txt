@@ -2,19 +2,39 @@ if the raw value for a reference-type property is not a string,
 warn and discard the value.
 
 -- test.glx --
+places:
+    somewhere:
+        name: Somewhere
 persons:
-    someone:
+    person-with-errors:
         properties:
             # residence has a "places" reference_type, and so requires a string.
             residence: true
+    person-well-formed:
+        properties:
+            residence:
+                date: "2023-01-09"
+                value: somewhere
 
 -- want-errors --
-persons\[someone\].Properties.residence: value discarded: expected string for "places" reference lookup, got bool
-persons\[someone\].Properties.residence: entry discarded: has neither value nor fields
-persons\[someone\].Properties.residence: property discarded: no entries
+persons\[person-with-errors\].Properties.residence: value discarded: expected string for "places" reference lookup, got bool
+persons\[person-with-errors\].Properties.residence: entry discarded: has neither value nor fields
+persons\[person-with-errors\].Properties.residence: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:
-    someone:
+    person-with-errors:
         properties: {}
-
+    person-well-formed:
+        properties:
+            residence:
+                definition:
+                    label: Residence
+                    reference_type: places
+                entries:
+                -   date: "2023-01-09"
+                    value: places/somewhere
+places:
+    somewhere:
+        name: Somewhere
+        properties: {}
