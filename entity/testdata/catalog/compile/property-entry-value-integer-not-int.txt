@@ -3,24 +3,42 @@ warn and discard the value.
 
 -- test.glx --
 places:
-    someplace:
-        name: Someplace
+    place-with-error:
+        name: Place With Error
         type: county
         properties:
             # population is an integer property.
             population: "string instead of integer"
+    place-well-formed:
+        name: Place Well Formed
+        type: county
+        properties:
+            population: 9
 
 -- want-errors --
-places\[someplace\].Properties.population: value discarded: expected integer, got string
-places\[someplace\].Properties.population: entry discarded: has neither value nor fields
-places\[someplace\].Properties.population: property discarded: no entries
+places\[place-with-error\].Properties.population: value discarded: expected integer, got string
+places\[place-with-error\].Properties.population: entry discarded: has neither value nor fields
+places\[place-with-error\].Properties.population: property discarded: no entries
 
 -- want-catalog.yaml --
 places:
-    someplace:
-        name: Someplace
+    place-with-error:
+        name: Place With Error
         type:
             definition:
                 label: County
             value: county
         properties: {}
+    place-well-formed:
+        name: Place Well Formed
+        type:
+            definition:
+                label: County
+            value: county
+        properties:
+            population:
+                definition:
+                    label: Population
+                    value_type: integer
+                entries:
+                -   value: IntValue{9}

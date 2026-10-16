@@ -336,7 +336,7 @@ func marshalFieldDefinition(out *jsontext.Encoder, in *glx.FieldDefinition) erro
 // prevents json.Unmarshal from unmarshaling the value as float64. The special
 // format allows Diff to match the IntValue type as well as the value.
 func marshalIntValue(out *jsontext.Encoder, in entity.IntValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue(%d)", in)))
+	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue{%d}", in)))
 }
 
 func marshalParticipant(out *jsontext.Encoder, in *entity.Participant) error {
