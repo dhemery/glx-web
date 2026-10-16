@@ -3,17 +3,31 @@ warn and discard the value.
 
 -- test.glx --
 persons:
-  someone:
-    properties:
-      # sex has a vocabulary type (sex_types) and so requires a string value.
-      sex: false
+    person-with-error:
+        properties:
+            # sex has a vocabulary type (sex_types) and so requires a string value.
+            sex: false
+    person-well-formed:
+        properties:
+            sex: unknown
 
 -- want-errors --
-persons\[someone\].Properties.sex: value discarded: expected string for "sex_types" vocabulary lookup, got bool
-persons\[someone\].Properties.sex: entry discarded: has neither value nor fields
-persons\[someone\].Properties.sex: property discarded: no entries
+persons\[person-with-error\].Properties.sex: value discarded: expected string for "sex_types" vocabulary lookup, got bool
+persons\[person-with-error\].Properties.sex: entry discarded: has neither value nor fields
+persons\[person-with-error\].Properties.sex: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:
-    someone:
-        properties: {}
+    person-with-error:
+        properties: {} # Ill-formed property discarded.
+    person-well-formed:
+        properties:
+            sex:
+                definition:
+                    label: Sex
+                    vocabulary_type: sex_types
+                entries:
+                -   value:
+                        value: unknown
+                        definition:
+                            label: Unknown
