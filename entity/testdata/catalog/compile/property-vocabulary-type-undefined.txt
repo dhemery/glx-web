@@ -4,20 +4,31 @@ discard the property.
 TODO(validation): Catch this error before trying to parse any value.
 -- test.glx --
 person_properties:
-    some_custom_property:
-        label: "Custom Property"
+    custom_property_with_error:
+        label: Custom Property with Error
         value_type: rabbit
+    custom_property_well_formed:
+        label: Custom Property Well Formed
+        value_type: integer
 persons:
     someone:
         properties:
-            some_custom_property: 42
+            custom_property_with_error: 42
+            custom_property_well_formed: 43
 
 -- want-errors --
-persons\[someone\].Properties.some_custom_property: value discarded: unknown value type "rabbit"
-persons\[someone\].Properties.some_custom_property: entry discarded: has neither value nor fields
-persons\[someone\].Properties.some_custom_property: property discarded: no entries
+persons\[someone\].Properties.custom_property_with_error: value discarded: unknown value type "rabbit"
+persons\[someone\].Properties.custom_property_with_error: entry discarded: has neither value nor fields
+persons\[someone\].Properties.custom_property_with_error: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:
     someone:
-        properties: {}
+        properties:
+            # custom_property_with_error discarded.
+            custom_property_well_formed:
+                definition:
+                    label: Custom Property Well Formed
+                    value_type: integer
+                entries:
+                -   value: IntValue{43}
