@@ -3,23 +3,52 @@ warn and discard all fields.
 
 -- test.glx --
 persons:
-  someone:
-    properties:
-      name:
-        value: Someone
-        # fields requires map[string]any
-        fields: "string instead of map of fields"
+    person-with-error:
+        properties:
+            name:
+                value: Person with Error
+                # fields requires map[string]any
+                fields: "string instead of map of fields"
+    person-well-formed:
+        properties:
+            name:
+                value: Person well Formed
+                fields:
+                    given: Person
+                    surname_prefix: well
+                    surname: Formed
 
 -- want-errors --
-persons\[someone\].Properties.name: all fields discarded: expected object, got string
+persons\[person-with-error\].Properties.name: all fields discarded: expected object, got string
 
 -- want-catalog.yaml --
 persons:
-  someone:
-    properties:
-      name:
-        definition:
-            label: Name
-            value_type: string
-        entries:
-          - value: StringValue{"Someone"}
+    person-with-error:
+        properties:
+            name:
+                definition:
+                    label: Name
+                    value_type: string
+                entries:
+                -   value: StringValue{"Person with Error"}
+    person-well-formed:
+        properties:
+            name:
+                definition:
+                    label: Name
+                    value_type: string
+                entries:
+                -   value: StringValue{"Person well Formed"}
+                    fields:
+                        given:
+                            definition:
+                                label: Given Name
+                            value: StringValue{"Person"}
+                        surname_prefix:
+                            definition:
+                                label: Surname Prefix
+                            value: StringValue{"well"}
+                        surname:
+                            definition:
+                                label: Surname
+                            value: StringValue{"Formed"}
