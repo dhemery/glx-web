@@ -3,17 +3,28 @@ warn and discard the value.
 
 -- test.glx --
 persons:
-    someone:
+    person-with-error:
         properties:
             # living is a boolean property.
             living: "string instead of bool"
+    person-well-formed:
+        properties:
+            living: false
 
 -- want-errors --
-persons\[someone\].Properties.living: value discarded: expected boolean, got string
-persons\[someone\].Properties.living: entry discarded: has neither value nor fields
-persons\[someone\].Properties.living: property discarded: no entries
+persons\[person-with-error\].Properties.living: value discarded: expected boolean, got string
+persons\[person-with-error\].Properties.living: entry discarded: has neither value nor fields
+persons\[person-with-error\].Properties.living: property discarded: no entries
 
 -- want-catalog.yaml --
 persons:
-    someone:
-        properties: {}
+    person-with-error:
+        properties: {} # Ill-formed property discarded.
+    person-well-formed:
+        properties:
+            living:
+                definition:
+                    label: Living
+                    value_type: boolean
+                entries:
+                -   value: BoolValue{false}
