@@ -6,9 +6,11 @@ persons:
     someone:
         properties:
             name:
-            -   value: Someone
+            -   value: Entry with Bad Date
                 # date requires a string.
                 date: [array, instead, of, string]
+            -   value: Entry with Good Date
+                date: "2012-05-22"
 
 -- want-errors --
 persons\[someone\].Properties.name\[0\]: date discarded: expected date string, got
@@ -22,4 +24,7 @@ persons:
                     label: Name
                     value_type: string
                 entries:
-                -   value: StringValue{"Someone"}
+                -   value: StringValue{"Entry with Bad Date"}
+                    # Bad date discarded, but value retained.
+                -   value: StringValue{"Entry with Good Date"}
+                    date: "2012-05-22"
