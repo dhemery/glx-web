@@ -160,31 +160,35 @@
 // its label, description, value type,
 // and other details.
 //
-// Each Property's values
-// are represented as a list of [entity.PropertyEntry].
-// The values are presented as a list
+// Each Property has a list of [entity.PropertyEntry].
+// Each entry always has a value, a date, and fields,
+// even if the property definition
+// does not specify all of those.
+// Each property always has a list of entries
 // even if the entity's GLX file gives only one value,
-// and even if the property's definition specifies a single value
-// A template that cares only about the first value
+// and even if the property's definition specifies a single value.
+// A template that cares only about the first entry
 // can access it via the Property's Value and String methods.
 //
-// Each Property has a Value method
-// that yields the property's first value.
+// Each Property has an Value method
+// that returns the value of the first entry.
 //
 // Each Property has a String method
-// that yields the property's first value as a string.
+// that returns the value of the first entry
+// as a string.
 //
-// # Property Values
+// # Property Entries
 //
-// Each PropertyValue has a Date and Fields,
-// even if the property definition does not specify them.
+// Each PropertyEntry has a Value, a Date, and Fields,
+// even if the property definition
+// does not specify all of those.
 // The fields are represented as a list of [entity.PropertyField].
 //
-// Each PropertyValue has a String method.
-// that yields the value as a string.
+// Each PropertyEntry has a String method.
+// that returns the entry's Value as a string.
 //
 // If a Property's type is a vocabulary type,
-// the Value of each PropertyValue
+// each entry's value
 // is represented as an [entity.VocabularyValue].
 //
 // # Property Fields
@@ -204,7 +208,7 @@
 //   - Entity fields of type "date",
 //     such as [entity.Event.Date].
 //   - Each [entity.PropertyEntry.Date],
-//     the date when the property value applied.
+//     the date when the entry's value applied.
 //   - Each [entity.PropertyEntry.Value]
 //     in properties of type "date".
 //
