@@ -2,20 +2,43 @@ If an event participant's Person is empty, discard the participant.
 The GLX spec requires a person, but GLX validation allows empty.
 
 -- test.glx --
+persons:
+    existing-person:
+        properties: {}
 events:
-    event-e:
+    event-with-error:
         type: birth
         participants:
         -   role: subject
             # No person
+    event-well-formed:
+        type: birth
+        participants:
+        -   role: subject
+            person: existing-person
 -- want-errors --
-events\[event-e\].Participants\[0\]: discarding participant: person must not be empty
+events\[event-with-error\].Participants\[0\]: discarding participant: person must not be empty
 -- want-catalog.yaml --
 events:
-    event-e:
+    event-with-error:
         type:
             definition:
                 label: Birth
             value: birth
         properties: {}
-        participants: []
+        participants: [] # Ill-formed participant discarded
+    event-well-formed:
+        type:
+            definition:
+                label: Birth
+            value: birth
+        properties: {}
+        participants:
+        -   role:
+                definition:
+                    label: Subject
+                value: subject
+            person: persons/existing-person
+persons:
+    existing-person:
+        properties: {}

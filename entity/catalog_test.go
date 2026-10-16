@@ -306,17 +306,15 @@ func marshalEvent(out *jsontext.Encoder, in *entity.Event) error {
 	v := struct {
 		Date         glxdate.Date               `json:"date"`
 		Participants []*entity.Participant      `json:"participants"`
-		Place        string                     `json:"place"`
+		Place        *entity.Place              `json:"place"`
 		Properties   map[string]entity.Property `json:"properties"`
 		Type         *entity.VocabularyValue    `json:"type"`
 	}{
 		Date:         in.Date,
 		Participants: in.Participants,
+		Place:        in.Place,
 		Properties:   in.Properties,
 		Type:         in.Type,
-	}
-	if in.Place != nil {
-		v.Place = in.Place.ID()
 	}
 	return json.MarshalEncode(out, &v)
 }
@@ -341,15 +339,13 @@ func marshalIntValue(out *jsontext.Encoder, in entity.IntValue) error {
 
 func marshalParticipant(out *jsontext.Encoder, in *entity.Participant) error {
 	v := struct {
-		Person     string                     `json:"person"`
+		Person     *entity.Person             `json:"person"`
+		Properties map[string]entity.Property `json:"properties,omitempty"`
 		Role       *entity.VocabularyValue    `json:"role"`
-		Properties map[string]entity.Property `json:"properties"`
 	}{
-		Role:       in.Role,
+		Person:     in.Person,
 		Properties: in.Properties,
-	}
-	if in.Person != nil {
-		v.Person = in.Person.ID()
+		Role:       in.Role,
 	}
 	return json.MarshalEncode(out, &v)
 }
@@ -372,16 +368,14 @@ func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
 	}
 	v := struct {
 		Name       string                     `json:"name"`
-		Parent     string                     `json:"parent"`
+		Parent     *entity.Place              `json:"parent"`
 		Properties map[string]entity.Property `json:"properties"`
 		Type       *entity.VocabularyValue    `json:"type"`
 	}{
 		Name:       in.Name,
+		Parent:     in.Parent,
 		Properties: in.Properties,
 		Type:       in.Type,
-	}
-	if in.Parent != nil {
-		v.Parent = in.Parent.ID()
 	}
 	return json.MarshalEncode(out, &v)
 }
