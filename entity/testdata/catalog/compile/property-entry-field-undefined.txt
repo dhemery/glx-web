@@ -3,15 +3,16 @@ warn and discard the field.
 
 -- test.glx --
 persons:
-  someone:
-    properties:
-      name:
-        value: Someone
-        fields:
-          monkey: "undefined field"
+    someone:
+        properties:
+            name:
+                value: Someone
+                fields:
+                    unknown_field: "unknown field"
+                    surname: "Known Field"
 
 -- want-errors --
-persons\[someone\].Properties.name: field discarded: unknown field "monkey"
+persons\[someone\].Properties.name: field discarded: unknown field "unknown_field"
 
 -- want-catalog.yaml --
 persons:
@@ -23,3 +24,10 @@ persons:
                     value_type: string
                 entries:
                 -   value: StringValue{"Someone"}
+                    fields:
+                        # unknown_field discarded, but known "surname" field retained.
+                        surname:
+                            definition:
+                                label: Surname
+                            value: StringValue{"Known Field"}
+
