@@ -9,9 +9,9 @@ import (
 
 func TestCompareDates(t *testing.T) {
 	tt := [][]string{
+		// Each slice is ordered as desired.
 		{
-			// Adjacent dates with each possible qualifier, ordered
-			// as desired.
+			// Adjacent dates with each possible qualifier.
 			"BEF 2022-05-15",
 			"    2022-05-15",
 			"AFT 2022-05-15",
@@ -22,7 +22,7 @@ func TestCompareDates(t *testing.T) {
 		{
 			// Across a month boundary. Every possible qualifier
 			// and precision from the last date of one month to the
-			// first date of the next, ordered as desired.
+			// first date of the next.
 			"BEF 2022-05-31",
 			"    2022-05-31",
 			"AFT 2022-05-31",
@@ -36,7 +36,7 @@ func TestCompareDates(t *testing.T) {
 		{
 			// Across a year boundary. Every possible qualifier and
 			// precision from the last date of one year to the
-			// first date of the next, ordered as desired.
+			// first date of the next.
 			"BEF 2021-12-31",
 			"    2021-12-31",
 			"AFT 2021-12-31",

@@ -6,6 +6,44 @@ import (
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
+// CompareDates compares two [glxdate.Date] values from the same calendar,
+// accounting for range, precision, and qualifiers. The comparison uses the
+// year, month, and day returned by Year, Month, and Day respectively. For
+// ranged dates, these values represent the start date of the range.
+//
+// For dates with precision less than [glxdate.PrecisionDay], an omitted month
+// or day is filled in with a value that depends on the qualifier. For
+// unqualified dates and BEF dates, an omitted month or day is filled in with a
+// value less than any actual month or day. For AFT dates, an omitted month
+// or day is filled in with a value greater than any actual month or day.
+//
+// After omitted values are filled in, the year, month, and day of the two
+// dates are compared. Two dates with the same year, month, day, and qualifier
+// compare equal. For dates that differ only in qualifier, an unqualified date
+// compares greater than a BEF date with the same year, month, and day, and
+// less than an AFT date with the same year, month, and day.
+//
+// A quirk of this function gives a non-intuitive result when an AFT date is
+// compared to a BEF date just above it. For example, given
+//
+//	x := glxdate.Parse("AFT 2021-02-02")
+//	y := glxdate.Parse("BEF 2021-02-03")
+//
+// CompareDates(x, y) return -1, even though any event after 2021-02-02 must
+// have happened after any event before 2021-02-03. Similar for BEF and AFT
+// dates with other precisions, including differing precisions. For example:
+//
+//	x := glxdate.Parse("AFT 2022")
+//	y := glxdate.Parse("BEF 2023-01-01")
+//
+// Resolving this quirk would require CompareDates to know the details of every
+// possible calendar.
+//
+// The result of comparing dates from different calendars is undefined.
+func CompareDates(x, y glxdate.Date) int {
+	return cmp.Compare(dateSortValue(x), dateSortValue(y))
+}
+
 const (
 	// Tie-breakers break ties between otherwise equal dates.
 	// tieBreakerBefore < tieBreakerUnqualified < tieBreakerAfter.
@@ -20,9 +58,9 @@ const (
 
 	// Amount to shift each field to make room for the higher-precision
 	// fields.
-	shiftDay   = widthTieBreaker         // Make room for tie-breaker bits.
-	shiftMonth = shiftDay + widthDay     // Make room for day and tie-breaker bits.
-	shiftYear  = shiftMonth + widthMonth // Make room for month, day, and tie-breaker bits.
+	shiftDay   = widthTieBreaker         // Make room for tie-breaker field.
+	shiftMonth = shiftDay + widthDay     // Make room for day and tie-breaker fields.
+	shiftYear  = shiftMonth + widthMonth // Make room for month, day, and tie-breaker fields.
 
 	// The maximum value that will fit in the day field. This value
 	// compares higher than any actual day.
@@ -33,7 +71,7 @@ const (
 	afterAnyActualMonth = 1<<widthMonth - 1
 )
 
-func sortDate(d glxdate.Date) int {
+func dateSortValue(d glxdate.Date) int {
 	var tieBreaker int
 
 	// Use BEF and AFT qualifiers to break ties beween otherwise equal
@@ -69,8 +107,4 @@ func sortDate(d glxdate.Date) int {
 	}
 
 	return d.Year()<<shiftYear + month<<shiftMonth + day<<shiftDay + tieBreaker
-}
-
-func CompareDates(x, y glxdate.Date) int {
-	return cmp.Compare(sortDate(x), sortDate(y))
 }
