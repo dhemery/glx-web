@@ -50,6 +50,23 @@ func TestCompareDates(t *testing.T) {
 			"    2022-01-01",
 			"AFT 2022-01-01",
 		},
+		{
+			// Across an epoch boundary. Every possible qualifier
+			// and precision from the final date BCE to the initial
+			// date AD.
+			"BEF 0001-12-31 BCE",
+			"    0001-12-31 BCE",
+			"AFT 0001-12-31 BCE",
+			"AFT 0001-12 BCE",
+			"AFT 0001 BCE",
+			"BEF 0001",
+			"    0001",
+			"BEF 0001-01",
+			"    0001-01",
+			"BEF 0001-01-01",
+			"    0001-01-01",
+			"AFT 0001-01-01",
+		},
 	}
 
 	for _, dateStrings := range tt {
