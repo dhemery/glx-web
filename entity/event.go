@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"slices"
+
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -31,6 +33,14 @@ type EventList []*Event
 // Sort returns the events sorted by String value.
 func (l EventList) Sort() EventList {
 	return sortValues(l)
+}
+
+func cmpEventDate(x, y *Event) int {
+	return CompareDates(x.Date, y.Date)
+}
+
+func (l EventList) ByDate() EventList {
+	return slices.SortedStableFunc(slices.Values(l), cmpEventDate)
 }
 
 func newEvent(id string, inner *glx.Event) *Event {
