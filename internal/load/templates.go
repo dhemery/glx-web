@@ -10,7 +10,7 @@ import (
 	"github.com/dhemery/glx-web/config"
 	"github.com/dhemery/glx-web/internal/render"
 	"github.com/genealogix/glx/go-glx"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 func Templates(templateDir string) (render.SiteTemplates, error) {

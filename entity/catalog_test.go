@@ -18,8 +18,8 @@ import (
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 	"github.com/google/go-cmp/cmp"
+	"go.yaml.in/yaml/v3"
 	"golang.org/x/tools/txtar"
-	"gopkg.in/yaml.v3"
 )
 
 // TestCatalogCompile tests how [entity.NewCatalog] compiles GLX archives. Each
