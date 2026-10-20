@@ -48,7 +48,7 @@ type RelationshipList []*Relationship
 
 // Sort returns the relationships sorted by String value.
 func (l RelationshipList) Sort() RelationshipList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func newRelationship(id string, inner *glx.Relationship) *Relationship {

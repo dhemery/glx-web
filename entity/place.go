@@ -39,7 +39,7 @@ type PlaceList []*Place
 
 // Sort returns the places sorted by String value.
 func (l PlaceList) Sort() PlaceList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func newPlace(id string, inner *glx.Place) *Place {

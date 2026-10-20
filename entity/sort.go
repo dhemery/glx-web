@@ -5,12 +5,10 @@ import (
 	"strings"
 )
 
-func sortValues[S ~[]E, E Stringer](in S) S {
-	sorted := slices.Clone(in)
-	slices.SortStableFunc(sorted, compareValues)
-	return sorted
+func sortedByString[S ~[]E, E Stringer](s S) S {
+	return slices.SortedStableFunc(slices.Values(s), compareString)
 }
 
-func compareValues[V Stringer](a, b V) int {
+func compareString[T Stringer](a, b T) int {
 	return strings.Compare(a.String(), b.String())
 }

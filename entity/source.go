@@ -34,7 +34,7 @@ type SourceList []*Source
 
 // Sort returns the sources sorted by String value.
 func (l SourceList) Sort() SourceList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func newSource(id string, inner *glx.Source) *Source {

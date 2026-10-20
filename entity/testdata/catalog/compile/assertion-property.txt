@@ -19,7 +19,7 @@ assertions:
 -- want-catalog.yaml --
 assertions:
     test-assertion:
-        subject: test-event
+        subject: events/test-event
         property: monkey
 events:
     test-event:

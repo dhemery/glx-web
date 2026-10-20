@@ -32,7 +32,7 @@ type EventList []*Event
 
 // Sort returns the events sorted by String value.
 func (l EventList) Sort() EventList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func cmpEventDate(x, y *Event) int {

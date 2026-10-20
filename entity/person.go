@@ -33,7 +33,7 @@ type PersonList []*Person
 
 // Sort returns the persons sorted by String value.
 func (l PersonList) Sort() PersonList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func extractSurname(props map[string]Property) string {

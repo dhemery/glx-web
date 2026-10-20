@@ -29,7 +29,7 @@ type RepositoryList []*Repository
 
 // Sort returns the repositories sorted by String value.
 func (l RepositoryList) Sort() RepositoryList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func newRepository(id string, inner *glx.Repository) *Repository {

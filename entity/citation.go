@@ -39,7 +39,7 @@ type CitationList []*Citation
 
 // Sort returns the citations sorted by String value.
 func (l CitationList) Sort() CitationList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func newCitation(id string, inner *glx.Citation) *Citation {

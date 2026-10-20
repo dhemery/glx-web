@@ -2,7 +2,6 @@ package entity_test
 
 import (
 	"bytes"
-	"encoding/json/jsontext"
 	"encoding/json/v2"
 	"errors"
 	"fmt"
@@ -16,7 +15,6 @@ import (
 
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
-	"github.com/genealogix/glx/go-glx/glxdate"
 	"github.com/google/go-cmp/cmp"
 	"go.yaml.in/yaml/v3"
 	"golang.org/x/tools/txtar"
@@ -72,9 +70,9 @@ func TestCatalogCompile(t *testing.T) {
 				t.Errorf("unmatched pattern: %q", p)
 			}
 
-			// Marshal and unmarshal the catalog to convert it to a
-			// map[string]any that can be compared to the structure
-			// represented by wantCatalog.
+			// Convert catalog to map[string]any that can be
+			// compared to the structure represented by
+			// wantCatalog.
 			gotCatalog, err := asObject(catalog, catalogMarshalOptions)
 			if err != nil {
 				t.Fatal(err)
@@ -198,8 +196,8 @@ func trimmedLines(bb []byte) []string {
 	return lines
 }
 
-// Convert in to an object by marshaling and unmarshaling. We're using instead
-// of YAML because JSOM gives more control over marshaling.
+// Convert in to an object by marshaling and unmarshaling. Use JSON instead of
+// YAML because JSON gives more control over marshaling.
 func asObject(in any, opts json.Options) (any, error) {
 	j, err := json.Marshal(in, opts)
 	if err != nil {
@@ -229,196 +227,4 @@ func loadGLXFile(files map[string][]byte) (*glx.GLXFile, error) {
 	}
 
 	return glxfile, nil
-}
-
-// JSON marshal options to reduce the JSON representation of the catalog to
-// only the details we want to compare. The resulting HSON omits each entity's
-// back-references and inner GLX entity. It also omits details of GLX
-// vocabularies (e.g. Description) that are useful for validating catalog
-// structure.
-var catalogMarshalOptions = json.JoinOptions(
-	json.OmitZeroStructFields(true),
-	json.WithMarshalers(
-		json.JoinMarshalers(
-			// Entities
-			json.MarshalToFunc(marshalAssertion),
-			json.MarshalToFunc(marshalCitation),
-			json.MarshalToFunc(marshalEvent),
-			json.MarshalToFunc(marshalPerson),
-			json.MarshalToFunc(marshalPlace),
-
-			json.MarshalToFunc(marshalParticipant),
-			json.MarshalToFunc(marshalPropertyEntry),
-
-			// Primitive Values
-			json.MarshalToFunc(marshalBoolValue),
-			json.MarshalToFunc(marshalDate),
-			json.MarshalToFunc(marshalIntValue),
-			json.MarshalToFunc(marshalStringValue),
-
-			// GLX types
-			json.MarshalToFunc(marshalFieldDefinition),
-			json.MarshalToFunc(marshalPropertyDefinition),
-			json.MarshalToFunc(marshalVocabularyEntry),
-		),
-	),
-)
-
-func marshalAssertion(out *jsontext.Encoder, in *entity.Assertion) error {
-	v := struct {
-		Date        glxdate.Date        `json:"date"`
-		Participant *entity.Participant `json:"participant"`
-		Property    string              `json:"property"`
-		Subject     string              `json:"subject"`
-	}{
-		Date:        in.Date,
-		Participant: in.Participant,
-		Property:    in.Property,
-		Subject:     in.Subject.ID(),
-	}
-	return json.MarshalEncode(out, &v)
-}
-
-func marshalBoolValue(out *jsontext.Encoder, in entity.BoolValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("BoolValue{%t}", in)))
-}
-
-func marshalCitation(out *jsontext.Encoder, in *entity.Citation) error {
-	if out.StackDepth() > 2 { // Marshaling a reference
-		return out.WriteToken(jsontext.String(in.PagePath()))
-	}
-	v := struct {
-		Properties map[string]entity.Property `json:"properties"`
-	}{
-		Properties: in.Properties,
-	}
-	return json.MarshalEncode(out, &v)
-}
-
-func marshalDate(out *jsontext.Encoder, in glxdate.Date) error {
-	return out.WriteToken(jsontext.String(in.Raw()))
-}
-
-func marshalEvent(out *jsontext.Encoder, in *entity.Event) error {
-	if out.StackDepth() > 2 { // Marshaling a reference
-		return out.WriteToken(jsontext.String(in.PagePath()))
-	}
-	v := struct {
-		Date         glxdate.Date               `json:"date"`
-		Participants []*entity.Participant      `json:"participants"`
-		Place        *entity.Place              `json:"place"`
-		Properties   map[string]entity.Property `json:"properties"`
-		Type         *entity.VocabularyValue    `json:"type"`
-	}{
-		Date:         in.Date,
-		Participants: in.Participants,
-		Place:        in.Place,
-		Properties:   in.Properties,
-		Type:         in.Type,
-	}
-	return json.MarshalEncode(out, &v)
-}
-
-func marshalFieldDefinition(out *jsontext.Encoder, in *glx.FieldDefinition) error {
-	v := struct {
-		Label     string `json:"label"`
-		ValueType string `json:"value_type"`
-	}{
-		Label:     in.Label,
-		ValueType: in.ValueType,
-	}
-	return json.MarshalEncode(out, &v)
-}
-
-// Marshal IntValue as a formatted string instead of a number. Using string
-// prevents json.Unmarshal from unmarshaling the value as float64. The special
-// format allows Diff to match the IntValue type as well as the value.
-func marshalIntValue(out *jsontext.Encoder, in entity.IntValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue{%d}", in)))
-}
-
-func marshalParticipant(out *jsontext.Encoder, in *entity.Participant) error {
-	v := struct {
-		Person     *entity.Person             `json:"person"`
-		Properties map[string]entity.Property `json:"properties,omitempty"`
-		Role       *entity.VocabularyValue    `json:"role"`
-	}{
-		Person:     in.Person,
-		Properties: in.Properties,
-		Role:       in.Role,
-	}
-	return json.MarshalEncode(out, &v)
-}
-
-func marshalPerson(out *jsontext.Encoder, in *entity.Person) error {
-	if out.StackDepth() > 2 { // Marshaling a reference
-		return out.WriteToken(jsontext.String(in.PagePath()))
-	}
-	v := struct {
-		Properties map[string]entity.Property `json:"properties"`
-	}{
-		Properties: in.Properties,
-	}
-	return json.MarshalEncode(out, &v)
-}
-
-func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
-	if out.StackDepth() > 2 { // Marshaling a reference
-		return out.WriteToken(jsontext.String(in.PagePath()))
-	}
-	v := struct {
-		Name       string                     `json:"name"`
-		Parent     *entity.Place              `json:"parent"`
-		Properties map[string]entity.Property `json:"properties"`
-		Type       *entity.VocabularyValue    `json:"type"`
-	}{
-		Name:       in.Name,
-		Parent:     in.Parent,
-		Properties: in.Properties,
-		Type:       in.Type,
-	}
-	return json.MarshalEncode(out, &v)
-}
-
-func marshalPropertyDefinition(out *jsontext.Encoder, in *glx.PropertyDefinition) error {
-	v := struct {
-		Label          string `json:"label"`
-		ValueType      string `json:"value_type"`
-		ReferenceType  string `json:"reference_type"`
-		VocabularyType string `json:"vocabulary_type"`
-	}{
-		Label:          in.Label,
-		ValueType:      in.ValueType,
-		ReferenceType:  in.ReferenceType,
-		VocabularyType: in.VocabularyType,
-	}
-	return json.MarshalEncode(out, &v)
-}
-
-func marshalPropertyEntry(out *jsontext.Encoder, in entity.PropertyEntry) error {
-	v := struct {
-		Date   glxdate.Date                    `json:"date"`
-		Fields map[string]entity.PropertyField `json:"fields,omitempty"`
-		Value  entity.Stringer                 `json:"value"`
-	}{
-		Date:   in.Date,
-		Fields: in.Fields,
-		Value:  in.Value,
-	}
-	return json.MarshalEncode(out, &v)
-
-}
-
-func marshalStringValue(out *jsontext.Encoder, in entity.StringValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("StringValue{%q}", in)))
-}
-
-func marshalVocabularyEntry(out *jsontext.Encoder, in *glx.VocabularyEntry) error {
-	v := struct {
-		Label string `json:"label"`
-	}{
-		Label: in.Label,
-	}
-
-	return json.MarshalEncode(out, &v)
 }

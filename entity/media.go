@@ -34,7 +34,7 @@ type MediaList []*Media
 
 // Sort returns the media sorted by String value.
 func (l MediaList) Sort() MediaList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func newMedia(id string, inner *glx.Media) *Media {

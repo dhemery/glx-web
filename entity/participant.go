@@ -26,7 +26,7 @@ type ParticipantList []*Participant
 
 // Sort returns the participants sorted by String value.
 func (l ParticipantList) Sort() ParticipantList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func parseParticipants(ctx *context, inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition) ParticipantList {

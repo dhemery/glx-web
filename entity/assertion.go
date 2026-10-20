@@ -35,7 +35,7 @@ type AssertionList []*Assertion
 
 // Sort returns the assertions sorted by String value.
 func (l AssertionList) Sort() AssertionList {
-	return sortValues(l)
+	return sortedByString(l)
 }
 
 func newAssertion(id string, inner *glx.Assertion) *Assertion {
