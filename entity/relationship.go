@@ -12,7 +12,7 @@ type Relationship struct {
 
 	EndEvent     *Event
 	Participants ParticipantList
-	Properties   map[string]Property
+	Properties   map[string]*Property
 	StartEvent   *Event
 	Type         *VocabularyValue
 
@@ -82,5 +82,11 @@ func (r *Relationship) compile(ctx *context) {
 }
 
 func (r *Relationship) addAssertion(a *Assertion) {
+	for name, prop := range r.Properties {
+		if name == a.Property {
+			prop.addAssertion(a)
+			return
+		}
+	}
 	r.Assertions = append(r.Assertions, a)
 }

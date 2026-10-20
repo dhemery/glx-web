@@ -9,7 +9,7 @@ type Place struct {
 	*glx.Place
 
 	Parent     *Place
-	Properties map[string]Property
+	Properties map[string]*Property
 	Type       *VocabularyValue
 
 	// Assertions about this place.
@@ -66,6 +66,12 @@ func (p *Place) compile(ctx *context) {
 }
 
 func (p *Place) addAssertion(a *Assertion) {
+	for name, prop := range p.Properties {
+		if name == a.Property {
+			prop.addAssertion(a)
+			return
+		}
+	}
 	p.Assertions = append(p.Assertions, a)
 }
 

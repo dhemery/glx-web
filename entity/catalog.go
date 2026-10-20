@@ -108,13 +108,17 @@ func NewCatalog(g *glx.GLXFile, w io.Writer) *Catalog {
 	}
 
 	ctx := &context{Catalog: c, GLX: g, Output: w}
-	compile(ctx, c.AssertionsByID)
-	compile(ctx, c.CitationsByID)
 	compile(ctx, c.EventsByID)
-	compile(ctx, c.MediaByID)
 	compile(ctx, c.PersonsByID)
 	compile(ctx, c.PlacesByID)
 	compile(ctx, c.RelationshipsByID)
+
+	// Compile assertions after subjects so the subjects can compile
+	// thier properties.
+	compile(ctx, c.AssertionsByID)
+
+	compile(ctx, c.CitationsByID)
+	compile(ctx, c.MediaByID)
 	compile(ctx, c.RepositoriesByID)
 	compile(ctx, c.SourcesByID)
 

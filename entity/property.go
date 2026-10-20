@@ -11,16 +11,27 @@ import (
 // slice of entries even if the GLX property is defined as single-valued.
 type Property struct {
 	Definition *glx.PropertyDefinition `json:"definition,omitzero"` // The GLX definition of the property.
-	Entries    []PropertyEntry         `json:"entries,omitzero,omitempty"`
+	Entries    []*PropertyEntry        `json:"entries,omitzero,omitempty"`
+	Assertions []*Assertion            `json:"assertions,omitempty"`
+}
+
+func (p *Property) addAssertion(a *Assertion) {
+	for _, e := range p.Entries {
+		if e.Date.Equal(a.Date) {
+			e.Assertions = append(e.Assertions, a)
+			return
+		}
+	}
+	p.Assertions = append(p.Assertions, a)
 }
 
 // String returns the string value of the first entry of p.
-func (p Property) String() string {
-	return p.Value().String()
+func (p *Property) String() string {
+	return p.FirstEntry().String()
 }
 
-// Value returns the first entry of p.
-func (p Property) Value() PropertyEntry {
+// FirstEntry returns the first entry of p.
+func (p *Property) FirstEntry() *PropertyEntry {
 	return p.Entries[0]
 }
 
@@ -28,23 +39,24 @@ func (p Property) Value() PropertyEntry {
 // PropertyEntry has a date and fields even if the property's definition does
 // not specify them.
 type PropertyEntry struct {
-	Value  Stringer                 `json:"value,omitzero,omitempty"`
-	Date   glxdate.Date             `json:"date,omitzero"` // The date when the value applied.
-	Fields map[string]PropertyField `json:"fields,omitzero,omitempty"`
+	Value      Stringer                 `json:"value,omitzero,omitempty"`
+	Date       glxdate.Date             `json:"date,omitzero"` // The date when the value applied.
+	Fields     map[string]PropertyField `json:"fields,omitzero,omitempty"`
+	Assertions []*Assertion             `json:"assertions,omitempty"`
 }
 
 // Field returns the named field of e.
-func (e PropertyEntry) Field(name string) PropertyField {
+func (e *PropertyEntry) Field(name string) PropertyField {
 	return e.Fields[name]
 }
 
 // String returns the string representation of the value of e.
-func (e PropertyEntry) String() string {
+func (e *PropertyEntry) String() string {
 	return e.Value.String()
 }
 
 // An entry is valid if it has either a value or fields.
-func (e PropertyEntry) valid() bool {
+func (e *PropertyEntry) valid() bool {
 	return e.Value != nil || len(e.Fields) > 0
 }
 
@@ -59,10 +71,10 @@ func (f PropertyField) String() string {
 	return f.Value.String()
 }
 
-func parseProperties(ctx *context, rawProperties map[string]any, defs map[string]*glx.PropertyDefinition) map[string]Property {
+func parseProperties(ctx *context, rawProperties map[string]any, defs map[string]*glx.PropertyDefinition) map[string]*Property {
 	ppctx := ctx.Sub("Properties")
 
-	properties := make(map[string]Property)
+	properties := make(map[string]*Property)
 	for name, rawProperty := range rawProperties {
 		pctx := ppctx.Sub(name)
 		def := defs[name]
@@ -77,13 +89,13 @@ func parseProperties(ctx *context, rawProperties map[string]any, defs map[string
 			continue
 		}
 
-		properties[name] = property
+		properties[name] = &property
 	}
 
 	return properties
 }
 
-func appendOrWarn(ctx *context, entries []PropertyEntry, entry PropertyEntry) []PropertyEntry {
+func appendOrWarn(ctx *context, entries []*PropertyEntry, entry *PropertyEntry) []*PropertyEntry {
 	if !entry.valid() {
 		ctx.Warn("entry discarded: has neither value nor fields")
 		return entries
@@ -92,7 +104,7 @@ func appendOrWarn(ctx *context, entries []PropertyEntry, entry PropertyEntry) []
 }
 
 func parseProperty(ctx *context, rawProperty any, def *glx.PropertyDefinition) Property {
-	entries := []PropertyEntry{}
+	entries := []*PropertyEntry{}
 
 	switch v := rawProperty.(type) {
 	case []any:
@@ -129,7 +141,7 @@ func asEntryMap(raw any) map[string]any {
 	return map[string]any{"value": raw}
 }
 
-func parseEntry(ctx *context, rawEntry map[string]any, def *glx.PropertyDefinition) PropertyEntry {
+func parseEntry(ctx *context, rawEntry map[string]any, def *glx.PropertyDefinition) *PropertyEntry {
 	var entry PropertyEntry
 
 	value, err := parseEntryValue(ctx, rawEntry["value"], def)
@@ -141,7 +153,7 @@ func parseEntry(ctx *context, rawEntry map[string]any, def *glx.PropertyDefiniti
 	entry.Date = parseEntryDate(ctx, rawEntry["date"])
 	entry.Fields = parseEntryFields(ctx, rawEntry["fields"], def.Fields)
 
-	return entry
+	return &entry
 }
 
 func parseEntryDate(ctx *context, rawDate any) glxdate.Date {

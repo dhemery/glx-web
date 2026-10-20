@@ -1,0 +1,85 @@
+-- test.glx --
+places:
+    test-place:
+        name: Test Place
+        properties:
+            population:
+            -   value: 110
+                date: "1910"
+            -   value: 220
+                date: "1920"
+
+assertions:
+    assertion-existential:
+        subject:
+            place: test-place
+        sources:
+        -   test-place-almanac
+    assertion-population-1920:
+        subject:
+            place: test-place
+        property: population
+        date: "1920"
+        value: 220
+        sources:
+        -   test-place-almanac
+    assertion-population-undated:
+        subject:
+            place: test-place
+        property: population
+        value: 110
+        sources:
+        -   test-place-almanac
+
+sources:
+    test-place-almanac:
+        title: Test Place Almanac
+
+-- want-errors --
+
+-- want-catalog.yaml --
+places:
+    test-place:
+        # Existential assertion attached to entity
+        assertions:
+        -   assertions/assertion-existential
+        name: Test Place
+        properties:
+            population:
+                definition:
+                    label: Population
+                    value_type: integer
+                entries:
+                -   date: "1910"
+                    value: IntValue{110}
+                -   date: "1920"
+                    value: IntValue{220}
+                    # Dated assertion attached to dated entry
+                    assertions:
+                    -   assertions/assertion-population-1920
+                # Undated assertion attached to property
+                assertions:
+                -   assertions/assertion-population-undated
+
+assertions:
+    assertion-existential:
+        subject: places/test-place
+        sources:
+        -   sources/test-place-almanac
+    assertion-population-1920:
+        subject: places/test-place
+        property: population
+        value: "220"
+        date: "1920"
+        sources:
+        -   sources/test-place-almanac
+    assertion-population-undated:
+        subject: places/test-place
+        property: population
+        value: "110"
+        sources:
+        -   sources/test-place-almanac
+
+sources:
+    test-place-almanac:
+        title: Test Place Almanac

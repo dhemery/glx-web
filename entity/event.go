@@ -14,7 +14,7 @@ type Event struct {
 	Date         glxdate.Date
 	Participants ParticipantList
 	Place        *Place
-	Properties   map[string]Property
+	Properties   map[string]*Property
 	Type         *VocabularyValue
 
 	// Assertions about this event.
@@ -73,6 +73,12 @@ func (e *Event) compile(ctx *context) {
 }
 
 func (e *Event) addAssertion(a *Assertion) {
+	for name, prop := range e.Properties {
+		if name == a.Property {
+			prop.addAssertion(a)
+			return
+		}
+	}
 	e.Assertions = append(e.Assertions, a)
 }
 

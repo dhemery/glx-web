@@ -29,3 +29,5 @@ events:
             value: birth
         properties: {}
         participants: []
+        assertions:
+        -   assertions/test-assertion

@@ -25,6 +25,7 @@ var catalogMarshalOptions = json.JoinOptions(
 			json.MarshalToFunc(marshalEvent),
 			json.MarshalToFunc(marshalPerson),
 			json.MarshalToFunc(marshalPlace),
+			json.MarshalToFunc(marshalSource),
 
 			json.MarshalToFunc(marshalParticipant),
 			json.MarshalToFunc(marshalPropertyEntry),
@@ -44,16 +45,23 @@ var catalogMarshalOptions = json.JoinOptions(
 )
 
 func marshalAssertion(out *jsontext.Encoder, in *entity.Assertion) error {
+	if out.StackDepth() > 2 { // Marshaling a reference
+		return out.WriteToken(jsontext.String(in.PagePath()))
+	}
 	v := struct {
 		Date        glxdate.Date        `json:"date"`
 		Participant *entity.Participant `json:"participant"`
 		Property    string              `json:"property"`
+		Sources     []*entity.Source    `json:"sources"`
 		Subject     entity.Stringer     `json:"subject"`
+		Value       string              `json:"value"`
 	}{
 		Date:        in.Date,
 		Participant: in.Participant,
 		Property:    in.Property,
+		Sources:     in.Sources,
 		Subject:     in.Subject,
+		Value:       in.Value,
 	}
 	return json.MarshalEncode(out, &v)
 }
@@ -67,7 +75,7 @@ func marshalCitation(out *jsontext.Encoder, in *entity.Citation) error {
 		return out.WriteToken(jsontext.String(in.PagePath()))
 	}
 	v := struct {
-		Properties map[string]entity.Property `json:"properties"`
+		Properties map[string]*entity.Property `json:"properties"`
 	}{
 		Properties: in.Properties,
 	}
@@ -83,12 +91,14 @@ func marshalEvent(out *jsontext.Encoder, in *entity.Event) error {
 		return out.WriteToken(jsontext.String(in.PagePath()))
 	}
 	v := struct {
-		Date         glxdate.Date               `json:"date"`
-		Participants []*entity.Participant      `json:"participants"`
-		Place        *entity.Place              `json:"place"`
-		Properties   map[string]entity.Property `json:"properties"`
-		Type         *entity.VocabularyValue    `json:"type"`
+		Assertions   []*entity.Assertion         `json:"assertions"`
+		Date         glxdate.Date                `json:"date"`
+		Participants []*entity.Participant       `json:"participants"`
+		Place        *entity.Place               `json:"place"`
+		Properties   map[string]*entity.Property `json:"properties"`
+		Type         *entity.VocabularyValue     `json:"type"`
 	}{
+		Assertions:   in.Assertions,
 		Date:         in.Date,
 		Participants: in.Participants,
 		Place:        in.Place,
@@ -118,9 +128,9 @@ func marshalIntValue(out *jsontext.Encoder, in entity.IntValue) error {
 
 func marshalParticipant(out *jsontext.Encoder, in *entity.Participant) error {
 	v := struct {
-		Person     *entity.Person             `json:"person"`
-		Properties map[string]entity.Property `json:"properties,omitempty"`
-		Role       *entity.VocabularyValue    `json:"role"`
+		Person     *entity.Person              `json:"person"`
+		Properties map[string]*entity.Property `json:"properties,omitempty"`
+		Role       *entity.VocabularyValue     `json:"role"`
 	}{
 		Person:     in.Person,
 		Properties: in.Properties,
@@ -134,7 +144,7 @@ func marshalPerson(out *jsontext.Encoder, in *entity.Person) error {
 		return out.WriteToken(jsontext.String(in.PagePath()))
 	}
 	v := struct {
-		Properties map[string]entity.Property `json:"properties"`
+		Properties map[string]*entity.Property `json:"properties"`
 	}{
 		Properties: in.Properties,
 	}
@@ -146,11 +156,13 @@ func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
 		return out.WriteToken(jsontext.String(in.PagePath()))
 	}
 	v := struct {
-		Name       string                     `json:"name"`
-		Parent     *entity.Place              `json:"parent"`
-		Properties map[string]entity.Property `json:"properties"`
-		Type       *entity.VocabularyValue    `json:"type"`
+		Assertions []*entity.Assertion         `json:"assertions"`
+		Name       string                      `json:"name"`
+		Parent     *entity.Place               `json:"parent"`
+		Properties map[string]*entity.Property `json:"properties"`
+		Type       *entity.VocabularyValue     `json:"type"`
 	}{
+		Assertions: in.Assertions,
 		Name:       in.Name,
 		Parent:     in.Parent,
 		Properties: in.Properties,
@@ -176,16 +188,36 @@ func marshalPropertyDefinition(out *jsontext.Encoder, in *glx.PropertyDefinition
 
 func marshalPropertyEntry(out *jsontext.Encoder, in entity.PropertyEntry) error {
 	v := struct {
-		Date   glxdate.Date                    `json:"date"`
-		Fields map[string]entity.PropertyField `json:"fields,omitempty"`
-		Value  entity.Stringer                 `json:"value"`
+		Assertions []*entity.Assertion             `json:"assertions"`
+		Date       glxdate.Date                    `json:"date"`
+		Fields     map[string]entity.PropertyField `json:"fields,omitempty"`
+		Value      entity.Stringer                 `json:"value"`
 	}{
-		Date:   in.Date,
-		Fields: in.Fields,
-		Value:  in.Value,
+		Assertions: in.Assertions,
+		Date:       in.Date,
+		Fields:     in.Fields,
+		Value:      in.Value,
 	}
 	return json.MarshalEncode(out, &v)
 
+}
+
+func marshalSource(out *jsontext.Encoder, in entity.Source) error {
+	if out.StackDepth() > 2 { // Marshaling a reference
+		return out.WriteToken(jsontext.String(in.PagePath()))
+	}
+	v := struct {
+		Title      string             `json:"title"`
+		Authors    []string           `json:"authors,omitempty"`
+		Repository *entity.Repository `json:"repository"`
+		Language   string             `json:"language"`
+	}{
+		Title:      in.Title,
+		Authors:    in.Authors,
+		Repository: in.Repository,
+		Language:   in.Language,
+	}
+	return json.MarshalEncode(out, &v)
 }
 
 func marshalStringValue(out *jsontext.Encoder, in entity.StringValue) error {
