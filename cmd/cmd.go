@@ -4,8 +4,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"net"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -31,26 +29,20 @@ var webCmd = &cobra.Command{
 }
 
 var (
-	archiveDir          = "."
-	buildSite           = true
+	archiveDir          = "./archive"
 	cleanBeforeBuilding = false
 	outputDir           = "./public"
-	serveAddress        = ""
-	staticDir           = ""
+	staticDir           = "./static"
 	templateDir         = "./templates"
 )
 
 func init() {
 	webCmd.Flags().StringVarP(&archiveDir, "archive", "a", archiveDir,
-		"the `archive` to render")
-	webCmd.Flags().BoolVarP(&buildSite, "build", "b", buildSite,
-		"build the website")
+		"the `dir` of the archive to render")
 	webCmd.Flags().BoolVarP(&cleanBeforeBuilding, "clean", "c", cleanBeforeBuilding,
 		"remove the existing output dir before building")
 	webCmd.Flags().StringVarP(&outputDir, "output", "o", outputDir,
 		"the output `dir`")
-	webCmd.Flags().StringVarP(&serveAddress, "serve", "S", serveAddress,
-		"serve the website on `address`, e.g. \"localhost:3333\"")
 	webCmd.Flags().StringVarP(&staticDir, "static", "s", staticDir,
 		"a `dir` of files to copy into the output dir, if any")
 	webCmd.Flags().StringVarP(&templateDir, "templates", "t", templateDir,
@@ -59,18 +51,6 @@ func init() {
 }
 
 func run(_ *cobra.Command, _ []string) error {
-	if buildSite {
-		if err := build(); err != nil {
-			return err
-		}
-	}
-	if serveAddress != "" {
-		return serve()
-	}
-	return nil
-}
-
-func build() error {
 	absArchiveDir, err := filepath.Abs(archiveDir)
 	if err != nil {
 		return fmt.Errorf("archive directory: %w", err)
@@ -113,7 +93,9 @@ func build() error {
 
 	if staticDir != "" {
 		if err := os.CopyFS(outputDir, os.DirFS(staticDir)); err != nil {
-			return fmt.Errorf("copying static files: %w", err)
+			if !errors.Is(err, os.ErrNotExist) {
+				return fmt.Errorf("copying static files: %w", err)
+			}
 		}
 	}
 
@@ -128,18 +110,4 @@ func build() error {
 		return fmt.Errorf("rendering: %w", err)
 	}
 	return nil
-}
-
-func serve() error {
-	listener, err := net.Listen("tcp", serveAddress)
-	if err != nil {
-		return err
-	}
-	defer listener.Close()
-
-	http.Handle("/", http.FileServer(http.Dir(outputDir)))
-
-	fmt.Println("Server is running on http://" + listener.Addr().String())
-
-	return http.Serve(listener, nil)
 }
