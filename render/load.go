@@ -13,10 +13,10 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-func Templates(templateDir string) (SiteTemplates, error) {
+func Templates(templateDir string) (siteTemplates, error) {
 	spec, err := loadSpec(templateDir)
 	if err != nil {
-		return SiteTemplates{}, fmt.Errorf("loading template configuration: %w", err)
+		return siteTemplates{}, fmt.Errorf("loading template configuration: %w", err)
 	}
 
 	return newSiteTemplates(os.DirFS(templateDir), spec)
@@ -28,9 +28,9 @@ type templateLoader struct {
 	baseTemplates map[string]*template.Template
 }
 
-func newSiteTemplates(fsys fs.FS, config Config) (SiteTemplates, error) {
-	st := SiteTemplates{
-		EntityTypes: make(map[glx.EntityType]EntityTypeTemplates),
+func newSiteTemplates(fsys fs.FS, config Config) (siteTemplates, error) {
+	st := siteTemplates{
+		EntityTypes: make(map[glx.EntityType]entityTypeTemplates),
 		Pages:       make(map[string]*template.Template),
 	}
 
@@ -60,8 +60,8 @@ func newSiteTemplates(fsys fs.FS, config Config) (SiteTemplates, error) {
 	return st, nil
 }
 
-func (l templateLoader) loadEntityTypeTemplates(spec EntityTypeTemplateSpec) (EntityTypeTemplates, error) {
-	et := EntityTypeTemplates{
+func (l templateLoader) loadEntityTypeTemplates(spec EntityTypeTemplateSpec) (entityTypeTemplates, error) {
+	et := entityTypeTemplates{
 		Pages: make(map[string]*template.Template),
 	}
 

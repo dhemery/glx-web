@@ -10,7 +10,7 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-func GLX(dir string) (*glx.GLXFile, error) {
+func loadGLX(dir string) (*glx.GLXFile, error) {
 	files, err := readGLXFiles(dir)
 	if err != nil {
 		return nil, err

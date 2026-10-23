@@ -11,14 +11,14 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-type SiteTemplates struct {
+type siteTemplates struct {
 	// Templates to render top-level pages.
 	Pages map[string]*template.Template
 	// Templates for each entity type.
-	EntityTypes map[glx.EntityType]EntityTypeTemplates
+	EntityTypes map[glx.EntityType]entityTypeTemplates
 }
 
-type EntityTypeTemplates struct {
+type entityTypeTemplates struct {
 	// Templates to render pages about the entity type.
 	Pages map[string]*template.Template
 	// Template to render the page about an entity of the type.
@@ -29,11 +29,11 @@ type Renderer struct {
 	OutputDir string
 	Clean     bool
 	StaticDir string
-	Templates SiteTemplates
+	Templates siteTemplates
 	Err       error
 }
 
-func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
+func (r *Renderer) Render(catalog *entity.Catalog) error {
 
 	err := r.renderTopLevelPages()
 	if err != nil {

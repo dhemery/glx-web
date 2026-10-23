@@ -65,11 +65,6 @@ func run(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("template directory: %w", err)
 	}
 
-	glxFile, err := entity.GLX(absArchiveDir)
-	if err != nil {
-		return err
-	}
-
 	templates, err := render.Templates(absTemplateDir)
 	if err != nil {
 		if validationError, ok := errors.AsType[*glx.StructuredValidationError](err); ok {
@@ -103,9 +98,12 @@ func run(_ *cobra.Command, _ []string) error {
 		Templates: templates,
 	}
 
-	catalog := entity.NewCatalog(glxFile, os.Stderr)
+	catalog, err := entity.NewCatalog(absArchiveDir, os.Stderr)
+	if err != nil {
+		return fmt.Errorf("loading GLX archive: %w", err)
+	}
 
-	if err := r.Render(catalog, glxFile); err != nil {
+	if err := r.Render(catalog); err != nil {
 		return fmt.Errorf("rendering: %w", err)
 	}
 	return nil
