@@ -35,33 +35,30 @@ type Renderer struct {
 }
 
 func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
-	data := data.Site{
-		GLX:     glxfile,
-		Catalog: catalog,
-	}
 
-	err := r.renderTopLevelPages(data)
+	err := r.renderTopLevelPages()
 	if err != nil {
 		return err
 	}
 
-	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions(), data)
-	r.renderEntities(glx.EntityTypeCitations, catalog.Citations(), data)
-	r.renderEntities(glx.EntityTypeEvents, catalog.Events(), data)
-	r.renderEntities(glx.EntityTypeMedia, catalog.Media(), data)
-	r.renderEntities(glx.EntityTypePersons, catalog.Persons(), data)
-	r.renderEntities(glx.EntityTypePlaces, catalog.Places(), data)
-	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships(), data)
-	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories(), data)
-	r.renderEntities(glx.EntityTypeSources, catalog.Sources(), data)
+	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions())
+	r.renderEntities(glx.EntityTypeCitations, catalog.Citations())
+	r.renderEntities(glx.EntityTypeEvents, catalog.Events())
+	r.renderEntities(glx.EntityTypeMedia, catalog.Media())
+	r.renderEntities(glx.EntityTypePersons, catalog.Persons())
+	r.renderEntities(glx.EntityTypePlaces, catalog.Places())
+	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships())
+	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories())
+	r.renderEntities(glx.EntityTypeSources, catalog.Sources())
 
 	return r.Err
 }
 
-func (r *Renderer) renderTopLevelPages(data data.Site) error {
+func (r *Renderer) renderTopLevelPages() error {
+	dot := data.Site()
 	for name, tmpl := range r.Templates.Pages {
 		fname := filepath.Join(r.OutputDir, name+".html")
-		err := render(fname, data, tmpl)
+		err := render(fname, dot, tmpl)
 		if err != nil {
 			return fmt.Errorf("rendering top-level page with template %q: %w", name, err)
 		}
@@ -74,15 +71,9 @@ type ider interface {
 	ID() string
 }
 
-func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S, siteData data.Site) {
+func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) {
 	if r.Err != nil {
 		return
-	}
-
-	entityTypeData := data.EntityType[S, E]{
-		Site:       siteData,
-		EntityType: t,
-		Entities:   entities,
 	}
 
 	entityTypeDir := filepath.Join(r.OutputDir, t.Plural())
@@ -93,18 +84,20 @@ func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S, 
 	}
 
 	templates := r.Templates.EntityTypes[t]
+	entitySet := data.EntitySet{
+		EntityType: t,
+		Entities:   entities,
+	}
+
 	for name, tmpl := range templates.Pages {
 		fname := filepath.Join(entityTypeDir, name+".html")
-		err := render(fname, entityTypeData, tmpl)
+		err := render(fname, entitySet, tmpl)
 		if err != nil {
 			r.Err = fmt.Errorf("rendering %s with page template %q: %w", t, name, err)
 			return
 		}
 	}
 
-	entityData := data.Entity{
-		Site: siteData,
-	}
 	entityTemplate := templates.Entity
 	if entityTemplate == nil {
 		r.Err = fmt.Errorf("no entity template for %s", t)
@@ -120,9 +113,8 @@ func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S, 
 		}
 
 		fname := filepath.Join(entityDir, "index.html")
-		entityData.Entity = entity
 
-		err := render(fname, entityData, entityTemplate)
+		err := render(fname, entity, entityTemplate)
 		if err != nil {
 			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)
 			return
@@ -130,12 +122,14 @@ func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S, 
 	}
 }
 
-func render(fname string, data any, tmpl *template.Template) error {
+func render(fname string, dot any, tmpl *template.Template) error {
 	f, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0644)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	return tmpl.Execute(f, data)
+	data.ResetPage()
+
+	return tmpl.Execute(f, dot)
 }

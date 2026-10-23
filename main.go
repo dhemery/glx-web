@@ -220,21 +220,21 @@
 //
 // To specify the templates,
 // write a config.yaml file in the template directory.
-// The file is deserialized into a [config.SiteTemplates].
+// The file is deserialized into a [config.SiteConfig].
 //
 // The configuration defines four kinds of templates:
 //
 //   - Base templates,
-//     declared in [config.SiteTemplates.Bases].
+//     declared in [config.SiteConfig.Bases].
 //     A base template is never invoked directly,
 //     but can be extended by other templates,
 //     including by other base templates.
 //
 //   - Site page templates,
-//     declared in [config.SiteTemplates.Pages].
+//     declared in [config.SiteConfig.Pages].
 //     A site page template renders a page
 //     about the site.
-//     It is applied to a [data.Site]
+//     It is applied to an empty struct,
 //     and its output is written to
 //     <output-dir>/<index-name>.html.
 //     You can render multiple top-level pages
@@ -246,7 +246,7 @@
 //     declared in [config.EntityTypeTemplates.Pages].
 //     An entity type page template renders a page
 //     about the collection of entities of a given type.
-//     It is applied to a [data.EntityType]
+//     It is applied to a [data.EntitySet]
 //     and its output is written to
 //     <output-dir>/<entity-type-plural>/<template-name>.html.
 //     You can render the collection in a variety of ways
@@ -258,7 +258,7 @@
 //   - Entity templates
 //     declared in [config.EntityTypeTemplates.Entity].
 //     An entity template renders a page about an entity.
-//     It is applied to a [data.Entity]
+//     It is applied to the entity,
 //     and its output is written to
 //     <output-dir>/<entity-type-plural>/<entity-id>/index.html.
 package main
@@ -273,8 +273,8 @@ import (
 )
 
 // Imports to support doc comments.
-var _ config.SiteTemplates
-var _ data.Site
+var _ config.SiteConfig
+var _ data.EntitySet
 var _ entity.IntValue
 var _ glx.EntityType
 var _ glxdate.Date

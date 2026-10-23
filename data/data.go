@@ -2,33 +2,63 @@
 package data
 
 import (
-	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
 
-// Site describes the site being rendered.
-type Site struct {
-	// The underlying GLX archive being rendered.
-	GLX *glx.GLXFile
-	// The catalog of entities being rendered.
-	Catalog *entity.Catalog
-
-	// TODO(feature): Add data parsed from a user-supplied site configuration
-	// YAML file.
+// EntitySet is the set of all entities of a given type.
+type EntitySet struct {
+	// The type of entity in the set.
+	glx.EntityType
+	// A map of the entities, keyed by ID.
+	Entities any
 }
 
-// EntityType describes the site and the set of entities of type T.
-type EntityType[S ~[]T, T any] struct {
-	Site
-	// The type of entity being rendered.
-	EntityType glx.EntityType
-	// The entities being rendered, keyed by ID.
-	Entities S
+var (
+	theSite     = site{Store: make(map[string]any)}
+	currentPage page
+)
+
+var TemplateFuncs = map[string]any{
+	"page": func() page { return currentPage },
+	"site": func() site { return theSite },
 }
 
-// Entity describes the site and an entity.
-type Entity struct {
-	Site
-	// The entity being rendered.
-	Entity any
+func ResetPage() {
+	currentPage = page{Store: make(map[string]any)}
+}
+
+func SetSiteData(data map[string]any) {
+	theSite.Data = data
+}
+
+func Site() site {
+	return theSite
+}
+
+type site struct {
+	// Data from the site field of congig.yaml
+	Data map[string]any
+	// Store shared by all pages.
+	Store Store
+}
+
+type page struct {
+	// Store scoped to a page.
+	Store Store
+}
+
+type Store map[string]any
+
+func (s Store) Get(name string) any {
+	return s[name]
+}
+
+func (s Store) Set(name string, value any) string {
+	s[name] = value
+	return ""
+}
+
+func (s Store) Delete(name string) string {
+	delete(s, name)
+	return ""
 }

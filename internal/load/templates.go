@@ -1,13 +1,16 @@
 package load
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/dhemery/glx-web/config"
+	"github.com/dhemery/glx-web/data"
 	"github.com/dhemery/glx-web/internal/render"
 	"github.com/genealogix/glx/go-glx"
 	"go.yaml.in/yaml/v3"
@@ -28,10 +31,10 @@ type templateLoader struct {
 	baseTemplates map[string]*template.Template
 }
 
-func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplates) (render.SiteTemplates, error) {
+func newSiteTemplates(fsys fs.FS, siteSpec config.SiteConfig) (render.SiteTemplates, error) {
 	st := render.SiteTemplates{
-		EntityTypes: map[glx.EntityType]render.EntityTypeTemplates{},
-		Pages:       map[string]*template.Template{},
+		EntityTypes: make(map[glx.EntityType]render.EntityTypeTemplates),
+		Pages:       make(map[string]*template.Template),
 	}
 
 	l := templateLoader{
@@ -56,6 +59,7 @@ func newSiteTemplates(fsys fs.FS, siteSpec config.SiteTemplates) (render.SiteTem
 		st.EntityTypes[et] = templates
 	}
 
+	data.SetSiteData(siteSpec.Data)
 	return st, nil
 }
 
@@ -87,7 +91,12 @@ func (l *templateLoader) load(spec config.TemplateSpec) (*template.Template, err
 	}
 
 	if base == nil {
-		return template.ParseFS(l.fsys, spec.Patterns...)
+		if len(spec.Patterns) == 0 {
+			return nil, errors.New("no base or patterns")
+
+		}
+		name := path.Base(spec.Patterns[0])
+		base = template.New(name).Funcs(data.TemplateFuncs)
 	}
 
 	if len(spec.Patterns) == 0 {
@@ -120,8 +129,8 @@ func (l *templateLoader) cloneBase(name string) (*template.Template, error) {
 	return base.Clone()
 }
 
-func loadSpec(dir string) (config.SiteTemplates, error) {
-	var spec config.SiteTemplates
+func loadSpec(dir string) (config.SiteConfig, error) {
+	var spec config.SiteConfig
 
 	configFileName := filepath.Join(dir, "config.yaml")
 	configFile, err := os.Open(configFileName)
@@ -137,5 +146,6 @@ func loadSpec(dir string) (config.SiteTemplates, error) {
 	if err != nil {
 		return spec, fmt.Errorf("%s: %w", "config.yaml", err)
 	}
+
 	return spec, err
 }

@@ -4,9 +4,11 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-// SiteTemplates specifies the templates for each site page, entity type
+// SiteConfig specifies the templates for each site page, entity type
 // page, and entity page.
-type SiteTemplates struct {
+type SiteConfig struct {
+	// Data available to templates via the "site.data" function.
+	Data map[string]any `json:"data"`
 	// Templates that other templates can build on. The key is used as the
 	// name of the base. Base templates can build on other base templates.
 	Bases map[string]TemplateSpec `json:"bases"`

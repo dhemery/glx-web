@@ -4,5 +4,5 @@
 // to render the output.
 //
 // To configure the templates, write a config.yaml file in the template
-// directory. See [SiteTemplates] for the fields.
+// directory. See [SiteConfig] for the fields.
 package config
