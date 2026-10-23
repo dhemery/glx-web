@@ -1,4 +1,4 @@
-package load
+package render
 
 import (
 	"errors"
@@ -9,17 +9,14 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/dhemery/glx-web/config"
-	"github.com/dhemery/glx-web/data"
-	"github.com/dhemery/glx-web/internal/render"
 	"github.com/genealogix/glx/go-glx"
 	"go.yaml.in/yaml/v3"
 )
 
-func Templates(templateDir string) (render.SiteTemplates, error) {
+func Templates(templateDir string) (SiteTemplates, error) {
 	spec, err := loadSpec(templateDir)
 	if err != nil {
-		return render.SiteTemplates{}, fmt.Errorf("loading template configuration: %w", err)
+		return SiteTemplates{}, fmt.Errorf("loading template configuration: %w", err)
 	}
 
 	return newSiteTemplates(os.DirFS(templateDir), spec)
@@ -27,23 +24,23 @@ func Templates(templateDir string) (render.SiteTemplates, error) {
 
 type templateLoader struct {
 	fsys          fs.FS
-	baseSpecs     map[string]config.TemplateSpec
+	baseSpecs     map[string]TemplateSpec
 	baseTemplates map[string]*template.Template
 }
 
-func newSiteTemplates(fsys fs.FS, siteSpec config.SiteConfig) (render.SiteTemplates, error) {
-	st := render.SiteTemplates{
-		EntityTypes: make(map[glx.EntityType]render.EntityTypeTemplates),
+func newSiteTemplates(fsys fs.FS, config Config) (SiteTemplates, error) {
+	st := SiteTemplates{
+		EntityTypes: make(map[glx.EntityType]EntityTypeTemplates),
 		Pages:       make(map[string]*template.Template),
 	}
 
 	l := templateLoader{
 		fsys:          fsys,
-		baseSpecs:     siteSpec.Bases,
+		baseSpecs:     config.Templates.Bases,
 		baseTemplates: make(map[string]*template.Template),
 	}
 
-	for name, indexSpec := range siteSpec.Pages {
+	for name, indexSpec := range config.Templates.Pages {
 		t, err := l.load(indexSpec)
 		if err != nil {
 			return st, fmt.Errorf("loading top-level template %q: %w", name, err)
@@ -51,7 +48,7 @@ func newSiteTemplates(fsys fs.FS, siteSpec config.SiteConfig) (render.SiteTempla
 		st.Pages[name] = t
 	}
 
-	for et, entityTypeSpec := range siteSpec.Entities {
+	for et, entityTypeSpec := range config.Templates.Entities {
 		templates, err := l.loadEntityTypeTemplates(entityTypeSpec)
 		if err != nil {
 			return st, fmt.Errorf("loading %s templates: %w", et, err)
@@ -59,12 +56,12 @@ func newSiteTemplates(fsys fs.FS, siteSpec config.SiteConfig) (render.SiteTempla
 		st.EntityTypes[et] = templates
 	}
 
-	data.SetSiteData(siteSpec.Data)
+	SetSiteData(config.Site.Data)
 	return st, nil
 }
 
-func (l templateLoader) loadEntityTypeTemplates(spec config.EntityTypeTemplates) (render.EntityTypeTemplates, error) {
-	et := render.EntityTypeTemplates{
+func (l templateLoader) loadEntityTypeTemplates(spec EntityTypeTemplateSpec) (EntityTypeTemplates, error) {
+	et := EntityTypeTemplates{
 		Pages: make(map[string]*template.Template),
 	}
 
@@ -84,7 +81,7 @@ func (l templateLoader) loadEntityTypeTemplates(spec config.EntityTypeTemplates)
 
 }
 
-func (l *templateLoader) load(spec config.TemplateSpec) (*template.Template, error) {
+func (l *templateLoader) load(spec TemplateSpec) (*template.Template, error) {
 	base, err := l.cloneBase(spec.Base)
 	if err != nil {
 		return nil, err
@@ -96,7 +93,7 @@ func (l *templateLoader) load(spec config.TemplateSpec) (*template.Template, err
 
 		}
 		name := path.Base(spec.Patterns[0])
-		base = template.New(name).Funcs(data.TemplateFuncs)
+		base = template.New(name).Funcs(TemplateFuncs)
 	}
 
 	if len(spec.Patterns) == 0 {
@@ -129,8 +126,8 @@ func (l *templateLoader) cloneBase(name string) (*template.Template, error) {
 	return base.Clone()
 }
 
-func loadSpec(dir string) (config.SiteConfig, error) {
-	var spec config.SiteConfig
+func loadSpec(dir string) (Config, error) {
+	var spec Config
 
 	configFileName := filepath.Join(dir, "config.yaml")
 	configFile, err := os.Open(configFileName)

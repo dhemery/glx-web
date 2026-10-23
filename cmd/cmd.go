@@ -8,8 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/dhemery/glx-web/entity"
-	"github.com/dhemery/glx-web/internal/load"
-	"github.com/dhemery/glx-web/internal/render"
+	"github.com/dhemery/glx-web/render"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/spf13/cobra"
 )
@@ -66,12 +65,12 @@ func run(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("template directory: %w", err)
 	}
 
-	glxFile, err := load.GLX(absArchiveDir)
+	glxFile, err := entity.GLX(absArchiveDir)
 	if err != nil {
 		return err
 	}
 
-	templates, err := load.Templates(absTemplateDir)
+	templates, err := render.Templates(absTemplateDir)
 	if err != nil {
 		if validationError, ok := errors.AsType[*glx.StructuredValidationError](err); ok {
 			for _, e := range validationError.Errors {

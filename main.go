@@ -220,18 +220,18 @@
 //
 // To specify the templates,
 // write a config.yaml file in the template directory.
-// The file is deserialized into a [config.SiteConfig].
+// The file is deserialized into a [render.Config].
 //
 // The configuration defines four kinds of templates:
 //
 //   - Base templates,
-//     declared in [config.SiteConfig.Bases].
+//     declared in render.Config.Bases.
 //     A base template is never invoked directly,
 //     but can be extended by other templates,
 //     including by other base templates.
 //
 //   - Site page templates,
-//     declared in [config.SiteConfig.Pages].
+//     declared in config.Config.Pages.
 //     A site page template renders a page
 //     about the site.
 //     It is applied to an empty struct,
@@ -243,10 +243,10 @@
 //     to render the home page for the site.
 //
 //   - Entity type page templates.
-//     declared in [config.EntityTypeTemplates.Pages].
+//     declared in config.EntityTypeTemplateSpec.Pages.
 //     An entity type page template renders a page
 //     about the collection of entities of a given type.
-//     It is applied to a [data.EntitySet]
+//     It is applied to a [render.EntitySet]
 //     and its output is written to
 //     <output-dir>/<entity-type-plural>/<template-name>.html.
 //     You can render the collection in a variety of ways
@@ -256,7 +256,7 @@
 //     to render a listing of the entities of the type.
 //
 //   - Entity templates
-//     declared in [config.EntityTypeTemplates.Entity].
+//     declared in config.EntityTypeTemplateSpec.Entity.
 //     An entity template renders a page about an entity.
 //     It is applied to the entity,
 //     and its output is written to
@@ -265,16 +265,14 @@ package main
 
 import (
 	"github.com/dhemery/glx-web/cmd"
-	"github.com/dhemery/glx-web/config"
-	"github.com/dhemery/glx-web/data"
 	"github.com/dhemery/glx-web/entity"
+	"github.com/dhemery/glx-web/render"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 // Imports to support doc comments.
-var _ config.SiteConfig
-var _ data.EntitySet
+var _ render.EntitySet
 var _ entity.IntValue
 var _ glx.EntityType
 var _ glxdate.Date

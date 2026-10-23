@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dhemery/glx-web/data"
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
@@ -55,7 +54,7 @@ func (r *Renderer) Render(catalog *entity.Catalog, glxfile *glx.GLXFile) error {
 }
 
 func (r *Renderer) renderTopLevelPages() error {
-	dot := data.Site()
+	dot := Site()
 	for name, tmpl := range r.Templates.Pages {
 		fname := filepath.Join(r.OutputDir, name+".html")
 		err := render(fname, dot, tmpl)
@@ -84,7 +83,7 @@ func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) 
 	}
 
 	templates := r.Templates.EntityTypes[t]
-	entitySet := data.EntitySet{
+	entitySet := EntitySet{
 		EntityType: t,
 		Entities:   entities,
 	}
@@ -129,7 +128,7 @@ func render(fname string, dot any, tmpl *template.Template) error {
 	}
 	defer f.Close()
 
-	data.ResetPage()
+	ResetPage()
 
 	return tmpl.Execute(f, dot)
 }

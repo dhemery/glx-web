@@ -1,5 +1,5 @@
 // Package data defines the data items that glx-web applies templates to.
-package data
+package render
 
 import (
 	"github.com/genealogix/glx/go-glx"

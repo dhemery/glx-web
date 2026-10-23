@@ -1,14 +1,26 @@
-package config
+package render
 
 import (
+	"path/filepath"
+
 	"github.com/genealogix/glx/go-glx"
 )
 
-// SiteConfig specifies the templates for each site page, entity type
-// page, and entity page.
+// Import for comment links.
+var _ = filepath.Match
+
+type Config struct {
+	Site      SiteConfig       `json:"site"`
+	Templates SiteTemplateSpec `json:"templates"`
+}
+
 type SiteConfig struct {
 	// Data available to templates via the "site.data" function.
 	Data map[string]any `json:"data"`
+}
+
+// SiteTemplateSpec specifies the templates to render the site.
+type SiteTemplateSpec struct {
 	// Templates that other templates can build on. The key is used as the
 	// name of the base. Base templates can build on other base templates.
 	Bases map[string]TemplateSpec `json:"bases"`
@@ -17,12 +29,12 @@ type SiteConfig struct {
 	Pages map[string]TemplateSpec `json:"pages"`
 	// Templates for each entity type. The key is the plural form of the
 	// entity type name, e.g. persons.
-	Entities map[glx.EntityType]EntityTypeTemplates `json:"entities"`
+	Entities map[glx.EntityType]EntityTypeTemplateSpec `json:"entities"`
 }
 
-// EntityTypeTemplates specifies templates for pages about entities and sets
+// EntityTypeTemplateSpec specifies templates for pages about entities and sets
 // of entities of a given type.
-type EntityTypeTemplates struct {
+type EntityTypeTemplateSpec struct {
 	// Templates for pages about the set of entities of a given type. The
 	// key is used as the base file name for the rendered file.
 	Pages map[string]TemplateSpec `json:"pages"`

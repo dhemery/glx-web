@@ -1,5 +1,4 @@
-// Package load loads archives and templates for glx-web.
-package load
+package entity
 
 import (
 	"fmt"
