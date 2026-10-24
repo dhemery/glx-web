@@ -1,7 +1,8 @@
-// Package render renders a website from a compiled GLX archive.
-package render
+// Package site renders a website from a compiled GLX archive.
+package site
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"os"
@@ -11,32 +12,46 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-type siteTemplates struct {
-	// Templates to render top-level pages.
-	Pages map[string]*template.Template
-	// Templates for each entity type.
-	EntityTypes map[glx.EntityType]entityTypeTemplates
+type Options struct {
+	Clean       bool
+	OutputDir   string
+	StaticDir   string
+	TemplateDir string
 }
 
-type entityTypeTemplates struct {
-	// Templates to render pages about the entity type.
-	Pages map[string]*template.Template
-	// Template to render the page about an entity of the type.
-	Entity *template.Template
-}
-
-type Renderer struct {
+type renderer struct {
 	OutputDir string
-	Clean     bool
-	StaticDir string
 	Templates siteTemplates
 	Err       error
 }
 
-func (r *Renderer) Render(catalog *entity.Catalog) error {
+func Render(catalog *entity.Catalog, opts *Options) error {
+	r := renderer{OutputDir: opts.OutputDir}
+	var err error
 
-	err := r.renderTopLevelPages()
-	if err != nil {
+	if r.Templates, err = loadTemplates(opts.TemplateDir); err != nil {
+		return err
+	}
+
+	if opts.Clean {
+		if err := os.RemoveAll(opts.OutputDir); err != nil {
+			return fmt.Errorf("removing output dir: %w", err)
+		}
+	}
+
+	if err := os.Mkdir(opts.OutputDir, 0755); err != nil {
+		return fmt.Errorf("creating output dir: %w", err)
+	}
+
+	if opts.StaticDir != "" {
+		if err := os.CopyFS(opts.OutputDir, os.DirFS(opts.StaticDir)); err != nil {
+			if !errors.Is(err, os.ErrNotExist) {
+				return fmt.Errorf("copying static files: %w", err)
+			}
+		}
+	}
+
+	if err = r.renderTopLevelPages(); err != nil {
 		return err
 	}
 
@@ -53,9 +68,9 @@ func (r *Renderer) Render(catalog *entity.Catalog) error {
 	return r.Err
 }
 
-func (r *Renderer) renderTopLevelPages() error {
+func (r *renderer) renderTopLevelPages() error {
 	dot := Site()
-	for name, tmpl := range r.Templates.Pages {
+	for name, tmpl := range r.Templates.sitePageTemplates {
 		fname := filepath.Join(r.OutputDir, name+".html")
 		err := render(fname, dot, tmpl)
 		if err != nil {
@@ -70,7 +85,7 @@ type ider interface {
 	ID() string
 }
 
-func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) {
+func (r *renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) {
 	if r.Err != nil {
 		return
 	}
@@ -82,13 +97,13 @@ func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) 
 		return
 	}
 
-	templates := r.Templates.EntityTypes[t]
+	templates := r.Templates.typeTemplates[t]
 	entitySet := EntitySet{
 		EntityType: t,
 		Entities:   entities,
 	}
 
-	for name, tmpl := range templates.Pages {
+	for name, tmpl := range templates.typePageTemplates {
 		fname := filepath.Join(entityTypeDir, name+".html")
 		err := render(fname, entitySet, tmpl)
 		if err != nil {
@@ -97,7 +112,7 @@ func (r *Renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) 
 		}
 	}
 
-	entityTemplate := templates.Entity
+	entityTemplate := templates.entityPageTemplate
 	if entityTemplate == nil {
 		r.Err = fmt.Errorf("no entity template for %s", t)
 		return

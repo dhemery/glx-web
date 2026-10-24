@@ -5,4 +5,4 @@
 //
 // To configure the templates, write a config.yaml file in the template
 // directory. See [Config] for the fields.
-package render
+package site

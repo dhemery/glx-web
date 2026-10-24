@@ -5,10 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/dhemery/glx-web/entity"
-	"github.com/dhemery/glx-web/render"
+	"github.com/dhemery/glx-web/site"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/spf13/cobra"
 )
@@ -28,44 +27,30 @@ var webCmd = &cobra.Command{
 }
 
 var (
-	archiveDir          = "./archive"
-	cleanBeforeBuilding = false
-	outputDir           = "./public"
-	staticDir           = "./static"
-	templateDir         = "./templates"
+	archiveDir = "./archive"
+	opts       = &site.Options{
+		Clean:       false,
+		OutputDir:   "./public",
+		StaticDir:   "./static",
+		TemplateDir: "./templates",
+	}
 )
 
 func init() {
 	webCmd.Flags().StringVarP(&archiveDir, "archive", "a", archiveDir,
 		"the `dir` of the archive to render")
-	webCmd.Flags().BoolVarP(&cleanBeforeBuilding, "clean", "c", cleanBeforeBuilding,
+	webCmd.Flags().BoolVarP(&opts.Clean, "clean", "c", opts.Clean,
 		"remove the existing output dir before building")
-	webCmd.Flags().StringVarP(&outputDir, "output", "o", outputDir,
+	webCmd.Flags().StringVarP(&opts.OutputDir, "output", "o", opts.OutputDir,
 		"the output `dir`")
-	webCmd.Flags().StringVarP(&staticDir, "static", "s", staticDir,
+	webCmd.Flags().StringVarP(&opts.StaticDir, "static", "s", opts.StaticDir,
 		"a `dir` of files to copy into the output dir, if any")
-	webCmd.Flags().StringVarP(&templateDir, "templates", "t", templateDir,
+	webCmd.Flags().StringVarP(&opts.TemplateDir, "templates", "t", opts.TemplateDir,
 		"the template `dir`")
-
 }
 
 func run(_ *cobra.Command, _ []string) error {
-	absArchiveDir, err := filepath.Abs(archiveDir)
-	if err != nil {
-		return fmt.Errorf("archive directory: %w", err)
-	}
-
-	absOutputDir, err := filepath.Abs(outputDir)
-	if err != nil {
-		return fmt.Errorf("output directory: %w", err)
-	}
-
-	absTemplateDir, err := filepath.Abs(templateDir)
-	if err != nil {
-		return fmt.Errorf("template directory: %w", err)
-	}
-
-	templates, err := render.Templates(absTemplateDir)
+	catalog, err := entity.NewCatalog(archiveDir, os.Stderr)
 	if err != nil {
 		if validationError, ok := errors.AsType[*glx.StructuredValidationError](err); ok {
 			for _, e := range validationError.Errors {
@@ -75,35 +60,7 @@ func run(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	if cleanBeforeBuilding {
-		if err := os.RemoveAll(outputDir); err != nil {
-			return fmt.Errorf("removing output dir: %w", err)
-		}
-	}
-
-	if err := os.Mkdir(outputDir, 0755); err != nil {
-		return fmt.Errorf("creating output dir: %w", err)
-	}
-
-	if staticDir != "" {
-		if err := os.CopyFS(outputDir, os.DirFS(staticDir)); err != nil {
-			if !errors.Is(err, os.ErrNotExist) {
-				return fmt.Errorf("copying static files: %w", err)
-			}
-		}
-	}
-
-	r := &render.Renderer{
-		OutputDir: absOutputDir,
-		Templates: templates,
-	}
-
-	catalog, err := entity.NewCatalog(absArchiveDir, os.Stderr)
-	if err != nil {
-		return fmt.Errorf("loading GLX archive: %w", err)
-	}
-
-	if err := r.Render(catalog); err != nil {
+	if err := site.Render(catalog, opts); err != nil {
 		return fmt.Errorf("rendering: %w", err)
 	}
 	return nil
