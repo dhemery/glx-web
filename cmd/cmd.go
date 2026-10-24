@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/dhemery/glx-web/entity"
+	"github.com/dhemery/glx-web/internal/load"
 	"github.com/dhemery/glx-web/site"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/spf13/cobra"
@@ -50,7 +51,12 @@ func init() {
 }
 
 func run(_ *cobra.Command, _ []string) error {
-	catalog, err := entity.NewCatalog(archiveDir, os.Stderr)
+	g, err := load.GLX(os.DirFS(archiveDir))
+	if err != nil {
+		return fmt.Errorf("loading GLX archive: %w", err)
+	}
+
+	catalog, err := entity.NewCatalog(g, os.Stderr)
 	if err != nil {
 		if validationError, ok := errors.AsType[*glx.StructuredValidationError](err); ok {
 			for _, e := range validationError.Errors {

@@ -58,11 +58,7 @@ func (c *Catalog) Sources() SourceList {
 }
 
 // NewCatalog compiles a catalog of entities from a GLX archive.
-func NewCatalog(archiveDir string, w io.Writer) (*Catalog, error) {
-	g, err := loadGLX(archiveDir)
-	if err != nil {
-		return nil, err
-	}
+func NewCatalog(g *glx.GLXFile, w io.Writer) (*Catalog, error) {
 	c := &Catalog{
 		AssertionsByID:    make(map[string]*Assertion),
 		CitationsByID:     make(map[string]*Citation),

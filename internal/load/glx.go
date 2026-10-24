@@ -1,17 +1,17 @@
-package entity
+// Package load loads the files used by glx.web
+package load
 
 import (
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
 )
 
-func loadGLX(dir string) (*glx.GLXFile, error) {
-	files, err := readGLXFiles(dir)
+func GLX(fsys fs.FS) (*glx.GLXFile, error) {
+	files, err := readGLXFiles(fsys)
 	if err != nil {
 		return nil, err
 	}
@@ -30,10 +30,10 @@ func loadGLX(dir string) (*glx.GLXFile, error) {
 	return g, nil
 }
 
-func readGLXFiles(dir string) (map[string][]byte, error) {
+func readGLXFiles(fsys fs.FS) (map[string][]byte, error) {
 	files := make(map[string][]byte)
 
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -56,19 +56,12 @@ func readGLXFiles(dir string) (map[string][]byte, error) {
 			return nil
 		}
 
-		cleanPath := filepath.Clean(path)
-
-		data, err := os.ReadFile(cleanPath)
+		data, err := fs.ReadFile(fsys, path)
 		if err != nil {
-			return fmt.Errorf("reading %s: %w", cleanPath, err)
+			return fmt.Errorf("reading %s: %w", path, err)
 		}
 
-		relPath, err := filepath.Rel(dir, cleanPath)
-		if err != nil {
-			return fmt.Errorf("getting relative path: %w", err)
-		}
-
-		files[relPath] = data
+		files[path] = data
 
 		return nil
 	})
