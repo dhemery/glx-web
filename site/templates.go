@@ -11,24 +11,28 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
-type siteTemplates struct {
-	// Templates to render top-level pages.
-	sitePageTemplates map[string]*template.Template
-	// Templates for each entity type.
-	typeTemplates map[glx.EntityType]entityTypeTemplates
+type templates struct {
+	site      map[string]*template.Template
+	entitySet map[glx.EntityType]map[string]*template.Template
+	entity    map[glx.EntityType]*template.Template
 }
 
-type entityTypeTemplates struct {
-	// Templates to render pages about the set of entities of some type.
-	typePageTemplates map[string]*template.Template
-	// Template to render the page about each entity of the type.
-	entityPageTemplate *template.Template
+func (s templates) ForSite() map[string]*template.Template {
+	return s.site
 }
 
-func loadTemplates(templateDir string) (siteTemplates, error) {
+func (s templates) ForEntitySet(e glx.EntityType) map[string]*template.Template {
+	return s.entitySet[e]
+}
+
+func (s templates) ForEntity(e glx.EntityType) *template.Template {
+	return s.entity[e]
+}
+
+func loadTemplates(templateDir string) (templates, error) {
 	config, err := loadConfig(templateDir)
 	if err != nil {
-		return siteTemplates{}, fmt.Errorf("loading template configuration: %w", err)
+		return templates{}, fmt.Errorf("loading template configuration: %w", err)
 	}
 
 	return loadSiteTemplates(os.DirFS(templateDir), config.Templates)
@@ -40,10 +44,11 @@ type templateLoader struct {
 	baseTemplates map[string]*template.Template
 }
 
-func loadSiteTemplates(fsys fs.FS, spec Spec) (siteTemplates, error) {
-	st := siteTemplates{
-		sitePageTemplates: make(map[string]*template.Template),
-		typeTemplates:     make(map[glx.EntityType]entityTypeTemplates),
+func loadSiteTemplates(fsys fs.FS, spec Spec) (templates, error) {
+	siteTemplates := templates{
+		site:      make(map[string]*template.Template),
+		entitySet: make(map[glx.EntityType]map[string]*template.Template),
+		entity:    make(map[glx.EntityType]*template.Template),
 	}
 
 	l := templateLoader{
@@ -53,49 +58,37 @@ func loadSiteTemplates(fsys fs.FS, spec Spec) (siteTemplates, error) {
 	}
 
 	// Load the templates for top-level pages.
-	for name, indexSpec := range spec.Pages {
-		tmpl, err := l.loadTemplate(indexSpec)
+	for name, sitePageSpec := range spec.Pages {
+		siteTemplate, err := l.loadTemplate(sitePageSpec)
 		if err != nil {
-			return st, fmt.Errorf("loading top-level template %q: %w", name, err)
+			return templates{}, fmt.Errorf("loading top-level template %q: %w", name, err)
 		}
-		st.sitePageTemplates[name] = tmpl
+		siteTemplates.site[name] = siteTemplate
 	}
 
 	// Load the templates for each entity type.
 	for et, entityTypeSpec := range spec.Entities {
-		tmpls, err := l.loadEntityTypeTemplates(entityTypeSpec)
-		if err != nil {
-			return st, fmt.Errorf("loading %s templates: %w", et, err)
+		entitySetTemplates := make(map[string]*template.Template)
+
+		// Load the entity set template.
+		for name, setPageSpec := range entityTypeSpec.Pages {
+			setTemplate, err := l.loadTemplate(setPageSpec)
+			if err != nil {
+				return templates{}, fmt.Errorf("index template %q: %w", name, err)
+			}
+			entitySetTemplates[name] = setTemplate
 		}
-		st.typeTemplates[et] = tmpls
-	}
+		siteTemplates.entitySet[et] = entitySetTemplates
 
-	return st, nil
-}
-
-func (l templateLoader) loadEntityTypeTemplates(spec EntityTypeSpec) (entityTypeTemplates, error) {
-	et := entityTypeTemplates{
-		typePageTemplates: make(map[string]*template.Template),
-	}
-
-	// Load the templates to render the pages about the set of entities of
-	// this type.
-	for name, entityTypePageSpec := range spec.Pages {
-		tmpl, err := l.loadTemplate(entityTypePageSpec)
+		// Load the entity template.
+		entityTemplate, err := l.loadTemplate(entityTypeSpec.Entity)
 		if err != nil {
-			return et, fmt.Errorf("index template %q: %w", name, err)
+			return templates{}, fmt.Errorf("entity template: %w", err)
 		}
-		et.typePageTemplates[name] = tmpl
+		siteTemplates.entity[et] = entityTemplate
 	}
 
-	// Load the template to render the page about each entity.
-	tmpl, err := l.loadTemplate(spec.Entity)
-	if err != nil {
-		return et, fmt.Errorf("entity template: %w", err)
-	}
-	et.entityPageTemplate = tmpl
-	return et, nil
-
+	return siteTemplates, nil
 }
 
 func (l *templateLoader) loadTemplate(spec TemplateSpec) (*template.Template, error) {
