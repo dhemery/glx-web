@@ -20,8 +20,8 @@ type Options struct {
 }
 
 type renderer struct {
+	config
 	OutputDir string
-	Templates siteTemplates
 	Err       error
 }
 
@@ -29,9 +29,11 @@ func Render(catalog *entity.Catalog, opts *Options) error {
 	r := renderer{OutputDir: opts.OutputDir}
 	var err error
 
-	if r.Templates, err = loadTemplates(opts.TemplateDir); err != nil {
+	r.config, err = loadConfig(opts.TemplateDir)
+	if err != nil {
 		return err
 	}
+	site.Data = r.Data
 
 	if opts.Clean {
 		if err := os.RemoveAll(opts.OutputDir); err != nil {
@@ -69,10 +71,9 @@ func Render(catalog *entity.Catalog, opts *Options) error {
 }
 
 func (r *renderer) renderTopLevelPages() error {
-	dot := Site()
-	for name, tmpl := range r.Templates.sitePageTemplates {
+	for name, tmpl := range r.Templates.forSite() {
 		fname := filepath.Join(r.OutputDir, name+".html")
-		err := render(fname, dot, tmpl)
+		err := render(fname, site, tmpl)
 		if err != nil {
 			return fmt.Errorf("rendering top-level page with template %q: %w", name, err)
 		}
@@ -85,36 +86,35 @@ type ider interface {
 	ID() string
 }
 
-func (r *renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) {
+func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S) {
 	if r.Err != nil {
 		return
 	}
 
-	entityTypeDir := filepath.Join(r.OutputDir, t.Plural())
+	entityTypeDir := filepath.Join(r.OutputDir, et.Plural())
 
 	if err := os.Mkdir(entityTypeDir, 0755); err != nil {
-		r.Err = fmt.Errorf("rendering %s: %w", t, err)
+		r.Err = fmt.Errorf("rendering %s: %w", et, err)
 		return
 	}
 
-	templates := r.Templates.typeTemplates[t]
 	entitySet := EntitySet{
-		EntityType: t,
+		EntityType: et,
 		Entities:   entities,
 	}
 
-	for name, tmpl := range templates.typePageTemplates {
+	for name, tmpl := range r.Templates.forEntitySet(et) {
 		fname := filepath.Join(entityTypeDir, name+".html")
 		err := render(fname, entitySet, tmpl)
 		if err != nil {
-			r.Err = fmt.Errorf("rendering %s with page template %q: %w", t, name, err)
+			r.Err = fmt.Errorf("rendering %s with entity set template %q: %w", et, name, err)
 			return
 		}
 	}
 
-	entityTemplate := templates.entityPageTemplate
+	entityTemplate := r.Templates.forEntity(et)
 	if entityTemplate == nil {
-		r.Err = fmt.Errorf("no entity template for %s", t)
+		r.Err = fmt.Errorf("no entity template for %s", et)
 		return
 	}
 
@@ -122,7 +122,7 @@ func (r *renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) 
 		id := entity.ID()
 		entityDir := filepath.Join(entityTypeDir, id)
 		if err := os.Mkdir(entityDir, 0755); err != nil {
-			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)
+			r.Err = fmt.Errorf("rendering %s[%s]: %w", et, id, err)
 			return
 		}
 
@@ -130,7 +130,7 @@ func (r *renderer) renderEntities[S ~[]E, E ider](t glx.EntityType, entities S) 
 
 		err := render(fname, entity, entityTemplate)
 		if err != nil {
-			r.Err = fmt.Errorf("rendering %s[%s]: %w", t, id, err)
+			r.Err = fmt.Errorf("rendering %s[%s]: %w", et, id, err)
 			return
 		}
 	}
@@ -143,7 +143,7 @@ func render(fname string, dot any, tmpl *template.Template) error {
 	}
 	defer f.Close()
 
-	ResetPage()
+	clear(pageStore)
 
 	return tmpl.Execute(f, dot)
 }

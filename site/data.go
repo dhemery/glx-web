@@ -13,37 +13,19 @@ type EntitySet struct {
 }
 
 var (
-	theSite     = site{Store: make(map[string]any)}
-	currentPage page
+	site      = Site{Data: make(map[string]any), Store: make(Store)}
+	siteStore = make(Store)
+	pageStore = make(Store)
 )
 
-var TemplateFuncs = map[string]any{
-	"page": func() page { return currentPage },
-	"site": func() site { return theSite },
-}
-
-func ResetPage() {
-	currentPage = page{Store: make(map[string]any)}
-}
-
-func SetSiteData(data map[string]any) {
-	theSite.Data = data
-}
-
-func Site() site {
-	return theSite
-}
-
-type site struct {
-	// Data from the site field of congig.yaml
-	Data map[string]any
-	// Store shared by all pages.
+type Site struct {
+	Data  map[string]any
 	Store Store
 }
 
-type page struct {
-	// Store scoped to a page.
-	Store Store
+var templateFuncs = map[string]any{
+	"site":  func() Site { return site },
+	"store": func() Store { return pageStore },
 }
 
 type Store map[string]any
