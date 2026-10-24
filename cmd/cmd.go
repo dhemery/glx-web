@@ -8,7 +8,7 @@ import (
 
 	"github.com/dhemery/glx-web/entity"
 	"github.com/dhemery/glx-web/internal/load"
-	"github.com/dhemery/glx-web/site"
+	"github.com/dhemery/glx-web/internal/render"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/spf13/cobra"
 )
@@ -22,35 +22,45 @@ func Execute() {
 
 var webCmd = &cobra.Command{
 	Use:   "glx-web",
-	Short: "Build a website from a GLX archive and templates.",
+	Short: "Build a website from a GLX archive and templ ffates.",
 	Args:  cobra.NoArgs,
 	RunE:  run,
 }
 
 var (
-	archiveDir = "./archive"
-	opts       = &site.Options{
-		Clean:       false,
-		OutputDir:   "./public",
-		StaticDir:   "./static",
-		TemplateDir: "./templates",
-	}
+	archiveDir  = "./archive"
+	templateDir = "./templates"
+	outputDir   = "./public"
+	staticDir   = "./static"
+	clean       = false
 )
 
 func init() {
 	webCmd.Flags().StringVarP(&archiveDir, "archive", "a", archiveDir,
 		"the `dir` of the archive to render")
-	webCmd.Flags().BoolVarP(&opts.Clean, "clean", "c", opts.Clean,
+	webCmd.Flags().BoolVarP(&clean, "clean", "c", clean,
 		"remove the existing output dir before building")
-	webCmd.Flags().StringVarP(&opts.OutputDir, "output", "o", opts.OutputDir,
+	webCmd.Flags().StringVarP(&outputDir, "output", "o", outputDir,
 		"the output `dir`")
-	webCmd.Flags().StringVarP(&opts.StaticDir, "static", "s", opts.StaticDir,
+	webCmd.Flags().StringVarP(&staticDir, "static", "s", staticDir,
 		"a `dir` of files to copy into the output dir, if any")
-	webCmd.Flags().StringVarP(&opts.TemplateDir, "templates", "t", opts.TemplateDir,
+	webCmd.Flags().StringVarP(&templateDir, "templates", "t", templateDir,
 		"the template `dir`")
 }
 
 func run(_ *cobra.Command, _ []string) error {
+	cfg, err := load.Config(templateDir, render.TemplateFuncs)
+	if err != nil {
+		return fmt.Errorf("loading configuration: %w", err)
+	}
+	opts := &render.Options{
+		Clean:     clean,
+		Data:      cfg.Data(),
+		OutputDir: outputDir,
+		StaticDir: staticDir,
+		Templates: cfg.Templates(),
+	}
+
 	g, err := load.GLX(os.DirFS(archiveDir))
 	if err != nil {
 		return fmt.Errorf("loading GLX archive: %w", err)
@@ -66,7 +76,7 @@ func run(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	if err := site.Render(catalog, opts); err != nil {
+	if err := render.Site(catalog, opts); err != nil {
 		return fmt.Errorf("rendering: %w", err)
 	}
 	return nil

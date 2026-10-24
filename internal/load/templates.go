@@ -1,4 +1,4 @@
-package site
+package load
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"path"
 
+	"github.com/dhemery/glx-web/config"
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -16,25 +17,26 @@ type templateSet struct {
 	entity    map[glx.EntityType]*template.Template
 }
 
-func (s templateSet) forSite() map[string]*template.Template {
+func (s templateSet) ForSite() map[string]*template.Template {
 	return s.site
 }
 
-func (s templateSet) forEntitySet(e glx.EntityType) map[string]*template.Template {
+func (s templateSet) ForSet(e glx.EntityType) map[string]*template.Template {
 	return s.entitySet[e]
 }
 
-func (s templateSet) forEntity(e glx.EntityType) *template.Template {
+func (s templateSet) ForEntity(e glx.EntityType) *template.Template {
 	return s.entity[e]
 }
 
 type templateLoader struct {
 	fsys          fs.FS
-	baseSpecs     map[string]TemplateSpec
+	funcs         template.FuncMap
+	baseSpecs     map[string]config.TemplateSpec
 	baseTemplates map[string]*template.Template
 }
 
-func compileTemplates(fsys fs.FS, spec Templates) (templateSet, error) {
+func compileTemplates(fsys fs.FS, spec config.Templates, funcs template.FuncMap) (templateSet, error) {
 	templates := templateSet{
 		site:      make(map[string]*template.Template),
 		entitySet: make(map[glx.EntityType]map[string]*template.Template),
@@ -45,6 +47,7 @@ func compileTemplates(fsys fs.FS, spec Templates) (templateSet, error) {
 		fsys:          fsys,
 		baseSpecs:     spec.Bases,
 		baseTemplates: make(map[string]*template.Template),
+		funcs:         funcs,
 	}
 
 	// Load the templates for top-level pages.
@@ -81,7 +84,7 @@ func compileTemplates(fsys fs.FS, spec Templates) (templateSet, error) {
 	return templates, nil
 }
 
-func (l *templateLoader) loadTemplate(spec TemplateSpec) (*template.Template, error) {
+func (l *templateLoader) loadTemplate(spec config.TemplateSpec) (*template.Template, error) {
 	if spec.Base == "" && len(spec.Patterns) == 0 {
 		return nil, errors.New("no base or patterns")
 	}
@@ -96,7 +99,7 @@ func (l *templateLoader) loadTemplate(spec TemplateSpec) (*template.Template, er
 	// body.
 	if base == nil {
 		name := path.Base(spec.Patterns[0])
-		base = template.New(name).Funcs(templateFuncs)
+		base = template.New(name).Funcs(l.funcs)
 	}
 
 	// If no patterns, return the cloned/new base as is.

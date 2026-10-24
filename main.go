@@ -220,7 +220,7 @@
 //
 // To specify the templates,
 // write a config.yaml file in the template directory.
-// The file is deserialized into a [render.Config].
+// The file is deserialized into a [config.Config].
 //
 // The configuration defines four kinds of templates:
 //
@@ -230,8 +230,8 @@
 //     but can be extended by other templates,
 //     including by other base templates.
 //
-//   - Site page templates,
-//     declared in config.Config.Pages.
+//   - Site templates,
+//     declared in config.Config.Site.
 //     A site page template renders a page
 //     about the site.
 //     It is applied to an empty struct,
@@ -242,11 +242,11 @@
 //     You will typically want a site page template named "index"
 //     to render the home page for the site.
 //
-//   - Entity type page templates.
+//   - Entity set templates.
 //     declared in config.EntityTypeTemplateSpec.Pages.
 //     An entity type page template renders a page
 //     about the collection of entities of a given type.
-//     It is applied to a [site.EntitySet]
+//     It is applied to a [context.EntitySet]
 //     and its output is written to
 //     <output-dir>/<entity-type-plural>/<template-name>.html.
 //     You can render the collection in a variety of ways
@@ -265,17 +265,19 @@ package main
 
 import (
 	"github.com/dhemery/glx-web/cmd"
+	"github.com/dhemery/glx-web/config"
+	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
-	site "github.com/dhemery/glx-web/site"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 // Imports to support doc comments.
-var _ site.EntitySet
 var _ entity.IntValue
 var _ glx.EntityType
 var _ glxdate.Date
+var _ context.EntitySet
+var _ config.Config
 
 func main() {
 	cmd.Execute()

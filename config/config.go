@@ -1,12 +1,10 @@
-package site
+// Package config TBD
+package config
 
 import (
-	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/genealogix/glx/go-glx"
-	"go.yaml.in/yaml/v3"
 )
 
 // Import for comment links.
@@ -62,35 +60,4 @@ type TemplateSpec struct {
 	// relative to the template directory. If the spec has no Base, the
 	// first pattern must supply the template body.
 	Patterns []string `json:"patterns"`
-}
-
-type config struct {
-	Data      map[string]any
-	Templates templateSet
-}
-
-func loadConfig(dir string) (config, error) {
-	var spec Config
-
-	configFileName := filepath.Join(dir, "config.yaml")
-	configFile, err := os.Open(configFileName)
-	if err != nil {
-		return config{}, err
-	}
-	defer configFile.Close()
-
-	dec := yaml.NewDecoder(configFile)
-	dec.KnownFields(true)
-
-	err = dec.Decode(&spec)
-	if err != nil {
-		return config{}, fmt.Errorf("%s: %w", "config.yaml", err)
-	}
-
-	tt, err := compileTemplates(os.DirFS(dir), spec.Templates)
-	if err != nil {
-		return config{}, fmt.Errorf("loading templates: %w", err)
-	}
-
-	return config{Data: spec.Data, Templates: tt}, err
 }

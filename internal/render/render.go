@@ -1,5 +1,5 @@
-// Package site renders a website from a compiled GLX archive.
-package site
+// Package render renders a website from a compiled GLX archive.
+package render
 
 import (
 	"errors"
@@ -8,32 +8,52 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
 
+type templateSet interface {
+	ForSite() map[string]*template.Template
+	ForSet(glx.EntityType) map[string]*template.Template
+	ForEntity(glx.EntityType) *template.Template
+}
+
 type Options struct {
-	Clean       bool
-	OutputDir   string
-	StaticDir   string
-	TemplateDir string
+	Clean     bool
+	Data      map[string]any
+	OutputDir string
+	StaticDir string
+	Templates templateSet
 }
 
 type renderer struct {
-	config
+	Templates templateSet
 	OutputDir string
 	Err       error
 }
 
-func Render(catalog *entity.Catalog, opts *Options) error {
-	r := renderer{OutputDir: opts.OutputDir}
-	var err error
+var (
+	site      context.Site
+	pageStore = make(context.Store)
+)
 
-	r.config, err = loadConfig(opts.TemplateDir)
-	if err != nil {
-		return err
+// TemplateFuncs is a map of functions to add to each template.
+var TemplateFuncs = map[string]any{
+	"site":  func() context.Site { return site },
+	"store": func() context.Store { return pageStore },
+}
+
+func Site(catalog *entity.Catalog, opts *Options) error {
+	site = context.Site{
+		Data:  opts.Data,
+		Store: make(context.Store),
 	}
-	site.Data = r.Data
+
+	r := renderer{
+		Templates: opts.Templates,
+		OutputDir: opts.OutputDir,
+	}
 
 	if opts.Clean {
 		if err := os.RemoveAll(opts.OutputDir); err != nil {
@@ -53,8 +73,12 @@ func Render(catalog *entity.Catalog, opts *Options) error {
 		}
 	}
 
-	if err = r.renderTopLevelPages(); err != nil {
-		return err
+	for name, tmpl := range r.Templates.ForSite() {
+		fname := filepath.Join(r.OutputDir, name+".html")
+		err := render(fname, site, tmpl)
+		if err != nil {
+			return fmt.Errorf("rendering top-level page with template %q: %w", name, err)
+		}
 	}
 
 	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions())
@@ -66,18 +90,6 @@ func Render(catalog *entity.Catalog, opts *Options) error {
 	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships())
 	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories())
 	r.renderEntities(glx.EntityTypeSources, catalog.Sources())
-
-	return r.Err
-}
-
-func (r *renderer) renderTopLevelPages() error {
-	for name, tmpl := range r.Templates.forSite() {
-		fname := filepath.Join(r.OutputDir, name+".html")
-		err := render(fname, site, tmpl)
-		if err != nil {
-			return fmt.Errorf("rendering top-level page with template %q: %w", name, err)
-		}
-	}
 
 	return r.Err
 }
@@ -98,12 +110,12 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 		return
 	}
 
-	entitySet := EntitySet{
+	entitySet := context.EntitySet{
 		EntityType: et,
 		Entities:   entities,
 	}
 
-	for name, tmpl := range r.Templates.forEntitySet(et) {
+	for name, tmpl := range r.Templates.ForSet(et) {
 		fname := filepath.Join(entityTypeDir, name+".html")
 		err := render(fname, entitySet, tmpl)
 		if err != nil {
@@ -112,7 +124,7 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 		}
 	}
 
-	entityTemplate := r.Templates.forEntity(et)
+	entityTemplate := r.Templates.ForEntity(et)
 	if entityTemplate == nil {
 		r.Err = fmt.Errorf("no entity template for %s", et)
 		return
