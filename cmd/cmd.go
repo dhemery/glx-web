@@ -53,13 +53,6 @@ func run(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return fmt.Errorf("loading configuration: %w", err)
 	}
-	opts := &render.Options{
-		Clean:     clean,
-		Data:      cfg.Data(),
-		OutputDir: outputDir,
-		StaticDir: staticDir,
-		Templates: cfg.Templates(),
-	}
 
 	g, err := load.GLX(os.DirFS(archiveDir))
 	if err != nil {
@@ -74,6 +67,14 @@ func run(_ *cobra.Command, _ []string) error {
 			}
 		}
 		return err
+	}
+
+	opts := &render.Options{
+		Clean:     clean,
+		Data:      cfg.Data(),
+		OutputDir: outputDir,
+		StaticDir: staticDir,
+		Templates: cfg.Templates(),
 	}
 
 	if err := render.Site(catalog, opts); err != nil {

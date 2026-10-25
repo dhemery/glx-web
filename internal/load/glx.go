@@ -39,7 +39,7 @@ func readGLXFiles(fsys fs.FS) (map[string][]byte, error) {
 		}
 
 		// Skip hidden files and dirs.
-		if strings.HasPrefix(d.Name(), ".") {
+		if strings.HasPrefix(path, ".") && path != "." {
 			if d.IsDir() {
 				return fs.SkipDir
 			}
