@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"path"
 
-	"github.com/dhemery/glx-web/config"
+	"github.com/dhemery/glx-web/tmpl"
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -32,11 +32,11 @@ func (s templateSet) ForEntity(e glx.EntityType) *template.Template {
 type templateLoader struct {
 	fsys          fs.FS
 	funcs         template.FuncMap
-	baseSpecs     map[string]config.TemplateSpec
+	baseSpecs     map[string]tmpl.Spec
 	baseTemplates map[string]*template.Template
 }
 
-func compileTemplates(fsys fs.FS, spec config.Templates, funcs template.FuncMap) (templateSet, error) {
+func compileTemplates(fsys fs.FS, specs tmpl.Specs, funcs template.FuncMap) (templateSet, error) {
 	templates := templateSet{
 		site:      make(map[string]*template.Template),
 		entitySet: make(map[glx.EntityType]map[string]*template.Template),
@@ -45,29 +45,29 @@ func compileTemplates(fsys fs.FS, spec config.Templates, funcs template.FuncMap)
 
 	l := templateLoader{
 		fsys:          fsys,
-		baseSpecs:     spec.Bases,
+		baseSpecs:     specs.Bases,
 		baseTemplates: make(map[string]*template.Template),
 		funcs:         funcs,
 	}
 
 	// Load the templates for top-level pages.
-	for name, siteSpec := range spec.Site {
+	for name, siteSpec := range specs.Site {
 		t, err := l.loadTemplate(siteSpec)
 		if err != nil {
-			return templateSet{}, fmt.Errorf("loading top-level template %q: %w", name, err)
+			return templateSet{}, fmt.Errorf("site template %q: %w", name, err)
 		}
 		templates.site[name] = t
 	}
 
 	// Load the templates for each entity type.
-	for et, typeSpec := range spec.Types {
+	for et, typeSpec := range specs.Types {
 		setTemplates := make(map[string]*template.Template)
 
 		// Load the entity set template.
-		for name, setPageSpec := range typeSpec.Set {
+		for name, setPageSpec := range typeSpec.Type {
 			t, err := l.loadTemplate(setPageSpec)
 			if err != nil {
-				return templateSet{}, fmt.Errorf("index template %q: %w", name, err)
+				return templateSet{}, fmt.Errorf("type template %q: %w", name, err)
 			}
 			setTemplates[name] = t
 		}
@@ -84,7 +84,7 @@ func compileTemplates(fsys fs.FS, spec config.Templates, funcs template.FuncMap)
 	return templates, nil
 }
 
-func (l *templateLoader) loadTemplate(spec config.TemplateSpec) (*template.Template, error) {
+func (l *templateLoader) loadTemplate(spec tmpl.Spec) (*template.Template, error) {
 	if spec.Base == "" && len(spec.Patterns) == 0 {
 		return nil, errors.New("no base or patterns")
 	}

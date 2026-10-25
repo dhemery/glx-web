@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
+	"github.com/dhemery/glx-web/tmpl"
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -34,20 +34,20 @@ type renderer struct {
 }
 
 var (
-	site      context.Site
-	pageStore = make(context.Store)
+	site      tmpl.Site
+	pageStore = make(tmpl.Store)
 )
 
 // TemplateFuncs is a map of functions to add to each template.
 var TemplateFuncs = map[string]any{
-	"site":  func() context.Site { return site },
-	"store": func() context.Store { return pageStore },
+	"site":  func() tmpl.Site { return site },
+	"store": func() tmpl.Store { return pageStore },
 }
 
 func Site(catalog *entity.Catalog, opts *Options) error {
-	site = context.Site{
+	site = tmpl.Site{
 		Data:  opts.Data,
-		Store: make(context.Store),
+		Store: make(tmpl.Store),
 	}
 
 	r := renderer{
@@ -110,7 +110,7 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 		return
 	}
 
-	entitySet := context.EntitySet{
+	entitySet := tmpl.EntitySet{
 		EntityType: et,
 		Entities:   entities,
 	}

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dhemery/glx-web/config"
+	"github.com/dhemery/glx-web/tmpl"
 	"go.yaml.in/yaml/v3"
 )
 
@@ -24,7 +24,7 @@ func (c cfg) Templates() templateSet {
 }
 
 func Config(dir string, funcs template.FuncMap) (cfg, error) {
-	var spec config.Config
+	var tmplConfig tmpl.Config
 
 	configFileName := filepath.Join(dir, "config.yaml")
 	configFile, err := os.Open(configFileName)
@@ -36,15 +36,15 @@ func Config(dir string, funcs template.FuncMap) (cfg, error) {
 	dec := yaml.NewDecoder(configFile)
 	dec.KnownFields(true)
 
-	err = dec.Decode(&spec)
+	err = dec.Decode(&tmplConfig)
 	if err != nil {
 		return cfg{}, fmt.Errorf("%s: %w", "config.yaml", err)
 	}
 
-	tt, err := compileTemplates(os.DirFS(dir), spec.Templates, funcs)
+	tt, err := compileTemplates(os.DirFS(dir), tmplConfig.Templates, funcs)
 	if err != nil {
 		return cfg{}, fmt.Errorf("loading templates: %w", err)
 	}
 
-	return cfg{data: spec.Data, templates: tt}, err
+	return cfg{data: tmplConfig.Data, templates: tt}, err
 }

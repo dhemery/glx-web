@@ -246,7 +246,7 @@
 //     declared in config.EntityTypeTemplateSpec.Pages.
 //     An entity type page template renders a page
 //     about the collection of entities of a given type.
-//     It is applied to a [context.EntitySet]
+//     It is applied to a [tmpl.EntitySet]
 //     and its output is written to
 //     <output-dir>/<entity-type-plural>/<template-name>.html.
 //     You can render the collection in a variety of ways
@@ -265,9 +265,8 @@ package main
 
 import (
 	"github.com/dhemery/glx-web/cmd"
-	"github.com/dhemery/glx-web/config"
-	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
+	"github.com/dhemery/glx-web/tmpl"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -276,8 +275,7 @@ import (
 var _ entity.IntValue
 var _ glx.EntityType
 var _ glxdate.Date
-var _ context.EntitySet
-var _ config.Config
+var _ tmpl.Config
 
 func main() {
 	cmd.Execute()
