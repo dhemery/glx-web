@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
-	"path"
 
 	"github.com/dhemery/glx-web/tmpl"
 	"github.com/genealogix/glx/go-glx"
@@ -29,13 +28,6 @@ func (s templateSet) ForEntity(e glx.EntityType) *template.Template {
 	return s.entity[e]
 }
 
-type templateLoader struct {
-	fsys          fs.FS
-	funcs         template.FuncMap
-	baseSpecs     map[string]tmpl.Spec
-	baseTemplates map[string]*template.Template
-}
-
 func compileTemplates(fsys fs.FS, specs tmpl.Specs, funcs template.FuncMap) (templateSet, error) {
 	templates := templateSet{
 		site:      make(map[string]*template.Template),
@@ -43,29 +35,28 @@ func compileTemplates(fsys fs.FS, specs tmpl.Specs, funcs template.FuncMap) (tem
 		entity:    make(map[glx.EntityType]*template.Template),
 	}
 
-	l := templateLoader{
-		fsys:          fsys,
-		baseSpecs:     specs.Bases,
-		baseTemplates: make(map[string]*template.Template),
-		funcs:         funcs,
+	c := templateCompiler{
+		fsys:  fsys,
+		specs: specs,
+		// Each compiled template ultimately uses root as a base, and
+		// so gains funcs.
+		root:  template.New("glx-web-root").Funcs(funcs),
+		bases: make(map[string]*template.Template),
 	}
 
-	// Load the templates for top-level pages.
-	for name, siteSpec := range specs.Site {
-		t, err := l.loadTemplate(siteSpec)
+	for name, siteSpec := range c.specs.Site {
+		t, err := c.compileTemplate(siteSpec)
 		if err != nil {
 			return templateSet{}, fmt.Errorf("site template %q: %w", name, err)
 		}
 		templates.site[name] = t
 	}
 
-	// Load the templates for each entity type.
-	for et, typeSpec := range specs.Types {
+	for et, typeSpec := range c.specs.Types {
 		setTemplates := make(map[string]*template.Template)
 
-		// Load the entity set template.
 		for name, setPageSpec := range typeSpec.Type {
-			t, err := l.loadTemplate(setPageSpec)
+			t, err := c.compileTemplate(setPageSpec)
 			if err != nil {
 				return templateSet{}, fmt.Errorf("type template %q: %w", name, err)
 			}
@@ -73,8 +64,7 @@ func compileTemplates(fsys fs.FS, specs tmpl.Specs, funcs template.FuncMap) (tem
 		}
 		templates.entitySet[et] = setTemplates
 
-		// Load the entity template.
-		t, err := l.loadTemplate(typeSpec.Entity)
+		t, err := c.compileTemplate(typeSpec.Entity)
 		if err != nil {
 			return templateSet{}, fmt.Errorf("entity template: %w", err)
 		}
@@ -84,51 +74,67 @@ func compileTemplates(fsys fs.FS, specs tmpl.Specs, funcs template.FuncMap) (tem
 	return templates, nil
 }
 
-func (l *templateLoader) loadTemplate(spec tmpl.Spec) (*template.Template, error) {
+type templateCompiler struct {
+	fsys fs.FS
+	// The default base to use when a Spec does not name a base.
+	root  *template.Template
+	specs tmpl.Specs
+	bases map[string]*template.Template
+}
+
+func (c *templateCompiler) compileTemplate(spec tmpl.Spec) (*template.Template, error) {
 	if spec.Base == "" && len(spec.Patterns) == 0 {
 		return nil, errors.New("no base or patterns")
 	}
 
-	base, err := l.cloneBase(spec.Base)
+	t, err := c.cloneBase(spec.Base)
 	if err != nil {
 		return nil, err
 	}
 
-	// If no base, create a new base with funcs but no body. Name it after
-	// the first pattern so that the first parsed file will supply the
-	// body.
-	if base == nil {
-		name := path.Base(spec.Patterns[0])
-		base = template.New(name).Funcs(l.funcs)
+	for _, pattern := range spec.Patterns {
+		files, err := fs.Glob(c.fsys, pattern)
+		if err != nil {
+			return nil, fmt.Errorf("pattern %q: %w", pattern, err)
+		}
+		for _, file := range files {
+			b, err := fs.ReadFile(c.fsys, file)
+			if err != nil {
+				return nil, fmt.Errorf("pattern %q: template file %q: %w",
+					pattern, file, err)
+			}
+			t, err = t.Parse(string(b))
+			if err != nil {
+				return nil, fmt.Errorf("pattern %q: template file %q: %w",
+					pattern, file, err)
+			}
+		}
 	}
-
-	// If no patterns, return the cloned/new base as is.
-	if len(spec.Patterns) == 0 {
-		return base, nil
-	}
-
-	return base.ParseFS(l.fsys, spec.Patterns...)
+	return t, nil
 }
 
-// Clone the named base template, loading it first if necessary.
-func (l *templateLoader) cloneBase(name string) (*template.Template, error) {
+// Clone the named base template, compiling it first if necessary.
+func (c *templateCompiler) cloneBase(name string) (*template.Template, error) {
+	// If no name, use root, which has funcs installed.
 	if name == "" {
-		return nil, nil
+		return c.root.Clone()
 	}
 
 	var base *template.Template
 	var err error
-	base, ok := l.baseTemplates[name]
-	if !ok { // base has not been loaded. Load it now.
-		spec, ok := l.baseSpecs[name]
+	base, ok := c.bases[name]
+
+	// If base has not been compiled, compile it now.
+	if !ok {
+		baseSpec, ok := c.specs.Bases[name]
 		if !ok {
-			return nil, fmt.Errorf("no spec for base template %q", name)
+			return nil, fmt.Errorf("base template %q: no such base", name)
 		}
-		base, err = l.loadTemplate(spec)
+		base, err = c.compileTemplate(baseSpec)
 		if err != nil {
-			return nil, fmt.Errorf("loading base template %q: %w", name, err)
+			return nil, fmt.Errorf("base template %q: %w", name, err)
 		}
-		l.baseTemplates[name] = base
+		c.bases[name] = base
 	}
 
 	return base.Clone()

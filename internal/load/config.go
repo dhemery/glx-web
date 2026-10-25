@@ -10,41 +10,40 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-type cfg struct {
+type config struct {
 	data      map[string]any
 	templates templateSet
 }
 
-func (c cfg) Data() map[string]any {
+func (c config) Data() map[string]any {
 	return c.data
 }
 
-func (c cfg) Templates() templateSet {
+func (c config) Templates() templateSet {
 	return c.templates
 }
 
-func Config(dir string, funcs template.FuncMap) (cfg, error) {
-	var tmplConfig tmpl.Config
-
+func Config(dir string, funcs template.FuncMap) (config, error) {
 	configFileName := filepath.Join(dir, "config.yaml")
 	configFile, err := os.Open(configFileName)
 	if err != nil {
-		return cfg{}, err
+		return config{}, err
 	}
 	defer configFile.Close()
 
 	dec := yaml.NewDecoder(configFile)
+	// Complain about unknown fields.
 	dec.KnownFields(true)
 
-	err = dec.Decode(&tmplConfig)
-	if err != nil {
-		return cfg{}, fmt.Errorf("%s: %w", "config.yaml", err)
+	var tmplConfig tmpl.Config
+	if err = dec.Decode(&tmplConfig); err != nil {
+		return config{}, fmt.Errorf("%s: %w", configFileName, err)
 	}
 
 	tt, err := compileTemplates(os.DirFS(dir), tmplConfig.Templates, funcs)
 	if err != nil {
-		return cfg{}, fmt.Errorf("loading templates: %w", err)
+		return config{}, err
 	}
 
-	return cfg{data: tmplConfig.Data, templates: tt}, err
+	return config{data: tmplConfig.Data, templates: tt}, err
 }
