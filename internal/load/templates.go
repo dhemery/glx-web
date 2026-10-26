@@ -13,7 +13,7 @@ import (
 type templateSet struct {
 	site      map[string]*template.Template
 	entitySet map[glx.EntityType]map[string]*template.Template
-	entity    map[glx.EntityType]*template.Template
+	entity    map[glx.EntityType]map[string]*template.Template
 }
 
 func (s templateSet) ForSite() map[string]*template.Template {
@@ -24,7 +24,7 @@ func (s templateSet) ForSet(e glx.EntityType) map[string]*template.Template {
 	return s.entitySet[e]
 }
 
-func (s templateSet) ForEntity(e glx.EntityType) *template.Template {
+func (s templateSet) ForEntity(e glx.EntityType) map[string]*template.Template {
 	return s.entity[e]
 }
 
@@ -32,7 +32,7 @@ func compileTemplates(fsys fs.FS, specs tmpl.Specs, funcs template.FuncMap) (tem
 	templates := templateSet{
 		site:      make(map[string]*template.Template),
 		entitySet: make(map[glx.EntityType]map[string]*template.Template),
-		entity:    make(map[glx.EntityType]*template.Template),
+		entity:    make(map[glx.EntityType]map[string]*template.Template),
 	}
 
 	c := templateCompiler{
@@ -55,8 +55,8 @@ func compileTemplates(fsys fs.FS, specs tmpl.Specs, funcs template.FuncMap) (tem
 	for et, typeSpec := range c.specs.Types {
 		setTemplates := make(map[string]*template.Template)
 
-		for name, setPageSpec := range typeSpec.Type {
-			t, err := c.compileTemplate(setPageSpec)
+		for name, spec := range typeSpec.Type {
+			t, err := c.compileTemplate(spec)
 			if err != nil {
 				return templateSet{}, fmt.Errorf("type template %q: %w", name, err)
 			}
@@ -64,11 +64,15 @@ func compileTemplates(fsys fs.FS, specs tmpl.Specs, funcs template.FuncMap) (tem
 		}
 		templates.entitySet[et] = setTemplates
 
-		t, err := c.compileTemplate(typeSpec.Entity)
-		if err != nil {
-			return templateSet{}, fmt.Errorf("entity template: %w", err)
+		entityTemplates := make(map[string]*template.Template)
+		for name, spec := range typeSpec.Entity {
+			t, err := c.compileTemplate(spec)
+			if err != nil {
+				return templateSet{}, fmt.Errorf("entity template %q: %w", name, err)
+			}
+			entityTemplates[name] = t
 		}
-		templates.entity[et] = t
+		templates.entity[et] = entityTemplates
 	}
 
 	return templates, nil

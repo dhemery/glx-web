@@ -35,8 +35,11 @@ type Types struct {
 	// to the type's [EntitySet]. The map key is used as the path for the
 	// rendered file relative to the output directory.
 	Type map[string]Spec `json:"type"`
-	// The template for each entity of the type.
-	Entity Spec `json:"entity"`
+	// Templates for each entity of the type. Each template is applied to
+	// the entity. Each occurrence of "<id>" in the map key is replaced
+	// with the entity's ID, and the result is used as the path for the
+	// rendered file, relative to the output directory.
+	Entity map[string]Spec `json:"entity"`
 }
 
 // Spec specifies a template. Each pattern is matched to files relative to the

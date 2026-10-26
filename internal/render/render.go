@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dhemery/glx-web/entity"
 	"github.com/dhemery/glx-web/tmpl"
@@ -16,7 +17,7 @@ import (
 type templateSet interface {
 	ForSite() map[string]*template.Template
 	ForSet(glx.EntityType) map[string]*template.Template
-	ForEntity(glx.EntityType) *template.Template
+	ForEntity(glx.EntityType) map[string]*template.Template
 }
 
 type Options struct {
@@ -74,7 +75,7 @@ func Site(catalog *entity.Catalog, opts *Options) error {
 	}
 
 	for name, tmpl := range r.Templates.ForSite() {
-		fname := filepath.Join(r.OutputDir, name+".html")
+		fname := filepath.Join(r.OutputDir, name)
 		err := render(fname, site, tmpl)
 		if err != nil {
 			return fmt.Errorf("rendering top-level page with template %q: %w", name, err)
@@ -103,52 +104,38 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 		return
 	}
 
-	entityTypeDir := filepath.Join(r.OutputDir, et.Plural())
-
-	if err := os.Mkdir(entityTypeDir, 0755); err != nil {
-		r.Err = fmt.Errorf("rendering %s: %w", et, err)
-		return
-	}
-
 	entitySet := tmpl.EntitySet{
 		EntityType: et,
 		Entities:   entities,
 	}
 
-	for name, tmpl := range r.Templates.ForSet(et) {
-		fname := filepath.Join(entityTypeDir, name+".html")
-		err := render(fname, entitySet, tmpl)
+	for name, t := range r.Templates.ForSet(et) {
+		fname := filepath.Join(r.OutputDir, name)
+		err := render(fname, entitySet, t)
 		if err != nil {
 			r.Err = fmt.Errorf("rendering %s with entity set template %q: %w", et, name, err)
 			return
 		}
 	}
 
-	entityTemplate := r.Templates.ForEntity(et)
-	if entityTemplate == nil {
-		r.Err = fmt.Errorf("no entity template for %s", et)
-		return
-	}
-
 	for _, entity := range entities {
 		id := entity.ID()
-		entityDir := filepath.Join(entityTypeDir, id)
-		if err := os.Mkdir(entityDir, 0755); err != nil {
-			r.Err = fmt.Errorf("rendering %s[%s]: %w", et, id, err)
-			return
-		}
+		for name, t := range r.Templates.ForEntity(et) {
+			fname := filepath.Join(r.OutputDir, strings.ReplaceAll(name, "<id>", id))
 
-		fname := filepath.Join(entityDir, "index.html")
-
-		err := render(fname, entity, entityTemplate)
-		if err != nil {
-			r.Err = fmt.Errorf("rendering %s[%s]: %w", et, id, err)
-			return
+			err := render(fname, entity, t)
+			if err != nil {
+				r.Err = fmt.Errorf("rendering %s[%s]: %w", et, id, err)
+				return
+			}
 		}
 	}
 }
 
 func render(fname string, dot any, tmpl *template.Template) error {
+	if err := os.MkdirAll(filepath.Dir(fname), 0755); err != nil {
+		return err
+	}
 	f, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0644)
 	if err != nil {
 		return err
