@@ -28,7 +28,7 @@ func (s templateSet) ForEntity(e glx.EntityType) map[string]*template.Template {
 	return s.entity[e]
 }
 
-func compileTemplates(templateDir string, specs tmpl.Specs, funcs template.FuncMap) (templateSet, error) {
+func compileSiteSpec(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) (templateSet, error) {
 	templates := templateSet{
 		site:      make(map[string]*template.Template),
 		entitySet: make(map[glx.EntityType]map[string]*template.Template),
@@ -42,8 +42,8 @@ func compileTemplates(templateDir string, specs tmpl.Specs, funcs template.FuncM
 		bases:       make(map[string]*template.Template),
 	}
 
-	for name, siteSpec := range c.specs.Site {
-		t, err := c.compileTemplate(siteSpec)
+	for name, spec := range c.specs.Site {
+		t, err := c.compileSpec(spec)
 		if err != nil {
 			return templateSet{}, fmt.Errorf("site template %q: %w", name, err)
 		}
@@ -51,26 +51,23 @@ func compileTemplates(templateDir string, specs tmpl.Specs, funcs template.FuncM
 	}
 
 	for et, typeSpec := range c.specs.Types {
-		setTemplates := make(map[string]*template.Template)
-
+		templates.entitySet[et] = make(map[string]*template.Template)
 		for name, spec := range typeSpec.Type {
-			t, err := c.compileTemplate(spec)
+			t, err := c.compileSpec(spec)
 			if err != nil {
 				return templateSet{}, fmt.Errorf("type template %q: %w", name, err)
 			}
-			setTemplates[name] = t
+			templates.entitySet[et][name] = t
 		}
-		templates.entitySet[et] = setTemplates
 
-		entityTemplates := make(map[string]*template.Template)
+		templates.entity[et] = make(map[string]*template.Template)
 		for name, spec := range typeSpec.Entity {
-			t, err := c.compileTemplate(spec)
+			t, err := c.compileSpec(spec)
 			if err != nil {
 				return templateSet{}, fmt.Errorf("entity template %q: %w", name, err)
 			}
-			entityTemplates[name] = t
+			templates.entity[et][name] = t
 		}
-		templates.entity[et] = entityTemplates
 	}
 
 	return templates, nil
@@ -79,29 +76,34 @@ func compileTemplates(templateDir string, specs tmpl.Specs, funcs template.FuncM
 type templateCompiler struct {
 	templateDir string
 	funcs       template.FuncMap
-	specs       tmpl.Specs
+	specs       tmpl.SiteSpec
 	bases       map[string]*template.Template
 }
 
-func (c *templateCompiler) compileTemplate(spec tmpl.Spec) (*template.Template, error) {
-	base, err := c.cloneBase(spec.Base)
+func (c *templateCompiler) compileSpec(spec tmpl.Spec) (*template.Template, error) {
+	base, err := c.base(spec.Base)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(spec.Files) == 0 {
-		if base == nil {
-			return nil, errors.New("no base and no files")
-		}
-		// No files, so use the cloned base.
+	switch {
+	case base == nil && len(spec.Files) == 0:
+		return nil, errors.New("no base and no files")
+	case len(spec.Files) == 0:
+		// There's a base but no files to parse. Use the base as is.
 		return base, nil
-	}
-
-	// If there's no base, use an undefined template named after the first
-	// file, with funcs installed.
-	if base == nil {
+	case base == nil:
+		// There are files to parse but no base. Use an undefined base
+		// with funcs. Name it after the first file so that parsing the
+		// file will define the template.
 		name := filepath.Base(spec.Files[0])
 		base = template.New(name).Funcs(c.funcs)
+	default:
+		// Both base and files are specified. Clone the base.
+		base, err = base.Clone()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var fnames []string
@@ -111,8 +113,8 @@ func (c *templateCompiler) compileTemplate(spec tmpl.Spec) (*template.Template, 
 	return base.ParseFiles(fnames...)
 }
 
-// Clone the named base template, compiling it first if necessary.
-func (c *templateCompiler) cloneBase(name string) (*template.Template, error) {
+// Return the named base template, compiling it first if necessary.
+func (c *templateCompiler) base(name string) (*template.Template, error) {
 	if name == "" {
 		return nil, nil
 	}
@@ -127,12 +129,12 @@ func (c *templateCompiler) cloneBase(name string) (*template.Template, error) {
 		if !ok {
 			return nil, fmt.Errorf("base template %q: no such base", name)
 		}
-		base, err = c.compileTemplate(baseSpec)
+		base, err = c.compileSpec(baseSpec)
 		if err != nil {
 			return nil, fmt.Errorf("base template %q: %w", name, err)
 		}
 		c.bases[name] = base
 	}
 
-	return base.Clone()
+	return base, nil
 }
