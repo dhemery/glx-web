@@ -14,7 +14,7 @@ type Assertion struct {
 	Media       MediaList
 	Participant *Participant
 	Sources     SourceList
-	Subject     entityReference
+	Subject     Stringer
 
 	// TODO(feature): Find a way to resolve entity and vocabulary
 	// references in Value. Maybe a single struct that captures every
@@ -100,10 +100,4 @@ func (a *Assertion) compile(ctx *context) {
 
 type subject interface {
 	addAssertion(*Assertion)
-}
-
-type entityReference interface {
-	ID() string
-	PagePath() string
-	String() string
 }

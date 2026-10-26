@@ -121,7 +121,7 @@ func NewCatalog(g *glx.GLXFile, w io.Writer) (*Catalog, error) {
 	return c, nil
 }
 
-func (c *Catalog) entity(id string, entityType string) entityReference {
+func (c *Catalog) entity(id string, entityType string) Stringer {
 	// TODO(feature): Handle the rest of the entity types.
 	switch entityType {
 	case glx.EntityTypeCitations.Plural():
