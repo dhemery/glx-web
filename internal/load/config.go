@@ -23,8 +23,8 @@ func (c config) Templates() templateSet {
 	return c.templates
 }
 
-func Config(dir string, funcs template.FuncMap) (config, error) {
-	configFileName := filepath.Join(dir, "config.yaml")
+func Config(templateDir string, funcs template.FuncMap) (config, error) {
+	configFileName := filepath.Join(templateDir, "config.yaml")
 	configFile, err := os.Open(configFileName)
 	if err != nil {
 		return config{}, err
@@ -40,7 +40,7 @@ func Config(dir string, funcs template.FuncMap) (config, error) {
 		return config{}, fmt.Errorf("%s: %w", configFileName, err)
 	}
 
-	tt, err := compileTemplates(os.DirFS(dir), tmplConfig.Templates, funcs)
+	tt, err := compileTemplates(templateDir, tmplConfig.Templates, funcs)
 	if err != nil {
 		return config{}, err
 	}

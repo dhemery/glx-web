@@ -2,8 +2,6 @@
 package tmpl
 
 import (
-	"path/filepath"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -38,23 +36,17 @@ type Types struct {
 	// Templates for each entity of the type. Each template is applied to
 	// the entity. Each occurrence of "<id>" in the map key is replaced
 	// with the entity's ID, and the result is used as the path for the
-	// rendered file, relative to the output directory.
+	// rendered file relative to the output directory.
 	Entity map[string]Spec `json:"entity"`
 }
 
-// Spec specifies a template. Each pattern is matched to files relative to the
-// template directory. The template is compiled by cloning the base and parsing
-// the content of each matching file into it. If no base is specified, an
-// undefined template named glx-web-root is used as the base.
-//
-// Patterns are matched according to the sementics of [filepath.Match].
+// Spec specifies a template. The template is compiled by cloning the base and
+// parsing the files into it. If no base is named, there must be at least one
+// file, and the first file must define the body of the template.
 type Spec struct {
 	// The name of the base template to build on.
 	Base string `json:"base"`
-	// The glob patterns that identify the template files to parse,
-	// relative to the template directory.
-	Patterns []string `json:"patterns"`
+	// The paths to the template files to parse relative to the template
+	// directory.
+	Files []string `json:"files"`
 }
-
-// Import for comment links.
-var _ = filepath.Match
