@@ -33,7 +33,7 @@ persons:
                     reference_type: places
                 entries:
                 -   date: "2023-01-09"
-                    value: places/somewhere
+                    value: somewhere
 places:
     somewhere:
         name: Somewhere

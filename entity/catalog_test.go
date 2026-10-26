@@ -59,7 +59,10 @@ func TestCatalogCompile(t *testing.T) {
 			}
 
 			output := &bytes.Buffer{}
-			catalog := entity.NewCatalog(glxFile, output)
+			catalog, err := entity.NewCatalog(glxFile, output)
+			if err != nil {
+				t.Fatalf("compiling catalog: %s", err)
+			}
 
 			gotOutputLines := trimmedLines(output.Bytes())
 			unmatchedOutputLines, unmatchedPatterns := matchLines(gotOutputLines, tc.wantOutput)

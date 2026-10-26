@@ -64,7 +64,7 @@ func marshalBoolValue(out *jsontext.Encoder, in entity.BoolValue) error {
 
 func marshalCitation(out *jsontext.Encoder, in *entity.Citation) error {
 	if out.StackDepth() > 2 { // Marshaling a reference
-		return out.WriteToken(jsontext.String(in.PagePath()))
+		return out.WriteToken(jsontext.String(in.ID()))
 	}
 	v := struct {
 		Properties map[string]entity.Property `json:"properties"`
@@ -80,7 +80,7 @@ func marshalDate(out *jsontext.Encoder, in glxdate.Date) error {
 
 func marshalEvent(out *jsontext.Encoder, in *entity.Event) error {
 	if out.StackDepth() > 2 { // Marshaling a reference
-		return out.WriteToken(jsontext.String(in.PagePath()))
+		return out.WriteToken(jsontext.String(in.ID()))
 	}
 	v := struct {
 		Date         glxdate.Date               `json:"date"`
@@ -131,7 +131,7 @@ func marshalParticipant(out *jsontext.Encoder, in *entity.Participant) error {
 
 func marshalPerson(out *jsontext.Encoder, in *entity.Person) error {
 	if out.StackDepth() > 2 { // Marshaling a reference
-		return out.WriteToken(jsontext.String(in.PagePath()))
+		return out.WriteToken(jsontext.String(in.ID()))
 	}
 	v := struct {
 		Properties map[string]entity.Property `json:"properties"`
@@ -143,7 +143,7 @@ func marshalPerson(out *jsontext.Encoder, in *entity.Person) error {
 
 func marshalPlace(out *jsontext.Encoder, in *entity.Place) error {
 	if out.StackDepth() > 2 { // Marshaling a reference
-		return out.WriteToken(jsontext.String(in.PagePath()))
+		return out.WriteToken(jsontext.String(in.ID()))
 	}
 	v := struct {
 		Name       string                     `json:"name"`

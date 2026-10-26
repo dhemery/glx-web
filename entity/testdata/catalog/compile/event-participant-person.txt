@@ -38,7 +38,7 @@ events:
                 definition:
                     label: Subject
                 value: subject
-            person: persons/existing-person
+            person: existing-person
 persons:
     existing-person:
         properties: {}
