@@ -3,8 +3,8 @@ package load
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"io/fs"
+	"text/template"
 
 	"github.com/dhemery/glx-web/tmpl"
 	"github.com/genealogix/glx/go-glx"

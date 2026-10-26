@@ -4,10 +4,10 @@ package render
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/dhemery/glx-web/entity"
 	"github.com/dhemery/glx-web/tmpl"
