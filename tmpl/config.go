@@ -1,4 +1,3 @@
-// Package tmpl configures the templates that glx-web uses to render pages.
 package tmpl
 
 import (
@@ -21,8 +20,8 @@ type SiteSpec struct {
 	// templates.
 	Bases map[string]Spec `json:"bases"`
 	// Templates for the site as a whole. Each template is applied to the
-	// [Site]. The map key is used as the path for the rendered file
-	// relative to the output directory.
+	// Site. The map key is used as the path for the rendered file relative
+	// to the output directory.
 	Site map[string]Spec `json:"site"`
 	// Templates for each entity type.
 	Types map[glx.EntityType]TypeSpec `json:"types"`
@@ -32,7 +31,7 @@ type SiteSpec struct {
 // type.
 type TypeSpec struct {
 	// Templates for the entity type as a whole. Each template is applied
-	// to the type's [EntitySet]. The map key is used as the path for the
+	// to the type's EntitySet. The map key is used as the path for the
 	// rendered file relative to the output directory.
 	Type map[string]Spec `json:"type"`
 	// Templates for each entity of the type. Each template is applied to

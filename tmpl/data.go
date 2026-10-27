@@ -10,7 +10,8 @@ type Site struct {
 	// The data parsed from the configuration file's data field.
 	Data map[string]any
 	// A key/value store scoped to the site. The store is maintained
-	// throughout the rendering of the site.
+	// throughout the rendering of the site. You can use this store to
+	// compile data to share across all templates.
 	Store Store
 }
 
@@ -26,6 +27,8 @@ type EntitySet struct {
 type Store map[string]any
 
 // Set associates key with value.
+// It returns an empty string so that it produces no output
+// when called without assigning its return value.
 func (s Store) Set(key string, value any) string {
 	s[key] = value
 	return ""
@@ -37,6 +40,8 @@ func (s Store) Get(key string) any {
 }
 
 // Delete deletes key and its associated value from s.
+// It returns an empty string so that it produces no output
+// when called without assigning its return value.
 func (s Store) Delete(key string) string {
 	delete(s, key)
 	return ""
