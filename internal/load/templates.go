@@ -42,31 +42,20 @@ func compileSiteSpec(templateDir string, specs tmpl.SiteSpec, funcs template.Fun
 		bases:       make(map[string]*template.Template),
 	}
 
-	for name, spec := range c.specs.Site {
-		t, err := c.compileSpec(spec)
-		if err != nil {
-			return templateSet{}, fmt.Errorf("site template %q: %w", name, err)
-		}
-		templates.site[name] = t
+	var err error
+	templates.site, err = c.compileSpecs("site", specs.Site)
+	if err != nil {
+		return templateSet{}, err
 	}
 
 	for et, typeSpec := range c.specs.Types {
-		templates.entitySet[et] = make(map[string]*template.Template)
-		for name, spec := range typeSpec.Type {
-			t, err := c.compileSpec(spec)
-			if err != nil {
-				return templateSet{}, fmt.Errorf("type template %q: %w", name, err)
-			}
-			templates.entitySet[et][name] = t
+		templates.entitySet[et], err = c.compileSpecs("type", typeSpec.Type)
+		if err != nil {
+			return templateSet{}, err
 		}
-
-		templates.entity[et] = make(map[string]*template.Template)
-		for name, spec := range typeSpec.Entity {
-			t, err := c.compileSpec(spec)
-			if err != nil {
-				return templateSet{}, fmt.Errorf("entity template %q: %w", name, err)
-			}
-			templates.entity[et][name] = t
+		templates.entity[et], err = c.compileSpecs("entity", typeSpec.Entity)
+		if err != nil {
+			return templateSet{}, err
 		}
 	}
 
@@ -78,6 +67,18 @@ type templateCompiler struct {
 	funcs       template.FuncMap
 	specs       tmpl.SiteSpec
 	bases       map[string]*template.Template
+}
+
+func (c *templateCompiler) compileSpecs(context string, specs map[string]tmpl.Spec) (map[string]*template.Template, error) {
+	tt := make(map[string]*template.Template)
+	for name, spec := range specs {
+		t, err := c.compileSpec(spec)
+		if err != nil {
+			return nil, fmt.Errorf("%s template %q: %w", context, name, err)
+		}
+		tt[name] = t
+	}
+	return tt, nil
 }
 
 func (c *templateCompiler) compileSpec(spec tmpl.Spec) (*template.Template, error) {
