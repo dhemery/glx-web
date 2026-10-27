@@ -40,7 +40,7 @@ func Config(templateDir string, funcs template.FuncMap) (config, error) {
 		return config{}, fmt.Errorf("%s: %w", configFileName, err)
 	}
 
-	tt, err := compileSiteSpec(templateDir, tmplConfig.Templates, funcs)
+	tt, err := compileTemplateSet(templateDir, tmplConfig.Templates, funcs)
 	if err != nil {
 		return config{}, err
 	}

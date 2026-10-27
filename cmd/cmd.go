@@ -77,8 +77,5 @@ func run(_ *cobra.Command, _ []string) error {
 		Templates: cfg.Templates(),
 	}
 
-	if err := render.Site(catalog, opts); err != nil {
-		return fmt.Errorf("rendering: %w", err)
-	}
-	return nil
+	return render.Site(catalog, opts)
 }

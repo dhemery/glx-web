@@ -20,7 +20,7 @@ func (s templateSet) ForSite() map[string]*template.Template {
 	return s.site
 }
 
-func (s templateSet) ForSet(e glx.EntityType) map[string]*template.Template {
+func (s templateSet) ForType(e glx.EntityType) map[string]*template.Template {
 	return s.entitySet[e]
 }
 
@@ -28,7 +28,7 @@ func (s templateSet) ForEntity(e glx.EntityType) map[string]*template.Template {
 	return s.entity[e]
 }
 
-func compileSiteSpec(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) (templateSet, error) {
+func compileTemplateSet(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) (templateSet, error) {
 	templates := templateSet{
 		site:      make(map[string]*template.Template),
 		entitySet: make(map[glx.EntityType]map[string]*template.Template),
@@ -43,17 +43,17 @@ func compileSiteSpec(templateDir string, specs tmpl.SiteSpec, funcs template.Fun
 	}
 
 	var err error
-	templates.site, err = c.compileSpecs("site", specs.Site)
+	templates.site, err = c.compileTemplates("site", specs.Site)
 	if err != nil {
 		return templateSet{}, err
 	}
 
 	for et, typeSpec := range c.specs.Types {
-		templates.entitySet[et], err = c.compileSpecs("type", typeSpec.Type)
+		templates.entitySet[et], err = c.compileTemplates("type", typeSpec.Type)
 		if err != nil {
 			return templateSet{}, err
 		}
-		templates.entity[et], err = c.compileSpecs("entity", typeSpec.Entity)
+		templates.entity[et], err = c.compileTemplates("entity", typeSpec.Entity)
 		if err != nil {
 			return templateSet{}, err
 		}
@@ -69,10 +69,10 @@ type templateCompiler struct {
 	bases       map[string]*template.Template
 }
 
-func (c *templateCompiler) compileSpecs(context string, specs map[string]tmpl.Spec) (map[string]*template.Template, error) {
+func (c *templateCompiler) compileTemplates(context string, specs map[string]tmpl.Spec) (map[string]*template.Template, error) {
 	tt := make(map[string]*template.Template)
 	for name, spec := range specs {
-		t, err := c.compileSpec(spec)
+		t, err := c.compileTemplate(spec)
 		if err != nil {
 			return nil, fmt.Errorf("%s template %q: %w", context, name, err)
 		}
@@ -81,7 +81,7 @@ func (c *templateCompiler) compileSpecs(context string, specs map[string]tmpl.Sp
 	return tt, nil
 }
 
-func (c *templateCompiler) compileSpec(spec tmpl.Spec) (*template.Template, error) {
+func (c *templateCompiler) compileTemplate(spec tmpl.Spec) (*template.Template, error) {
 	base, err := c.base(spec.Base)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (c *templateCompiler) base(name string) (*template.Template, error) {
 		if !ok {
 			return nil, fmt.Errorf("base template %q: no such base", name)
 		}
-		base, err = c.compileSpec(baseSpec)
+		base, err = c.compileTemplate(baseSpec)
 		if err != nil {
 			return nil, fmt.Errorf("base template %q: %w", name, err)
 		}

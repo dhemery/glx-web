@@ -16,7 +16,7 @@ import (
 
 type templateSet interface {
 	ForSite() map[string]*template.Template
-	ForSet(glx.EntityType) map[string]*template.Template
+	ForType(glx.EntityType) map[string]*template.Template
 	ForEntity(glx.EntityType) map[string]*template.Template
 }
 
@@ -78,7 +78,7 @@ func Site(catalog *entity.Catalog, opts *Options) error {
 		fname := filepath.Join(r.OutputDir, name)
 		err := render(fname, site, tmpl)
 		if err != nil {
-			return fmt.Errorf("rendering top-level page with template %q: %w", name, err)
+			return fmt.Errorf("rendering %s: %w", fname, err)
 		}
 	}
 
@@ -109,11 +109,11 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 		Entities:   entities,
 	}
 
-	for name, t := range r.Templates.ForSet(et) {
+	for name, t := range r.Templates.ForType(et) {
 		fname := filepath.Join(r.OutputDir, name)
 		err := render(fname, entitySet, t)
 		if err != nil {
-			r.Err = fmt.Errorf("rendering %s with entity set template %q: %w", et, name, err)
+			r.Err = fmt.Errorf("rendering %s: %w", fname, err)
 			return
 		}
 	}
@@ -125,7 +125,7 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 
 			err := render(fname, entity, t)
 			if err != nil {
-				r.Err = fmt.Errorf("rendering %s[%s]: %w", et, id, err)
+				r.Err = fmt.Errorf("rendering %s: %w", fname, err)
 				return
 			}
 		}
