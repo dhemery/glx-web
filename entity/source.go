@@ -11,7 +11,7 @@ type Source struct {
 
 	Date       glxdate.Date
 	Media      []*Media
-	Properties map[string]Property
+	Properties map[string]*Property
 	Repository *Repository
 	Type       *VocabularyValue
 

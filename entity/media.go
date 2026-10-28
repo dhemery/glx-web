@@ -10,7 +10,7 @@ type Media struct {
 	*glx.Media
 
 	Date       glxdate.Date
-	Properties map[string]Property
+	Properties map[string]*Property
 	// The source documented by this media.
 	Source *Source
 	Type   *VocabularyValue

@@ -12,7 +12,7 @@ type Relationship struct {
 
 	EndEvent     *Event
 	Participants ParticipantList
-	Properties   map[string]Property
+	Properties   map[string]*Property
 	StartEvent   *Event
 	Type         *VocabularyValue
 

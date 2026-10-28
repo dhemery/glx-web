@@ -12,7 +12,7 @@ type Citation struct {
 	*glx.Citation
 
 	Media      MediaList
-	Properties map[string]Property
+	Properties map[string]*Property
 	Repository *Repository
 	Source     *Source
 

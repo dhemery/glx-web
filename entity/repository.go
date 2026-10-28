@@ -9,7 +9,7 @@ type Repository struct {
 	entity
 	*glx.Repository
 
-	Properties map[string]Property
+	Properties map[string]*Property
 	Type       *VocabularyValue
 
 	// Citations that directly reference this repository. Citations that

@@ -14,7 +14,7 @@ type Event struct {
 	Date         glxdate.Date
 	Participants ParticipantList
 	Place        *Place
-	Properties   map[string]Property
+	Properties   map[string]*Property
 	Type         *VocabularyValue
 
 	// Assertions about this event.

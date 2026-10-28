@@ -9,7 +9,7 @@ import (
 type Participant struct {
 	*glx.Participant
 	Person     *Person
-	Properties map[string]Property
+	Properties map[string]*Property
 	Role       *VocabularyValue
 }
 

@@ -9,7 +9,7 @@ type Person struct {
 	entity
 	*glx.Person
 
-	Properties map[string]Property
+	Properties map[string]*Property
 
 	// Assertions about this person.
 	Assertions AssertionList
@@ -36,12 +36,12 @@ func (l PersonList) Sort() PersonList {
 	return sortedByString(l)
 }
 
-func extractSurname(props map[string]Property) string {
+func extractSurname(props map[string]*Property) string {
 	nameProp, ok := props["name"]
 	if !ok {
 		return ""
 	}
-	surnameField, ok := nameProp.Value().Fields["surname"]
+	surnameField, ok := nameProp.Entry().Fields["surname"]
 	if !ok {
 		return ""
 	}
