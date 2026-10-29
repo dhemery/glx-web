@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/genealogix/glx/go-glx"
 )
@@ -11,6 +12,11 @@ type Participant struct {
 	Person     *Person
 	Properties map[string]*Property
 	Role       *VocabularyValue
+}
+
+// HasRole reports whether p's Role is present in roles.
+func (p *Participant) HasRole(roles ...string) bool {
+	return slices.Contains(roles, p.Role.Value)
 }
 
 // String returns a description of p
@@ -24,9 +30,28 @@ func (p *Participant) String() string {
 
 type ParticipantList []*Participant
 
+func (l ParticipantList) Persons() PersonList {
+	var persons PersonList
+	for _, p := range l {
+		persons = append(persons, p.Person)
+	}
+	return persons
+}
+
 // Sort returns the participants sorted by String value.
 func (l ParticipantList) Sort() ParticipantList {
 	return sortedByString(l)
+}
+
+// WithRoles returns the participants in l whose Role is present in roles.
+func (l ParticipantList) WithRoles(roles ...string) ParticipantList {
+	var matches ParticipantList
+	for _, p := range l {
+		if p.HasRole(roles...) {
+			matches = append(matches, p)
+		}
+	}
+	return matches
 }
 
 func parseParticipants(ctx *context, inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition) ParticipantList {

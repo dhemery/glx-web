@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -44,11 +45,35 @@ func (r *Relationship) String() string {
 	}
 }
 
+// HasType reports whether r's Type is present in types.
+func (r *Relationship) HasType(types ...string) bool {
+	return slices.Contains(types, r.Type.Value)
+}
+
 type RelationshipList []*Relationship
+
+func (l RelationshipList) Participants() ParticipantList {
+	var participants ParticipantList
+	for _, r := range l {
+		participants = slices.Concat(participants, r.Participants)
+	}
+	return participants
+}
 
 // Sort returns the relationships sorted by String value.
 func (l RelationshipList) Sort() RelationshipList {
 	return sortedByString(l)
+}
+
+// WithTypes returns the relationships in l whose Type is present in types.
+func (l RelationshipList) WithTypes(types ...string) RelationshipList {
+	var matches RelationshipList
+	for _, r := range l {
+		if r.HasType(types...) {
+			matches = append(matches, r)
+		}
+	}
+	return matches
 }
 
 func newRelationship(id string, inner *glx.Relationship) *Relationship {

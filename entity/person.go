@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"slices"
+
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -34,6 +36,17 @@ type PersonList []*Person
 // Sort returns the persons sorted by String value.
 func (l PersonList) Sort() PersonList {
 	return sortedByString(l)
+}
+
+// Intersect returns the persons in l that appear in persons.
+func (l PersonList) Intersect(persons PersonList) PersonList {
+	var intersection PersonList
+	for _, p := range l {
+		if slices.Contains(persons, p) {
+			intersection = append(intersection, p)
+		}
+	}
+	return intersection
 }
 
 func extractSurname(props map[string]*Property) string {
