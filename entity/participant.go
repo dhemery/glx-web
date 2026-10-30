@@ -30,6 +30,14 @@ func (p *Participant) String() string {
 
 type ParticipantList []*Participant
 
+// Diff returns the participants in l that do not appear in participants.
+func (l ParticipantList) Diff(participants ParticipantList) ParticipantList {
+	return slices.DeleteFunc(slices.Clone(l), func(p *Participant) bool {
+		return slices.Contains(participants, p)
+	})
+}
+
+// Persons returns the persons of the participants in l.
 func (l ParticipantList) Persons() PersonList {
 	var persons PersonList
 	for _, p := range l {

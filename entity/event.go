@@ -23,6 +23,11 @@ type Event struct {
 	Relationships RelationshipList
 }
 
+// HasType reports whether e's Type is present in types.
+func (e *Event) HasType(types ...string) bool {
+	return slices.Contains(types, e.Type.Value)
+}
+
 // String returns e's Title.
 func (e *Event) String() string {
 	return e.Title
@@ -33,6 +38,17 @@ type EventList []*Event
 // Sort returns the events sorted by String value.
 func (l EventList) Sort() EventList {
 	return sortedByString(l)
+}
+
+// WithType returns the events in l whose Type is present in types.
+func (l EventList) WithType(types ...string) EventList {
+	var matches EventList
+	for _, e := range l {
+		if e.HasType(types...) {
+			matches = append(matches, e)
+		}
+	}
+	return matches
 }
 
 func cmpEventDate(x, y *Event) int {
