@@ -27,7 +27,9 @@ type Assertion struct {
 
 // String returns a string representation of a
 // composed by concatenating the string values of
-// the subject, property, participant, and assertion date.
+// the subject, property, participant, and assertion date,
+// in that order,
+// separated by spaces.
 // If the participant is present,
 // the role appears before the person's name.
 // If the assertion date is present

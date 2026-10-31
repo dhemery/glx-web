@@ -125,11 +125,6 @@ are represented as [glxdate.Date]:
 
 # Assertion Limitations
 
-Assertion's String method
-currently yields a value
-that merely identifies the assertion
-instead of describing it.
-
 Assertion's Value field
 is currently presented as a plain string,
 even if the property being asserted
