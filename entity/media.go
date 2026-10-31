@@ -6,8 +6,8 @@ import (
 )
 
 type Media struct {
-	entity
 	*glx.Media
+	id string
 
 	Date       glxdate.Date
 	Properties map[string]*Property
@@ -25,6 +25,16 @@ type Media struct {
 	ReferencingSources []*Source
 }
 
+// EntityType returns [glx.EntityTypeMedia].
+func (m *Media) EntityType() glx.EntityType {
+	return glx.EntityTypeMedia
+}
+
+// ID returns m's ID.
+func (m *Media) ID() string {
+	return m.id
+}
+
 // String returns m's Title.
 func (m *Media) String() string {
 	return m.Title
@@ -39,15 +49,14 @@ func (l MediaList) Sort() MediaList {
 
 func newMedia(id string, inner *glx.Media) *Media {
 	return &Media{
-		Media:      inner,
-		EntityType: glx.EntityTypeMedia,
-		id:         id,
-		Date:       parseDate(inner.Date.String()),
+		Media: inner,
+		id:    id,
+		Date:  parseDate(inner.Date.String()),
 	}
 }
 
 func (m *Media) compile(ctx *context) {
-	mctx := ctx.ForEntity(m.entity)
+	mctx := ctx.ForEntity(m)
 
 	inner := m.Media
 	// Ignore error. GLX validation guarantees that the type, if any, is valid.

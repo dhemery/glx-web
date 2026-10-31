@@ -6,8 +6,8 @@ import (
 
 // Repository represents a GLX repository entity.
 type Repository struct {
-	entity
 	*glx.Repository
+	id string
 
 	Properties map[string]*Property
 	Type       *VocabularyValue
@@ -18,6 +18,16 @@ type Repository struct {
 	Citations CitationList
 	// Sources in this repository.
 	Sources SourceList
+}
+
+// EntityType returns [glx.EntityTypeRepositories].
+func (r *Repository) EntityType() glx.EntityType {
+	return glx.EntityTypeRepositories
+}
+
+// ID returns a's ID.
+func (r *Repository) ID() string {
+	return r.id
 }
 
 // String returns r's Name.
@@ -35,13 +45,12 @@ func (l RepositoryList) Sort() RepositoryList {
 func newRepository(id string, inner *glx.Repository) *Repository {
 	return &Repository{
 		Repository: inner,
-		EntityType: glx.EntityTypeRepositories,
 		id:         id,
 	}
 }
 
 func (r *Repository) compile(ctx *context) {
-	rctx := ctx.ForEntity(r.entity)
+	rctx := ctx.ForEntity(r)
 
 	inner := r.Repository
 

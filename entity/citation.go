@@ -8,8 +8,8 @@ import (
 
 // Citation represents a GLX citation entity.
 type Citation struct {
-	entity
 	*glx.Citation
+	id string
 
 	Media      MediaList
 	Properties map[string]*Property
@@ -18,6 +18,16 @@ type Citation struct {
 
 	// Assertions that cite this citation as evidence.
 	Assertions AssertionList
+}
+
+// EntityType returns [glx.EntityTypeCitations].
+func (c *Citation) EntityType() glx.EntityType {
+	return glx.EntityTypeCitations
+}
+
+// ID returns c's ID.
+func (c *Citation) ID() string {
+	return c.id
 }
 
 // String returns a string formed by concatenating
@@ -44,14 +54,13 @@ func (l CitationList) Sort() CitationList {
 
 func newCitation(id string, inner *glx.Citation) *Citation {
 	return &Citation{
-		Citation:   inner,
-		EntityType: glx.EntityTypeCitations,
-		id:         id,
+		Citation: inner,
+		id:       id,
 	}
 }
 
 func (c *Citation) compile(ctx *context) {
-	cctx := ctx.ForEntity(c.entity)
+	cctx := ctx.ForEntity(c)
 
 	inner := c.Citation
 	c.Media = cctx.Catalog.media(inner.Media)

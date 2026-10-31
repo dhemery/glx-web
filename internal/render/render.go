@@ -41,8 +41,10 @@ var (
 
 // TemplateFuncs is a map of functions to add to each template.
 var TemplateFuncs = map[string]any{
-	"site":  func() tmpl.Site { return site },
-	"store": func() tmpl.Store { return pageStore },
+	"is_entity":           entity.IsEntity,
+	"is_vocabulary_value": entity.IsVocabularyValue,
+	"site":                func() tmpl.Site { return site },
+	"store":               func() tmpl.Store { return pageStore },
 }
 
 func Site(catalog *entity.Catalog, opts *Options) error {

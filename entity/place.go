@@ -5,8 +5,8 @@ import (
 )
 
 type Place struct {
-	entity
 	*glx.Place
+	id string
 
 	Parent     *Place
 	Properties map[string]*Property
@@ -21,6 +21,11 @@ type Place struct {
 	Events EventList
 }
 
+// EntityType returns [glx.EntityTypePlaces].
+func (p *Place) EntityType() glx.EntityType {
+	return glx.EntityTypePlaces
+}
+
 // FullName returns p's Name followed by the FullName of its parent Place, if
 // any, separated by ", ".
 func (p *Place) FullName() string {
@@ -28,6 +33,11 @@ func (p *Place) FullName() string {
 		return p.Name
 	}
 	return p.Name + ", " + p.Parent.FullName()
+}
+
+// ID returns a's ID.
+func (p *Place) ID() string {
+	return p.id
 }
 
 // String returns p's full name.
@@ -44,14 +54,13 @@ func (l PlaceList) Sort() PlaceList {
 
 func newPlace(id string, inner *glx.Place) *Place {
 	return &Place{
-		Place:      inner,
-		EntityType: glx.EntityTypePlaces,
-		id:         id,
+		Place: inner,
+		id:    id,
 	}
 }
 
 func (p *Place) compile(ctx *context) {
-	pctx := ctx.ForEntity(p.entity)
+	pctx := ctx.ForEntity(p)
 
 	inner := p.Place
 	p.Parent = pctx.Catalog.PlacesByID[p.ParentID]

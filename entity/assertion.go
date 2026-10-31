@@ -8,8 +8,8 @@ import (
 )
 
 type Assertion struct {
-	entity
 	*glx.Assertion
+	id string
 
 	Citations   CitationList
 	Date        glxdate.Date
@@ -23,6 +23,16 @@ type Assertion struct {
 	// possible assertion structure, like how glx.EntityRef has a field for
 	// each type of subject, and glx.PropertyDefinition has a field for
 	// each kind of value type.
+}
+
+// EntityType returns [glx.EntityTypeAssertions].
+func (a *Assertion) EntityType() glx.EntityType {
+	return glx.EntityTypeAssertions
+}
+
+// ID returns a's ID.
+func (a *Assertion) ID() string {
+	return a.id
 }
 
 // String returns a string representation of a
@@ -64,15 +74,14 @@ func (l AssertionList) Sort() AssertionList {
 
 func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	return &Assertion{
-		Assertion:  inner,
-		EntityType: glx.EntityTypeAssertions,
-		id:         id,
-		Date:       parseDate(inner.Date.String()),
+		Assertion: inner,
+		id:        id,
+		Date:      parseDate(inner.Date.String()),
 	}
 }
 
 func (a *Assertion) compile(ctx *context) {
-	actx := ctx.ForEntity(a.entity)
+	actx := ctx.ForEntity(a)
 
 	inner := a.Assertion
 	a.Citations = actx.Catalog.citations(inner.Citations)

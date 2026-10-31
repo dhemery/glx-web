@@ -8,8 +8,8 @@ import (
 
 // Person represents a GLX person entity.
 type Person struct {
-	entity
 	*glx.Person
+	id string
 
 	Properties map[string]*Property
 
@@ -24,6 +24,16 @@ type Person struct {
 // DisplayName returns a display name extracted from p's properties.
 func (p *Person) DisplayName() string {
 	return glx.PersonDisplayName(p.Person)
+}
+
+// EntityType returns [glx.EntityTypePersons].
+func (p *Person) EntityType() glx.EntityType {
+	return glx.EntityTypePersons
+}
+
+// ID returns a's ID.
+func (p *Person) ID() string {
+	return p.id
 }
 
 // String returns p's display name.
@@ -73,14 +83,13 @@ func (l PersonList) GroupBySurname() map[string]PersonList {
 
 func newPerson(id string, inner *glx.Person) *Person {
 	return &Person{
-		Person:     inner,
-		EntityType: glx.EntityTypePersons,
-		id:         id,
+		Person: inner,
+		id:     id,
 	}
 }
 
 func (p *Person) compile(ctx *context) {
-	pctx := ctx.ForEntity(p.entity)
+	pctx := ctx.ForEntity(p)
 
 	inner := p.Person
 	p.Properties = parseProperties(pctx, inner.Properties, pctx.GLX.PersonProperties)

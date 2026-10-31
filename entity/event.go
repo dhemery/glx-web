@@ -8,8 +8,8 @@ import (
 )
 
 type Event struct {
-	entity
 	*glx.Event
+	id string
 
 	Date         glxdate.Date
 	Participants ParticipantList
@@ -23,9 +23,19 @@ type Event struct {
 	Relationships RelationshipList
 }
 
-// HasType reports whether e's Type is present in types.
+// EntityType returns [glx.EntityTypeEvents].
+func (e *Event) EntityType() glx.EntityType {
+	return glx.EntityTypeEvents
+}
+
+// HasType reports whether e's event Type is present in types.
 func (e *Event) HasType(types ...string) bool {
 	return slices.Contains(types, e.Type.Value)
+}
+
+// ID returns e's ID.
+func (e *Event) ID() string {
+	return e.id
 }
 
 // String returns e's Title.
@@ -61,15 +71,14 @@ func (l EventList) ByDate() EventList {
 
 func newEvent(id string, inner *glx.Event) *Event {
 	return &Event{
-		Event:      inner,
-		EntityType: glx.EntityTypeEvents,
-		id:         id,
-		Date:       parseDate(inner.Date.String()),
+		Event: inner,
+		id:    id,
+		Date:  parseDate(inner.Date.String()),
 	}
 }
 
 func (e *Event) compile(ctx *context) {
-	ectx := ctx.ForEntity(e.entity)
+	ectx := ctx.ForEntity(e)
 
 	inner := e.Event
 	// TODO(validation): Warn if no participants. Spec requires at least one.

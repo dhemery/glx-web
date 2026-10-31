@@ -6,8 +6,8 @@ import (
 )
 
 type Source struct {
-	entity
 	*glx.Source
+	id string
 
 	Date       glxdate.Date
 	Media      []*Media
@@ -25,6 +25,16 @@ type Source struct {
 	ReferencingMedia MediaList
 }
 
+// EntityType returns [glx.EntityTypeSources].
+func (s *Source) EntityType() glx.EntityType {
+	return glx.EntityTypeSources
+}
+
+// ID returns a's ID.
+func (s *Source) ID() string {
+	return s.id
+}
+
 // String returns s's Title.
 func (s *Source) String() string {
 	return s.Title
@@ -39,15 +49,14 @@ func (l SourceList) Sort() SourceList {
 
 func newSource(id string, inner *glx.Source) *Source {
 	return &Source{
-		Source:     inner,
-		EntityType: glx.EntityTypeSources,
-		id:         id,
-		Date:       parseDate(inner.Date.String()),
+		Source: inner,
+		id:     id,
+		Date:   parseDate(inner.Date.String()),
 	}
 }
 
 func (s *Source) compile(ctx *context) {
-	sctx := ctx.ForEntity(s.entity)
+	sctx := ctx.ForEntity(s)
 
 	inner := s.Source
 	s.Media = sctx.Catalog.media(inner.Media)

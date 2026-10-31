@@ -8,8 +8,8 @@ import (
 )
 
 type Relationship struct {
-	entity
 	*glx.Relationship
+	id string
 
 	EndEvent     *Event
 	Participants ParticipantList
@@ -19,6 +19,21 @@ type Relationship struct {
 
 	// Assertions about this relationship.
 	Assertions AssertionList
+}
+
+// EntityType returns [glx.EntityTypeRelationships].
+func (r *Relationship) EntityType() glx.EntityType {
+	return glx.EntityTypeRelationships
+}
+
+// HasType reports whether r's Type is present in types.
+func (r *Relationship) HasType(types ...string) bool {
+	return slices.Contains(types, r.Type.Value)
+}
+
+// ID returns a's ID.
+func (r *Relationship) ID() string {
+	return r.id
 }
 
 // String returns a description of r
@@ -43,11 +58,6 @@ func (r *Relationship) String() string {
 		parts[len(parts)-1] = "and " + parts[len(parts)-1]
 		return strings.Join(parts, ", ")
 	}
-}
-
-// HasType reports whether r's Type is present in types.
-func (r *Relationship) HasType(types ...string) bool {
-	return slices.Contains(types, r.Type.Value)
 }
 
 type RelationshipList []*Relationship
@@ -79,13 +89,12 @@ func (l RelationshipList) WithTypes(types ...string) RelationshipList {
 func newRelationship(id string, inner *glx.Relationship) *Relationship {
 	return &Relationship{
 		Relationship: inner,
-		EntityType:   glx.EntityTypeRelationships,
 		id:           id,
 	}
 }
 
 func (r *Relationship) compile(ctx *context) {
-	rctx := ctx.ForEntity(r.entity)
+	rctx := ctx.ForEntity(r)
 
 	inner := r.Relationship
 	r.EndEvent = rctx.Catalog.EventsByID[inner.EndEvent]

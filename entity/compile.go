@@ -23,12 +23,12 @@ func compile[C compiler](ctx *context, compilers map[string]C) {
 type context struct {
 	GLX     *glx.GLXFile // Underlying GLX File.
 	Catalog *Catalog     // Catalog being compiled.
-	Entity  entity       // Entity being compiled.
+	Entity  Entity       // Entity being compiled.
 	Path    string       // Path to the current element within entity.
 	Output  io.Writer    // Writer for warnings.
 }
 
-func (c *context) ForEntity(e entity) *context {
+func (c *context) ForEntity(e Entity) *context {
 	out := *c
 	out.Entity = e
 	out.Path = ""
@@ -48,7 +48,7 @@ func (c *context) Subi(i int) *context {
 }
 
 func (c *context) String() string {
-	return fmt.Sprintf("%s[%s]%s", c.Entity.Plural(), c.Entity.id, c.Path)
+	return fmt.Sprintf("%s[%s]%s", c.Entity.EntityType().Plural(), c.Entity.ID(), c.Path)
 }
 
 func (c *context) Warn(warning any) {
