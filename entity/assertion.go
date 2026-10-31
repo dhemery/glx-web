@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"strings"
+
 	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
@@ -23,12 +25,32 @@ type Assertion struct {
 	// each kind of value type.
 }
 
-// String returns a string representation of a.
-// The value returned by the current implementation
-// is useful only to identify which assertion produced it.
+// String returns a string representation of a
+// composed by concatenating the string values of
+// the subject, property, participant, and assertion date.
+// If the participant is present,
+// the role appears before the person's name.
+// If the assertion date is present
+// its string value is prepended with "as of".
 func (a *Assertion) String() string {
-	// TODO(feature): Better String()
-	return "Assertion " + a.ID()
+	var parts []string
+	parts = append(parts, a.Subject.String())
+	if a.Property != "" {
+		parts = append(parts, a.Property)
+	}
+	switch {
+	case a.Participant != nil:
+		// Valid participant.
+		parts = append(parts, a.Participant.Role.Value, a.Participant.Person.String())
+	case a.Assertion.Participant != nil:
+		// Discarded participant. Use details from underlying glx.Assertion as is.
+		parts = append(parts, a.Assertion.Participant.Role, a.Assertion.Participant.Person)
+	}
+	if a.Date.Valid() {
+		parts = append(parts, "as of", a.Date.String())
+
+	}
+	return strings.Join(parts, " ")
 }
 
 type AssertionList []*Assertion
