@@ -2,7 +2,6 @@ package load
 
 import (
 	"fmt"
-	"html/template"
 	"os"
 	"path/filepath"
 
@@ -10,24 +9,11 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-type config struct {
-	data      map[string]any
-	templates templateSet
-}
-
-func (c config) Data() map[string]any {
-	return c.data
-}
-
-func (c config) Templates() templateSet {
-	return c.templates
-}
-
-func Config(templateDir string, funcs template.FuncMap) (config, error) {
+func Config(templateDir string) (tmpl.Config, error) {
 	configFileName := filepath.Join(templateDir, "config.yaml")
 	configFile, err := os.Open(configFileName)
 	if err != nil {
-		return config{}, err
+		return tmpl.Config{}, err
 	}
 	defer configFile.Close()
 
@@ -37,13 +23,8 @@ func Config(templateDir string, funcs template.FuncMap) (config, error) {
 
 	var tmplConfig tmpl.Config
 	if err = dec.Decode(&tmplConfig); err != nil {
-		return config{}, fmt.Errorf("%s: %w", configFileName, err)
+		return tmpl.Config{}, fmt.Errorf("%s: %w", configFileName, err)
 	}
 
-	tt, err := compileTemplateSet(templateDir, tmplConfig.Templates, funcs)
-	if err != nil {
-		return config{}, err
-	}
-
-	return config{data: tmplConfig.Data, templates: tt}, err
+	return tmplConfig, nil
 }

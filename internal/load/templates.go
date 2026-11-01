@@ -28,7 +28,7 @@ func (s templateSet) ForEntity(e glx.EntityType) map[string]*template.Template {
 	return s.entity[e]
 }
 
-func compileTemplateSet(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) (templateSet, error) {
+func Templates(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) (templateSet, error) {
 	templates := templateSet{
 		site:      make(map[string]*template.Template),
 		entitySet: make(map[glx.EntityType]map[string]*template.Template),

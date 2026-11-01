@@ -49,11 +49,6 @@ func init() {
 }
 
 func run(_ *cobra.Command, _ []string) error {
-	cfg, err := load.Config(templateDir, render.TemplateFuncs)
-	if err != nil {
-		return fmt.Errorf("loading configuration: %w", err)
-	}
-
 	g, err := load.GLX(os.DirFS(archiveDir))
 	if err != nil {
 		return fmt.Errorf("loading GLX archive: %w", err)
@@ -69,12 +64,22 @@ func run(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
+	cfg, err := load.Config(templateDir)
+	if err != nil {
+		return fmt.Errorf("loading configuration: %w", err)
+	}
+
+	tmpls, err := load.Templates(templateDir, cfg.Templates, render.TemplateFuncs)
+	if err != nil {
+		return fmt.Errorf("loading templates: %w", err)
+	}
+
 	opts := &render.Options{
 		Clean:     clean,
-		Data:      cfg.Data(),
+		Data:      cfg.Data,
 		OutputDir: outputDir,
 		StaticDir: staticDir,
-		Templates: cfg.Templates(),
+		Templates: tmpls,
 	}
 
 	return render.Site(catalog, opts)
