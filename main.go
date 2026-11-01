@@ -1,7 +1,7 @@
 /*
 The glx-web command renders a website
 from a GLX archive.
-It applies user-specified templates to render pages:
+It applies user-specified templates to render files:
   - for each entity,
   - for the set of entities of each type,
   - and for the website as a whole.

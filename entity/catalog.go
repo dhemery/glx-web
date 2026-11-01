@@ -8,6 +8,22 @@ import (
 	"github.com/genealogix/glx/go-glx"
 )
 
+// Entity is the type satisfied by every entity in a [Catalog]. Templates can
+// check whether a value is an entity by calling the "is_entity" template
+// function.
+type Entity interface {
+	EntityType() glx.EntityType
+	ID() string
+	String() string
+}
+
+// IsEntity reports whether v satisfies [Entity]. Templates can call this
+// function via the "is_entity" template function.
+func IsEntity(v any) bool {
+	_, ok := v.(Entity)
+	return ok
+}
+
 // Catalog is a collection of entities compiled from a GLX archive.
 type Catalog struct {
 	AssertionsByID    map[string]*Assertion    `json:"assertions,omitempty"`
@@ -120,8 +136,7 @@ func NewCatalog(g *glx.GLXFile, w io.Writer) (*Catalog, error) {
 
 	return c, nil
 }
-
-func (c *Catalog) entity(id string, entityType string) Stringer {
+func (c *Catalog) entity(id string, entityType string) Entity {
 	// TODO(feature): Handle the rest of the entity types.
 	switch entityType {
 	case glx.EntityTypeCitations.Plural():

@@ -31,12 +31,12 @@ func (p *Person) EntityType() glx.EntityType {
 	return glx.EntityTypePersons
 }
 
-// ID returns a's ID.
+// ID returns the person's ID.
 func (p *Person) ID() string {
 	return p.id
 }
 
-// String returns p's display name.
+// String returns the person's DisplayName.
 func (p *Person) String() string {
 	return p.DisplayName()
 }

@@ -85,7 +85,7 @@ func (v *VocabularyValue) String() string {
 	return v.Definition.Label
 }
 
-// IsVocabularyValue reports whether v is a VocabularyValue. Templates can call
+// IsVocabularyValue reports whether v is a [VocabularyValue]. Templates can call
 // this function via the "is_vocabulary_value" template function.
 func IsVocabularyValue(v any) bool {
 	_, ok := v.(VocabularyValue)

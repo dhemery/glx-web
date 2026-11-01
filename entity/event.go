@@ -28,17 +28,17 @@ func (e *Event) EntityType() glx.EntityType {
 	return glx.EntityTypeEvents
 }
 
-// HasType reports whether e's event Type is present in types.
+// HasType reports whether the event's Type is present in types.
 func (e *Event) HasType(types ...string) bool {
 	return slices.Contains(types, e.Type.Value)
 }
 
-// ID returns e's ID.
+// ID returns the event's ID.
 func (e *Event) ID() string {
 	return e.id
 }
 
-// String returns e's Title.
+// String returns the event's Title.
 func (e *Event) String() string {
 	return e.Title
 }

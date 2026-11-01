@@ -25,12 +25,12 @@ func (r *Repository) EntityType() glx.EntityType {
 	return glx.EntityTypeRepositories
 }
 
-// ID returns a's ID.
+// ID returns the repository's ID.
 func (r *Repository) ID() string {
 	return r.id
 }
 
-// String returns r's Name.
+// String returns the repository's Name.
 func (r *Repository) String() string {
 	return r.Name
 }

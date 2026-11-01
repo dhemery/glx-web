@@ -26,8 +26,9 @@ func (p *Place) EntityType() glx.EntityType {
 	return glx.EntityTypePlaces
 }
 
-// FullName returns p's Name followed by the FullName of its parent Place, if
-// any, separated by ", ".
+// FullName returns the place's Name
+// followed by the FullName of its parent Place, if any,
+// separated by ", ".
 func (p *Place) FullName() string {
 	if p.Parent == nil {
 		return p.Name
@@ -35,14 +36,14 @@ func (p *Place) FullName() string {
 	return p.Name + ", " + p.Parent.FullName()
 }
 
-// ID returns a's ID.
+// ID returns the place's ID.
 func (p *Place) ID() string {
 	return p.id
 }
 
-// String returns p's full name.
+// String returns the place's name.
 func (p *Place) String() string {
-	return p.FullName()
+	return p.Name
 }
 
 type PlaceList []*Place

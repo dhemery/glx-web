@@ -16,7 +16,7 @@ type Assertion struct {
 	Media       MediaList
 	Participant *Participant
 	Sources     SourceList
-	Subject     Stringer
+	Subject     Entity
 
 	// TODO(feature): Find a way to resolve entity and vocabulary
 	// references in Value. Maybe a single struct that captures every
@@ -30,13 +30,14 @@ func (a *Assertion) EntityType() glx.EntityType {
 	return glx.EntityTypeAssertions
 }
 
-// ID returns a's ID.
+// ID returns the assertion's ID.
 func (a *Assertion) ID() string {
 	return a.id
 }
 
-// String returns a string representation of a
-// composed by concatenating the string values of
+// String returns a string representation of the assertion.
+// The string is composed
+// by concatenating the string values of
 // the subject, property, participant, and assertion date,
 // in that order,
 // separated by spaces.

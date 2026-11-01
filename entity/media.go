@@ -30,12 +30,12 @@ func (m *Media) EntityType() glx.EntityType {
 	return glx.EntityTypeMedia
 }
 
-// ID returns m's ID.
+// ID returns the media's ID.
 func (m *Media) ID() string {
 	return m.id
 }
 
-// String returns m's Title.
+// String returns the media's Title.
 func (m *Media) String() string {
 	return m.Title
 }

@@ -25,12 +25,13 @@ func (c *Citation) EntityType() glx.EntityType {
 	return glx.EntityTypeCitations
 }
 
-// ID returns c's ID.
+// ID returns the citation's ID.
 func (c *Citation) ID() string {
 	return c.id
 }
 
-// String returns a string formed by concatenating
+// String returns a string representation of the citation.
+// The string is formed by concatenating
 // the string value of c's locator property
 // (if it has one)
 // onto the string value of C's source,

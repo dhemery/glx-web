@@ -1,8 +1,7 @@
 /*
-Package tmpl configures the templates that glx-web uses to render files.
-It also defines the data supplied to each template,
-and the functions that a template can use
-to access and manage data not passed directly to the template.
+Package tmpl
+defines the templates, data, and functions
+that glx-web uses to render files.
 
 # Templates
 
@@ -65,18 +64,29 @@ making it available to all templates.
 # Functions
 
 The glx-web command defines several functions
-that all templates can access:
+that all templates can use:
 
-  - The store function returns a key/value [Store]
-    that persists for the life of the currently executing template.
-    You can use this Store
-    to compile data for use later in the template.
+	is_entity
+	    Reports whether its argument satisfies entity.Entity.
 
-  - The site function returns the [Site],
-    which includes the custom data supplied by the configuration file
-    and a global key/value [Store]
-    that persists across the execution of all templates.
-    You can use this Store
-    to compile data to share across all templates.
+	is_property
+	    Reports whether its argument's type is entity.Property.
+
+	is_vocabulary_value
+	    Reports whether its argument's type is entity.VocabularyValue.
+
+	site
+	    Returns the Site, which includes the custom data supplied by the
+	    configuration file and a global key/value Store that persists
+	    across the execution of all templates. You can use this site Store
+	    to compile data to share across all templates.
+
+	store
+	    Returns a Store that persists for the life of the currently
+	    executing template. You can use this Store to compile data for use
+	    later in the template.
+
+See [tmpl.Site] and [tmpl.Store] for descriptions of the values returned by the
+site and store functions.
 */
 package tmpl

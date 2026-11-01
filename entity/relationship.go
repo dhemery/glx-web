@@ -26,18 +26,18 @@ func (r *Relationship) EntityType() glx.EntityType {
 	return glx.EntityTypeRelationships
 }
 
-// HasType reports whether r's Type is present in types.
+// HasType reports whether the relationship's Type is present in types.
 func (r *Relationship) HasType(types ...string) bool {
 	return slices.Contains(types, r.Type.Value)
 }
 
-// ID returns a's ID.
+// ID returns the relationship's ID.
 func (r *Relationship) ID() string {
 	return r.id
 }
 
-// String returns a description of r
-// composed by concatenating
+// String returns a string representation of the relationship.
+// The string is composed by concatenating
 // the string values of all participants,
 // separated by commas and conjunctions as appropriate.
 func (r *Relationship) String() string {

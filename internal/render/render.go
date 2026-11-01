@@ -20,56 +20,35 @@ type templateSet interface {
 	ForEntity(glx.EntityType) map[string]*template.Template
 }
 
-type Options struct {
+// state captures the global state available to each template via dot or
+// functions.
+type state interface {
+	Site() tmpl.Site
+	PrepareExecute()
+}
+
+type Renderer struct {
 	Clean     bool
-	Data      map[string]any
 	OutputDir string
 	StaticDir string
 	Templates templateSet
-}
-
-type renderer struct {
-	Templates templateSet
-	OutputDir string
+	State     state
 	Err       error
 }
 
-var (
-	site      tmpl.Site
-	pageStore = make(tmpl.Store)
-)
-
-// TemplateFuncs is a map of functions to add to each template.
-var TemplateFuncs = map[string]any{
-	"is_entity":           entity.IsEntity,
-	"is_vocabulary_value": entity.IsVocabularyValue,
-	"site":                func() tmpl.Site { return site },
-	"store":               func() tmpl.Store { return pageStore },
-}
-
-func Site(catalog *entity.Catalog, opts *Options) error {
-	site = tmpl.Site{
-		Data:  opts.Data,
-		Store: make(tmpl.Store),
-	}
-
-	r := renderer{
-		Templates: opts.Templates,
-		OutputDir: opts.OutputDir,
-	}
-
-	if opts.Clean {
-		if err := os.RemoveAll(opts.OutputDir); err != nil {
+func (r *Renderer) Render(catalog *entity.Catalog) error {
+	if r.Clean {
+		if err := os.RemoveAll(r.OutputDir); err != nil {
 			return fmt.Errorf("removing output dir: %w", err)
 		}
 	}
 
-	if err := os.Mkdir(opts.OutputDir, 0755); err != nil {
+	if err := os.Mkdir(r.OutputDir, 0755); err != nil {
 		return fmt.Errorf("creating output dir: %w", err)
 	}
 
-	if opts.StaticDir != "" {
-		if err := os.CopyFS(opts.OutputDir, os.DirFS(opts.StaticDir)); err != nil {
+	if r.StaticDir != "" {
+		if err := os.CopyFS(r.OutputDir, os.DirFS(r.StaticDir)); err != nil {
 			if !errors.Is(err, os.ErrNotExist) {
 				return fmt.Errorf("copying static files: %w", err)
 			}
@@ -78,7 +57,7 @@ func Site(catalog *entity.Catalog, opts *Options) error {
 
 	for name, tmpl := range r.Templates.ForSite() {
 		fname := filepath.Join(r.OutputDir, name)
-		err := render(fname, site, tmpl)
+		err := r.executeTemplate(fname, r.State.Site(), tmpl)
 		if err != nil {
 			return fmt.Errorf("rendering %s: %w", fname, err)
 		}
@@ -101,7 +80,7 @@ type ider interface {
 	ID() string
 }
 
-func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S) {
+func (r *Renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S) {
 	if r.Err != nil {
 		return
 	}
@@ -113,7 +92,7 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 
 	for name, t := range r.Templates.ForType(et) {
 		fname := filepath.Join(r.OutputDir, name)
-		err := render(fname, entitySet, t)
+		err := r.executeTemplate(fname, entitySet, t)
 		if err != nil {
 			r.Err = fmt.Errorf("rendering %s: %w", fname, err)
 			return
@@ -125,7 +104,7 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 		for name, t := range r.Templates.ForEntity(et) {
 			fname := filepath.Join(r.OutputDir, strings.ReplaceAll(name, "<id>", id))
 
-			err := render(fname, entity, t)
+			err := r.executeTemplate(fname, entity, t)
 			if err != nil {
 				r.Err = fmt.Errorf("rendering %s: %w", fname, err)
 				return
@@ -134,7 +113,7 @@ func (r *renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S)
 	}
 }
 
-func render(fname string, dot any, tmpl *template.Template) error {
+func (r *Renderer) executeTemplate(fname string, dot any, tmpl *template.Template) error {
 	if err := os.MkdirAll(filepath.Dir(fname), 0755); err != nil {
 		return err
 	}
@@ -144,7 +123,7 @@ func render(fname string, dot any, tmpl *template.Template) error {
 	}
 	defer f.Close()
 
-	clear(pageStore)
+	r.State.PrepareExecute()
 
 	return tmpl.Execute(f, dot)
 }

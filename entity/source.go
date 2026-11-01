@@ -30,12 +30,12 @@ func (s *Source) EntityType() glx.EntityType {
 	return glx.EntityTypeSources
 }
 
-// ID returns a's ID.
+// ID returns the source's ID.
 func (s *Source) ID() string {
 	return s.id
 }
 
-// String returns s's Title.
+// String returns the source's Title.
 func (s *Source) String() string {
 	return s.Title
 }

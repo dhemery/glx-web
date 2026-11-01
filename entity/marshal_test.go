@@ -48,7 +48,7 @@ func marshalAssertion(out *jsontext.Encoder, in *entity.Assertion) error {
 		Date        glxdate.Date        `json:"date"`
 		Participant *entity.Participant `json:"participant"`
 		Property    string              `json:"property"`
-		Subject     entity.Stringer     `json:"subject"`
+		Subject     entity.Entity       `json:"subject"`
 	}{
 		Date:        in.Date,
 		Participant: in.Participant,

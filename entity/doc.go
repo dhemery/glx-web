@@ -6,37 +6,36 @@ more convenient to render via templates.
 
 # Entities
 
-Each entity embeds the corresponding GLX entity.
-This makes is possible to access the underlying GLX entity’s fields
-even if the outer entity hides them.
-
 Each entity knows its ID and [glx.EntityType].
 
-Each entity has a String method that,
-for most entity types,
-yields a reasonable value to use as a page title.
+Each entity has a String method
+that returns a reasonable value to use as a page title.
 See each entity's String method for details.
 
-Entity fields of reference type
-are resolved to pointers to the referenced entities.
-For example, Citation's Source field
-is resolved to a *Source.
-Assertion's Citations field
-is resolved to a []*Citation.
+# Entity Fields
 
 Entity fields of vocabulary type
 are represented as [VocabularyValue].
 
+Entity fields of reference type
+are resolved to pointers to the referenced entities.
+For example, Event's Place field
+is resolved to a *Place.
+
+Each entity embeds the corresponding GLX entity.
+This makes is possible to access the underlying GLX entity’s fields
+even if the outer entity hides them.
+For example,
+Each [Event] embeds a [*glx.Event]
+that points to the original event from your GLX archive.
+If dot is an Event,
+you can access the fields of the embedded GLX Event:
+
+	{{.Event.Place}}
+
 # Properties
 
 Each property is represented as a [Property].
-In many cases
-this allows rendering any property
-in a straightforward way,
-without (in many cases) having to reason about
-the property definition
-or its YAML representation.
-
 Each Property knows its definition
 (see [glx.PropertyDefinition]),
 which gives access to
@@ -94,16 +93,16 @@ to its label, description,
 and other details.
 
 VocabularyValue has a String method
-that yields the label associated with the value.
+that returns the label associated with the value.
 
 # Back-References
 
 Each entity compiles lists of "back-references,"
 direct references to the entity from other entities.
 For example:
-  - [Person.Events] yields the list of events in which the person participated.
-  - [Event.Assertions] yields the list of assertions about the event.
-  - [Source.Citations] yields the list of citations that cite the source.
+  - [Person.Events] is the list of events in which the person participated.
+  - [Event.Assertions] is the list of assertions about the event.
+  - [Source.Citations] is the list of citations that cite the source.
 
 Currently this back-reference compilation does not include:
   - References via properties.
