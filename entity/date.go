@@ -3,8 +3,17 @@ package entity
 import (
 	"cmp"
 
+	"github.com/genealogix/glx/go-glx"
 	"github.com/genealogix/glx/go-glx/glxdate"
 )
+
+// CompareDateStrings compares two [glx.DateString] values by parsing each and
+// comparing the resulting [glxdate.Date] values with [CompareDates].
+func CompareDateStrings(x, y glx.DateString) int {
+	xd, _ := x.Parse()
+	yd, _ := y.Parse()
+	return CompareDates(xd, yd)
+}
 
 // CompareDates compares two [glxdate.Date] values from the same calendar,
 // accounting for range, precision, and qualifiers. The comparison uses the

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/genealogix/glx/go-glx"
-	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 // Property holds the values of a property of an entity. Each Property holds a
@@ -39,7 +38,7 @@ func IsProperty(v any) bool {
 // not specify them.
 type PropertyEntry struct {
 	Value  Stringer                 `json:"value,omitzero,omitempty"`
-	Date   glxdate.Date             `json:"date,omitzero"` // The date when the value applied.
+	Date   glx.DateString           `json:"date,omitzero"` // The date when the value applied.
 	Fields map[string]PropertyField `json:"fields,omitzero,omitempty"`
 }
 
@@ -157,16 +156,16 @@ func parseEntry(ctx *context, rawEntry map[string]any, def *glx.PropertyDefiniti
 	return &entry
 }
 
-func parseEntryDate(ctx *context, rawDate any) glxdate.Date {
+func parseEntryDate(ctx *context, rawDate any) glx.DateString {
 	if rawDate == nil {
-		return glxdate.Date{}
+		return ""
 	}
 
-	d, err := parseRawDate(rawDate)
+	ds, err := parseDateString(rawDate)
 	if err != nil {
 		ctx.Warnf("date discarded: %s", err)
 	}
-	return d
+	return ds
 }
 
 func parseEntryFields(ctx *context, rawFields any, defs map[string]*glx.FieldDefinition) map[string]PropertyField {

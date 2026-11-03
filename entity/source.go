@@ -2,14 +2,12 @@ package entity
 
 import (
 	"github.com/genealogix/glx/go-glx"
-	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 type Source struct {
 	*glx.Source
 	id string
 
-	Date       glxdate.Date
 	Media      []*Media
 	Properties map[string]*Property
 	Repository *Repository
@@ -51,7 +49,6 @@ func newSource(id string, inner *glx.Source) *Source {
 	return &Source{
 		Source: inner,
 		id:     id,
-		Date:   parseDate(inner.Date.String()),
 	}
 }
 

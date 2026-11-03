@@ -4,14 +4,12 @@ import (
 	"slices"
 
 	"github.com/genealogix/glx/go-glx"
-	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 type Event struct {
 	*glx.Event
 	id string
 
-	Date         glxdate.Date
 	Participants ParticipantList
 	Place        *Place
 	Properties   map[string]*Property
@@ -62,7 +60,7 @@ func (l EventList) WithType(types ...string) EventList {
 }
 
 func cmpEventDate(x, y *Event) int {
-	return CompareDates(x.Date, y.Date)
+	return CompareDateStrings(x.Date, y.Date)
 }
 
 func (l EventList) ByDate() EventList {
@@ -73,7 +71,6 @@ func newEvent(id string, inner *glx.Event) *Event {
 	return &Event{
 		Event: inner,
 		id:    id,
-		Date:  parseDate(inner.Date.String()),
 	}
 }
 

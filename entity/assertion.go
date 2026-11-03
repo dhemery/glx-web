@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
-	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 type Assertion struct {
@@ -12,7 +11,6 @@ type Assertion struct {
 	id string
 
 	Citations   CitationList
-	Date        glxdate.Date
 	Media       MediaList
 	Participant *Participant
 	Sources     SourceList
@@ -59,7 +57,7 @@ func (a *Assertion) String() string {
 		// Discarded participant. Use details from underlying glx.Assertion as is.
 		parts = append(parts, a.Assertion.Participant.Role, a.Assertion.Participant.Person)
 	}
-	if a.Date.Valid() {
+	if a.Date.String() != "" {
 		parts = append(parts, "as of", a.Date.String())
 
 	}
@@ -77,7 +75,6 @@ func newAssertion(id string, inner *glx.Assertion) *Assertion {
 	return &Assertion{
 		Assertion: inner,
 		id:        id,
-		Date:      parseDate(inner.Date.String()),
 	}
 }
 

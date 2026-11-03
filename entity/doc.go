@@ -111,17 +111,6 @@ Currently this back-reference compilation does not include:
     such as an Assertion's indirect reference to a source
     via a direct reference to a Citation.
 
-# Dates
-
-Dates in the following values
-are represented as [glxdate.Date]:
-  - Entity fields of type "date",
-    such as [Event.Date].
-  - Each [PropertyEntry.Date],
-    the date when the entry's value applied.
-  - Each [PropertyEntry.Value]
-    in properties of type "date".
-
 # Assertion Limitations
 
 Assertion's Value field

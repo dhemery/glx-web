@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/genealogix/glx/go-glx"
-	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 type Stringer interface {
@@ -38,7 +37,7 @@ func parsePrimitiveValue(rawValue any, valueType string) (Stringer, error) {
 		}
 		return BoolValue(b), nil
 	case "date":
-		return parseRawDate(rawValue)
+		return parseDateString(rawValue)
 	case "integer":
 		i, ok := rawValue.(int)
 		if !ok {
@@ -56,17 +55,12 @@ func parsePrimitiveValue(rawValue any, valueType string) (Stringer, error) {
 	return nil, errUnknown{"value type", valueType}
 }
 
-func parseRawDate(rawDate any) (glxdate.Date, error) {
-	s, ok := rawDate.(string)
+func parseDateString(rawDate any) (glx.DateString, error) {
+	ds, ok := rawDate.(string)
 	if !ok {
-		return glxdate.Date{}, errParse{"date string", rawDate}
+		return "", errParse{"date string", rawDate}
 	}
-	return parseDate(s), nil
-}
-
-func parseDate(s string) glxdate.Date {
-	date, _ := glxdate.Parse(s)
-	return date
+	return glx.DateString(ds), nil
 }
 
 // VocabularyValue represents a value from a GLX vocabulary. Templates can

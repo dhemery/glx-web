@@ -7,7 +7,6 @@ import (
 
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
-	"github.com/genealogix/glx/go-glx/glxdate"
 )
 
 // JSON marshal options to reduce the JSON representation of the catalog to
@@ -31,7 +30,6 @@ var catalogMarshalOptions = json.JoinOptions(
 
 			// Primitive Values
 			json.MarshalToFunc(marshalBoolValue),
-			json.MarshalToFunc(marshalDate),
 			json.MarshalToFunc(marshalIntValue),
 			json.MarshalToFunc(marshalStringValue),
 
@@ -45,7 +43,7 @@ var catalogMarshalOptions = json.JoinOptions(
 
 func marshalAssertion(out *jsontext.Encoder, in *entity.Assertion) error {
 	v := struct {
-		Date        glxdate.Date        `json:"date"`
+		Date        glx.DateString      `json:"date"`
 		Participant *entity.Participant `json:"participant"`
 		Property    string              `json:"property"`
 		Subject     entity.Entity       `json:"subject"`
@@ -74,16 +72,12 @@ func marshalCitation(out *jsontext.Encoder, in *entity.Citation) error {
 	return json.MarshalEncode(out, &v)
 }
 
-func marshalDate(out *jsontext.Encoder, in glxdate.Date) error {
-	return out.WriteToken(jsontext.String(in.Raw()))
-}
-
 func marshalEvent(out *jsontext.Encoder, in *entity.Event) error {
 	if out.StackDepth() > 2 { // Marshaling a reference
 		return out.WriteToken(jsontext.String(in.ID()))
 	}
 	v := struct {
-		Date         glxdate.Date                `json:"date"`
+		Date         glx.DateString              `json:"date"`
 		Participants []*entity.Participant       `json:"participants"`
 		Place        *entity.Place               `json:"place"`
 		Properties   map[string]*entity.Property `json:"properties"`
@@ -176,7 +170,7 @@ func marshalPropertyDefinition(out *jsontext.Encoder, in *glx.PropertyDefinition
 
 func marshalPropertyEntry(out *jsontext.Encoder, in entity.PropertyEntry) error {
 	v := struct {
-		Date   glxdate.Date                    `json:"date"`
+		Date   glx.DateString                  `json:"date"`
 		Fields map[string]entity.PropertyField `json:"fields,omitempty"`
 		Value  entity.Stringer                 `json:"value"`
 	}{

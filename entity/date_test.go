@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/dhemery/glx-web/entity"
-	"github.com/genealogix/glx/go-glx/glxdate"
+	"github.com/genealogix/glx/go-glx"
 )
 
 func TestCompareDates(t *testing.T) {
-	tt := [][]string{
+	tt := [][]glx.DateString{
 		// Each slice is ordered as desired.
 		{
 			// Adjacent dates with each possible qualifier.
@@ -70,39 +70,33 @@ func TestCompareDates(t *testing.T) {
 	}
 
 	for _, dateStrings := range tt {
-		var dates []glxdate.Date
-		for _, dateString := range dateStrings {
-			date, _ := glxdate.Parse(dateString)
-			dates = append(dates, date)
-		}
-
 		// Compare each date to itself.
-		for _, d := range dates {
+		for _, d := range dateStrings {
 			want := 0
-			got := entity.CompareDates(d, d)
+			got := entity.CompareDateStrings(d, d)
 			if got != want {
-				t.Errorf("CompareDates(%q, %q) = %d, want %d", d, d, got, want)
+				t.Errorf("CompareDateStrings(%q, %q) = %d, want %d", d, d, got, want)
 			}
 
 		}
 
 		// Compare each date to each date later in the slice.
-		for i, x := range dates[:len(dates)-1] {
-			for _, y := range dates[i+1:] {
-				got := entity.CompareDates(x, y)
+		for i, x := range dateStrings[:len(dateStrings)-1] {
+			for _, y := range dateStrings[i+1:] {
+				got := entity.CompareDateStrings(x, y)
 				// The slice is ordered as desired, so we want
 				// the result to indicate x < y.
 				want := -1
 				if got != want {
-					t.Errorf("CompareDates(x=%q, y=%q) = %d, want %d", x, y, got, want)
+					t.Errorf("CompareDateStrings(x=%q, y=%q) = %d, want %d", x, y, got, want)
 				}
 
 				// Swap the order of the arguments, and so swap
 				// the sign of the desired result.
-				got = entity.CompareDates(y, x)
+				got = entity.CompareDateStrings(y, x)
 				want = -want
 				if got != 1 {
-					t.Errorf("CompareDates(y=%q, x=%q) = %d, want %d", y, x, got, want)
+					t.Errorf("CompareDateStrings(y=%q, x=%q) = %d, want %d", y, x, got, want)
 				}
 			}
 		}
