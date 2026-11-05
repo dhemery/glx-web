@@ -84,8 +84,18 @@ func (p *Place) compile(ctx *context) {
 	}
 }
 
-func (p *Place) addAssertion(a *Assertion) {
+func (p *Place) addAssertion(a *Assertion) string {
 	p.Assertions = append(p.Assertions, a)
+
+	name := a.Assertion.Property
+	switch name {
+	case "name":
+		return "Name"
+	case "parent":
+		return "Parent"
+	default:
+		return propertyLabel(glx.PropEventProperties, name)
+	}
 }
 
 func (p *Place) addChild(child *Place) {

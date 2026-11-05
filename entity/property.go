@@ -229,3 +229,37 @@ func parseEntryValue(ctx *context, rawValue any, def *glx.PropertyDefinition) (S
 		return nil, nil
 	}
 }
+
+var propertyVocabularies map[string]map[string]*glx.PropertyDefinition
+
+func initPropertyVocabularies(g *glx.GLXFile) {
+	propertyVocabularies = map[string]map[string]*glx.PropertyDefinition{
+		glx.PropCitationProperties:     g.CitationProperties,
+		glx.PropEventProperties:        g.EventProperties,
+		glx.PropMediaProperties:        g.MediaProperties,
+		glx.PropPersonProperties:       g.PersonProperties,
+		glx.PropPlaceProperties:        g.PlaceProperties,
+		glx.PropRelationshipProperties: g.RelationshipProperties,
+		glx.PropRepositoryProperties:   g.RepositoryProperties,
+		glx.PropSourceProperties:       g.SourceProperties,
+	}
+}
+
+func propertyDefinition(vocabName, propName string) *glx.PropertyDefinition {
+	defs := propertyVocabularies[vocabName]
+	if defs == nil {
+		return nil
+	}
+
+	return defs[propName]
+}
+
+func propertyLabel(vocabName, propName string) string {
+	def := propertyDefinition(vocabName, propName)
+
+	if def == nil {
+		return propName
+	}
+
+	return def.Label
+}

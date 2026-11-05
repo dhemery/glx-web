@@ -76,6 +76,7 @@ func (c *Catalog) Sources() SourceList {
 // NewCatalog compiles a catalog of entities from a GLX archive.
 func NewCatalog(g *glx.GLXFile, w io.Writer) (*Catalog, error) {
 	initVocabularies(g)
+	initPropertyVocabularies(g)
 
 	c := &Catalog{
 		AssertionsByID:    make(map[string]*Assertion),

@@ -123,6 +123,8 @@ func (r *Relationship) compile(ctx *context) {
 	}
 }
 
-func (r *Relationship) addAssertion(a *Assertion) {
+func (r *Relationship) addAssertion(a *Assertion) string {
 	r.Assertions = append(r.Assertions, a)
+
+	return propertyLabel(glx.PropEventProperties, a.Assertion.Property)
 }

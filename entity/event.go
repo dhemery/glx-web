@@ -103,8 +103,18 @@ func (e *Event) compile(ctx *context) {
 	}
 }
 
-func (e *Event) addAssertion(a *Assertion) {
+func (e *Event) addAssertion(a *Assertion) string {
 	e.Assertions = append(e.Assertions, a)
+
+	name := a.Assertion.Property
+	switch name {
+	case "date":
+		return "Date"
+	case "place":
+		return "Place"
+	default:
+		return propertyLabel(glx.PropEventProperties, name)
+	}
 }
 
 func (e *Event) addRelationship(r *Relationship) {

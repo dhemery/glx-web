@@ -127,9 +127,16 @@ Currently this back-reference compilation does not include:
     such as an Assertion's indirect reference to a source
     via a direct reference to a Citation.
 
-# Assertion Limitations
+# Assertions
 
-Assertion's Value field
+Each Assertion's Property field
+that names a known field or property
+is resolved to a Label
+for the asserted field or property.
+The original, unresolved Property string
+is available through the embedded [*glx.Assertion].
+
+NOTE: Assertion's Value field
 is currently presented as a plain string,
 even if the property being asserted
 has reference type or vocabulary type.

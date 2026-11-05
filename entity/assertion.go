@@ -16,14 +16,18 @@ type Assertion struct {
 	Citations   CitationList
 	Media       MediaList
 	Participant *Participant
-	Sources     SourceList
-	Subject     Entity
+	// The label for the embedded assertion's property. If the property
+	// names a field of the subject, Property is the name of the field in
+	// Title Case. If the property names a defined property of the subject,
+	// Property is the Label from the property's [glx.PropertyDefinition].
+	// Otherwise the Property is a copy of the embedded assertion's
+	// Property.
+	Property string
+	Sources  SourceList
+	Subject  Entity
 
 	// TODO(feature): Find a way to resolve entity and vocabulary
-	// references in Value. Maybe a single struct that captures every
-	// possible assertion structure, like how glx.EntityRef has a field for
-	// each type of subject, and glx.PropertyDefinition has a field for
-	// each kind of value type.
+	// references in Value.
 }
 
 // EntityType returns [glx.EntityTypeAssertions].
@@ -124,7 +128,7 @@ func (a *Assertion) compile(ctx *context) {
 	}
 
 	if s, ok := a.Subject.(subject); ok {
-		s.addAssertion(a)
+		a.Property = s.addAssertion(a)
 	}
 
 	for _, c := range a.Citations {
@@ -141,5 +145,12 @@ func (a *Assertion) compile(ctx *context) {
 }
 
 type subject interface {
-	addAssertion(*Assertion)
+	addAssertion(*Assertion) string
 }
+
+var (
+	_ subject = (*Event)(nil)
+	_ subject = (*Person)(nil)
+	_ subject = (*Place)(nil)
+	_ subject = (*Relationship)(nil)
+)

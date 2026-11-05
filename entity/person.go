@@ -104,8 +104,10 @@ func (p *Person) compile(ctx *context) {
 	p.Properties = parseProperties(pctx, inner.Properties, pctx.GLX.PersonProperties)
 }
 
-func (p *Person) addAssertion(a *Assertion) {
+func (p *Person) addAssertion(a *Assertion) string {
 	p.Assertions = append(p.Assertions, a)
+
+	return propertyLabel(glx.PropPersonProperties, a.Assertion.Property)
 }
 
 func (p *Person) addEvent(e *Event) {
