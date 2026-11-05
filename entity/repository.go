@@ -1,6 +1,9 @@
 package entity
 
 import (
+	"iter"
+	"slices"
+
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -36,6 +39,14 @@ func (r *Repository) String() string {
 }
 
 type RepositoryList []*Repository
+
+func (l RepositoryList) All() iter.Seq[*Repository] {
+	return slices.Values(l)
+}
+
+func (l RepositoryList) EntityType() glx.EntityType {
+	return glx.EntityTypeRepositories
+}
 
 // Sort returns the repositories sorted by String value.
 func (l RepositoryList) Sort() RepositoryList {

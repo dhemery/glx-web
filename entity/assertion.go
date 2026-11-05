@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"iter"
+	"slices"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -66,6 +68,14 @@ func (a *Assertion) String() string {
 }
 
 type AssertionList []*Assertion
+
+func (l AssertionList) All() iter.Seq[*Assertion] {
+	return slices.Values(l)
+}
+
+func (l AssertionList) EntityType() glx.EntityType {
+	return glx.EntityTypeAssertions
+}
 
 // Sort returns the assertions sorted by String value.
 func (l AssertionList) Sort() AssertionList {

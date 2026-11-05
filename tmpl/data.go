@@ -1,9 +1,5 @@
 package tmpl
 
-import (
-	"github.com/genealogix/glx/go-glx"
-)
-
 // Site is the data passed to each Site template. It is also available to all
 // templates via the site function.
 type Site struct {
@@ -13,14 +9,6 @@ type Site struct {
 	// throughout the rendering of the site. You can use this store to
 	// compile data to share across all templates.
 	Store Store
-}
-
-// EntitySet is the data passed to each Type template.
-type EntitySet struct {
-	// The type of entity in the set.
-	glx.EntityType
-	// A map of the entities, keyed by ID.
-	Entities any
 }
 
 // Store is a key-value store.

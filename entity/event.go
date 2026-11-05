@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"iter"
 	"slices"
 
 	"github.com/genealogix/glx/go-glx"
@@ -43,6 +44,22 @@ func (e *Event) String() string {
 
 type EventList []*Event
 
+func (l EventList) All() iter.Seq[*Event] {
+	return slices.Values(l)
+}
+
+func (l EventList) ByDate() EventList {
+	return slices.SortedStableFunc(slices.Values(l), cmpEventDate)
+}
+
+func cmpEventDate(x, y *Event) int {
+	return CompareDateStrings(x.Date, y.Date)
+}
+
+func (l EventList) EntityType() glx.EntityType {
+	return glx.EntityTypeEvents
+}
+
 // Sort returns the events sorted by String value.
 func (l EventList) Sort() EventList {
 	return sortedByString(l)
@@ -57,14 +74,6 @@ func (l EventList) WithType(types ...string) EventList {
 		}
 	}
 	return matches
-}
-
-func cmpEventDate(x, y *Event) int {
-	return CompareDateStrings(x.Date, y.Date)
-}
-
-func (l EventList) ByDate() EventList {
-	return slices.SortedStableFunc(slices.Values(l), cmpEventDate)
 }
 
 func newEvent(id string, inner *glx.Event) *Event {

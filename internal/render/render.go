@@ -4,6 +4,7 @@ package render
 import (
 	"errors"
 	"fmt"
+	"iter"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,15 +64,15 @@ func (r *Renderer) Render(catalog *entity.Catalog) error {
 		}
 	}
 
-	r.renderEntities(glx.EntityTypeAssertions, catalog.Assertions())
-	r.renderEntities(glx.EntityTypeCitations, catalog.Citations())
-	r.renderEntities(glx.EntityTypeEvents, catalog.Events())
-	r.renderEntities(glx.EntityTypeMedia, catalog.Media())
-	r.renderEntities(glx.EntityTypePersons, catalog.Persons())
-	r.renderEntities(glx.EntityTypePlaces, catalog.Places())
-	r.renderEntities(glx.EntityTypeRelationships, catalog.Relationships())
-	r.renderEntities(glx.EntityTypeRepositories, catalog.Repositories())
-	r.renderEntities(glx.EntityTypeSources, catalog.Sources())
+	r.renderEntities(catalog.Assertions())
+	r.renderEntities(catalog.Citations())
+	r.renderEntities(catalog.Events())
+	r.renderEntities(catalog.Media())
+	r.renderEntities(catalog.Persons())
+	r.renderEntities(catalog.Places())
+	r.renderEntities(catalog.Relationships())
+	r.renderEntities(catalog.Repositories())
+	r.renderEntities(catalog.Sources())
 
 	return r.Err
 }
@@ -80,28 +81,31 @@ type ider interface {
 	ID() string
 }
 
-func (r *Renderer) renderEntities[S ~[]E, E ider](et glx.EntityType, entities S) {
+type entityList[T ider] interface {
+	All() iter.Seq[T]
+	EntityType() glx.EntityType
+}
+
+func (r *Renderer) renderEntities[S entityList[E], E ider](entities S) {
 	if r.Err != nil {
 		return
 	}
 
-	entitySet := tmpl.EntitySet{
-		EntityType: et,
-		Entities:   entities,
-	}
+	entityType := entities.EntityType()
 
-	for name, t := range r.Templates.ForType(et) {
+	for name, t := range r.Templates.ForType(entityType) {
 		fname := filepath.Join(r.OutputDir, name)
-		err := r.executeTemplate(fname, entitySet, t)
+		err := r.executeTemplate(fname, entities, t)
 		if err != nil {
 			r.Err = fmt.Errorf("rendering %s: %w", fname, err)
 			return
 		}
 	}
 
-	for _, entity := range entities {
+	entityTemplates := r.Templates.ForEntity(entityType)
+	for entity := range entities.All() {
 		id := entity.ID()
-		for name, t := range r.Templates.ForEntity(et) {
+		for name, t := range entityTemplates {
 			fname := filepath.Join(r.OutputDir, strings.ReplaceAll(name, "<id>", id))
 
 			err := r.executeTemplate(fname, entity, t)

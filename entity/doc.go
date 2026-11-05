@@ -95,6 +95,22 @@ Each type defines methods that return the value's
 label, [*glx.VocabularyEntry], vocabulary name, and raw value.
 The String method for each type returns the value's label.
 
+# Entity and Participant Lists
+
+Each entity type has an associated list type.
+Each list type
+has an EntityType method that
+returns the [glx.EntityType] of its entities.
+
+There is also a [ParticipantList] type.
+
+Some list types
+have methods to sort, filter, group, and map the elements
+in ways often useful for templates.
+For example, [PersonList.GroupBySurname]
+groups persons by surname.
+[ParticipantList.Persons] maps the participants to persons.
+
 # Back-References
 
 Each entity compiles lists of "back-references,"
