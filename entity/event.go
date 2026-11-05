@@ -13,7 +13,7 @@ type Event struct {
 	Participants ParticipantList
 	Place        *Place
 	Properties   map[string]*Property
-	Type         *VocabularyValue
+	Type         EventType
 
 	// Assertions about this event.
 	Assertions AssertionList
@@ -28,7 +28,7 @@ func (e *Event) EntityType() glx.EntityType {
 
 // HasType reports whether the event's Type is present in types.
 func (e *Event) HasType(types ...string) bool {
-	return slices.Contains(types, e.Type.Value)
+	return slices.Contains(types, e.Type.Value())
 }
 
 // ID returns the event's ID.
@@ -83,7 +83,7 @@ func (e *Event) compile(ctx *context) {
 	e.Place = ectx.Catalog.PlacesByID[e.PlaceID]
 	e.Properties = parseProperties(ectx, inner.Properties, ectx.GLX.EventProperties)
 	// Ignoring error. GLX validation guarantees that the type is present and valid.
-	e.Type, _ = newVocabularyValue(inner.Type, ectx.GLX.EventTypes)
+	e.Type = EventType(inner.Type)
 
 	for _, p := range e.Participants {
 		p.Person.addEvent(e)

@@ -10,7 +10,7 @@ type Repository struct {
 	id string
 
 	Properties map[string]*Property
-	Type       *VocabularyValue
+	Type       RepositoryType
 
 	// Citations that directly reference this repository. Citations that
 	// reference this repository only indirectly through sources are not
@@ -55,8 +55,7 @@ func (r *Repository) compile(ctx *context) {
 	inner := r.Repository
 
 	r.Properties = parseProperties(rctx, inner.Properties, rctx.GLX.RepositoryProperties)
-	// Ignore error. GLX validation guarantees that the type, if any, is valid.
-	r.Type, _ = newVocabularyValue(inner.Type, rctx.GLX.RepositoryTypes)
+	r.Type = RepositoryType(inner.Type)
 }
 
 func (r *Repository) addCitation(c *Citation) {

@@ -10,6 +10,7 @@ type Assertion struct {
 	*glx.Assertion
 	id string
 
+	Confidence  ConfidenceLevel
 	Citations   CitationList
 	Media       MediaList
 	Participant *Participant
@@ -52,7 +53,7 @@ func (a *Assertion) String() string {
 	switch {
 	case a.Participant != nil:
 		// Valid participant.
-		parts = append(parts, a.Participant.Role.Value, a.Participant.Person.String())
+		parts = append(parts, a.Participant.Role.Label(), a.Participant.Person.String())
 	case a.Assertion.Participant != nil:
 		// Discarded participant. Use details from underlying glx.Assertion as is.
 		parts = append(parts, a.Assertion.Participant.Role, a.Assertion.Participant.Person)
@@ -82,6 +83,8 @@ func (a *Assertion) compile(ctx *context) {
 	actx := ctx.ForEntity(a)
 
 	inner := a.Assertion
+	a.Confidence = ConfidenceLevel(inner.Confidence)
+
 	a.Citations = actx.Catalog.citations(inner.Citations)
 	a.Media = actx.Catalog.media(inner.Media)
 	a.Sources = actx.Catalog.sources(inner.Sources)
@@ -92,18 +95,16 @@ func (a *Assertion) compile(ctx *context) {
 		a.Subject = actx.Catalog.PersonsByID[s.Person]
 	case s.Event != "":
 		a.Subject = actx.Catalog.EventsByID[s.Event]
-		roles := actx.GLX.ParticipantRoles
 		props := actx.GLX.EventProperties
-		participant, err := parseParticipant(ctx, inner.Participant, roles, props)
+		participant, err := parseParticipant(ctx, inner.Participant, props)
 		if err != nil {
 			actx.Sub("Participant").Warnf("discarded participant: %s", err)
 		}
 		a.Participant = participant
 	case s.Relationship != "":
 		a.Subject = actx.Catalog.RelationshipsByID[s.Relationship]
-		roles := actx.GLX.ParticipantRoles
 		props := actx.GLX.RelationshipProperties
-		participant, err := parseParticipant(ctx, inner.Participant, roles, props)
+		participant, err := parseParticipant(ctx, inner.Participant, props)
 		if err != nil {
 			actx.Sub("Participant").Warnf("discarded participant: %s", err)
 		}

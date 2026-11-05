@@ -10,7 +10,7 @@ type Place struct {
 
 	Parent     *Place
 	Properties map[string]*Property
-	Type       *VocabularyValue
+	Type       PlaceType
 
 	// Assertions about this place.
 	Assertions AssertionList
@@ -66,13 +66,11 @@ func (p *Place) compile(ctx *context) {
 	inner := p.Place
 	p.Parent = pctx.Catalog.PlacesByID[p.ParentID]
 	p.Properties = parseProperties(pctx, inner.Properties, pctx.GLX.PlaceProperties)
-	// Ignore error. GLX validation guarantees that the type, if any, is valid.
-	p.Type, _ = newVocabularyValue(inner.Type, pctx.GLX.PlaceTypes)
+	p.Type = PlaceType(inner.Type)
 
 	if p.Parent != nil {
 		p.Parent.addChild(p)
 	}
-
 }
 
 func (p *Place) addAssertion(a *Assertion) {

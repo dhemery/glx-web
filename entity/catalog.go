@@ -12,9 +12,9 @@ import (
 // check whether a value is an entity by calling the "is_entity" template
 // function.
 type Entity interface {
+	Stringer
 	EntityType() glx.EntityType
 	ID() string
-	String() string
 }
 
 // IsEntity reports whether v satisfies [Entity]. Templates can call this
@@ -75,6 +75,8 @@ func (c *Catalog) Sources() SourceList {
 
 // NewCatalog compiles a catalog of entities from a GLX archive.
 func NewCatalog(g *glx.GLXFile, w io.Writer) (*Catalog, error) {
+	initVocabularies(g)
+
 	c := &Catalog{
 		AssertionsByID:    make(map[string]*Assertion),
 		CitationsByID:     make(map[string]*Citation),
@@ -173,45 +175,4 @@ func (c *Catalog) sources(ids []string) []*Source {
 		sources = append(sources, s)
 	}
 	return sources
-}
-
-func vocabulary(g *glx.GLXFile, name string) map[string]*glx.VocabularyEntry {
-	switch name {
-	case glx.VocabRelationshipTypes:
-		return g.RelationshipTypes
-	case glx.VocabEventTypes:
-		return g.EventTypes
-	case glx.VocabPlaceTypes:
-		return g.PlaceTypes
-	case glx.VocabRepositoryTypes:
-		return g.RepositoryTypes
-	case glx.VocabParticipantRoles:
-		return g.ParticipantRoles
-	case glx.VocabMediaTypes:
-		return g.MediaTypes
-	case glx.VocabConfidenceLevels:
-		return g.ConfidenceLevels
-	case glx.VocabSourceTypes:
-		return g.SourceTypes
-	case glx.VocabSexTypes:
-		return g.SexTypes
-	case glx.VocabGenderTypes:
-		return g.GenderTypes
-	case glx.VocabSearchResultTypes:
-		return g.SearchResultTypes
-	case glx.VocabResearchLogStatusTypes:
-		return g.ResearchLogStatusTypes
-	case glx.VocabStudyTypes:
-		return g.StudyTypes
-	case glx.VocabStudyStatuses:
-		return g.StudyStatuses
-	case glx.VocabLegalStatuses:
-		return g.LegalStatuses
-	case glx.VocabSourceNatures:
-		return g.SourceNatures
-	case glx.VocabInformationTypes:
-		return g.InformationTypes
-	default:
-		return nil
-	}
 }

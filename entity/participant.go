@@ -11,12 +11,12 @@ type Participant struct {
 	*glx.Participant
 	Person     *Person
 	Properties map[string]*Property
-	Role       *VocabularyValue
+	Role       ParticipantRole
 }
 
 // HasRole reports whether p's Role is present in roles.
 func (p *Participant) HasRole(roles ...string) bool {
-	return slices.Contains(roles, p.Role.Value)
+	return slices.Contains(roles, p.Role.Value())
 }
 
 // String returns a description of p
@@ -25,7 +25,7 @@ func (p *Participant) HasRole(roles ...string) bool {
 // of its role and person,
 // separated by a space.
 func (p *Participant) String() string {
-	return p.Role.Definition.Label + " " + p.Person.String()
+	return p.Role.Label() + " " + p.Person.String()
 }
 
 type ParticipantList []*Participant
@@ -65,12 +65,11 @@ func (l ParticipantList) WithRoles(roles ...string) ParticipantList {
 func parseParticipants(ctx *context, inner []glx.Participant, propertyDefs map[string]*glx.PropertyDefinition) ParticipantList {
 	ppctx := ctx.Sub("Participants")
 
-	roleDefs := ppctx.GLX.ParticipantRoles
 	participants := ParticipantList{}
 
 	for i, p := range inner {
 		pctx := ppctx.Subi(i)
-		participant, err := parseParticipant(pctx, &p, roleDefs, propertyDefs)
+		participant, err := parseParticipant(pctx, &p, propertyDefs)
 		if err != nil {
 			pctx.Warnf("discarding participant: %s", err)
 			continue
@@ -81,7 +80,7 @@ func parseParticipants(ctx *context, inner []glx.Participant, propertyDefs map[s
 	return participants
 }
 
-func parseParticipant(ctx *context, inner *glx.Participant, roleDefs map[string]*glx.VocabularyEntry, propertyDefs map[string]*glx.PropertyDefinition) (*Participant, error) {
+func parseParticipant(ctx *context, inner *glx.Participant, propertyDefs map[string]*glx.PropertyDefinition) (*Participant, error) {
 	if inner == nil {
 		// Assertion can pass nil *Participant.
 		return nil, nil
@@ -92,13 +91,10 @@ func parseParticipant(ctx *context, inner *glx.Participant, roleDefs map[string]
 		return nil, errors.New("person must not be empty")
 	}
 
-	// Role is optional, but GLX validates Role if present.
-	role, _ := newVocabularyValue(inner.Role, roleDefs)
-
 	return &Participant{
 		Participant: inner,
 		Person:      ctx.Catalog.PersonsByID[inner.Person],
 		Properties:  parseProperties(ctx, inner.Properties, propertyDefs),
-		Role:        role,
+		Role:        ParticipantRole(inner.Role),
 	}, nil
 }

@@ -11,7 +11,7 @@ type Media struct {
 	Properties map[string]*Property
 	// The source documented by this media.
 	Source *Source
-	Type   *VocabularyValue
+	Type   MediaType
 
 	// Assertions that directly cite this media as evidence. Assertions
 	// that reference this media only indirectly through citations or
@@ -57,7 +57,7 @@ func (m *Media) compile(ctx *context) {
 
 	inner := m.Media
 	// Ignore error. GLX validation guarantees that the type, if any, is valid.
-	m.Type, _ = newVocabularyValue(inner.Type, mctx.GLX.MediaTypes)
+	m.Type = MediaType(inner.Type)
 	m.Properties = parseProperties(mctx, inner.Properties, mctx.GLX.MediaProperties)
 	m.Source = mctx.Catalog.SourcesByID[inner.Source]
 

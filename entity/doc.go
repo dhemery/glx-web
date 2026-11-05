@@ -4,6 +4,10 @@ supplements a GLX archive and its entities
 with features that make them
 more convenient to render via templates.
 
+The top-level item of this package
+is the [Catalog] of all entities
+defined in your GLX archive.
+
 # Entities
 
 Each entity knows its ID and [glx.EntityType].
@@ -14,8 +18,8 @@ See each entity's String method for details.
 
 # Entity Fields
 
-Entity fields of vocabulary type
-are represented as [VocabularyValue].
+Each entity field of vocabulary type
+is represented as a type that implements [VocabularyValue].
 
 Entity fields of reference type
 are resolved to pointers to the referenced entities.
@@ -71,7 +75,7 @@ that returns the entry's value as a string.
 
 If a Property's type is a vocabulary type,
 each entry's value
-is represented as a [VocabularyValue].
+is represented as a type that implements [VocabularyValue].
 
 # Property Fields
 
@@ -85,15 +89,11 @@ that yeilds the field's value as a string.
 
 # Vocabulary Values
 
-Each VocabularyValue
-knows its definition
-(see [glx.VocabularyEntry]),
-which gives access
-to its label, description,
-and other details.
-
-VocabularyValue has a String method
-that returns the label associated with the value.
+Each value from a GLX controlled vocabulary
+is represented as a type that implements [VocabularyValue].
+Each type defines methods that return the value's
+label, [*glx.VocabularyEntry], vocabulary name, and raw value.
+The String method for each type returns the value's label.
 
 # Back-References
 

@@ -15,7 +15,7 @@ type Relationship struct {
 	Participants ParticipantList
 	Properties   map[string]*Property
 	StartEvent   *Event
-	Type         *VocabularyValue
+	Type         RelationshipType
 
 	// Assertions about this relationship.
 	Assertions AssertionList
@@ -28,7 +28,7 @@ func (r *Relationship) EntityType() glx.EntityType {
 
 // HasType reports whether the relationship's Type is present in types.
 func (r *Relationship) HasType(types ...string) bool {
-	return slices.Contains(types, r.Type.Value)
+	return slices.Contains(types, r.Type.Value())
 }
 
 // ID returns the relationship's ID.
@@ -49,9 +49,9 @@ func (r *Relationship) String() string {
 	}
 	switch len(parts) {
 	case 0:
-		return r.Type.Definition.Label + r.ID()
+		return r.Type.Label() + r.ID()
 	case 1:
-		return r.Type.Definition.Label + " of " + parts[0]
+		return r.Type.Label() + " of " + parts[0]
 	case 2:
 		return strings.Join(parts, " and ")
 	default:
@@ -101,8 +101,7 @@ func (r *Relationship) compile(ctx *context) {
 	r.Participants = parseParticipants(rctx, inner.Participants, rctx.GLX.RelationshipProperties)
 	r.Properties = parseProperties(rctx, inner.Properties, rctx.GLX.RelationshipProperties)
 	r.StartEvent = rctx.Catalog.EventsByID[inner.StartEvent]
-	// Ignore error. GLX validation guarantees that the type is present and valid.
-	r.Type, _ = newVocabularyValue(inner.Type, rctx.GLX.RelationshipTypes)
+	r.Type = RelationshipType(inner.Type)
 
 	for _, p := range r.Participants {
 		p.Person.addRelationship(r)

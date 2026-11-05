@@ -73,7 +73,7 @@ that all templates can use:
 	    Reports whether its argument's type is entity.Property.
 
 	is_vocabulary_value
-	    Reports whether its argument's type is entity.VocabularyValue.
+	    Reports whether its argument's type satisfies entity.VocabularyValue.
 
 	site
 	    Returns the Site, which includes the custom data supplied by the

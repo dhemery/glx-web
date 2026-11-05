@@ -223,7 +223,7 @@ func parseEntryValue(ctx *context, rawValue any, def *glx.PropertyDefinition) (S
 				got:  rawValue,
 			}
 		}
-		return newVocabularyValue(term, vocabulary(ctx.GLX, def.VocabularyType))
+		return newVocabularyValue(def.VocabularyType, term)
 	default:
 		// GLX validation guarantees that exactly one type field of def has a value.
 		return nil, nil
