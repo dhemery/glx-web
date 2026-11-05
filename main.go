@@ -3,7 +3,7 @@ The glx-web command renders a website
 from a GLX archive.
 It applies user-specified templates to render files:
   - for each entity,
-  - for the set of entities of each type,
+  - for the list of all entities of each type,
   - and for the website as a whole.
 
 See [entity.Catalog]

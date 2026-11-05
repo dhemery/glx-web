@@ -1,6 +1,7 @@
 package tmpl
 
 import (
+	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -15,13 +16,12 @@ type Config struct {
 
 // SiteSpec specifies the templates for the site and for each entity type.
 type SiteSpec struct {
-	// Templates that other templates can build on. The map key is used as
-	// the name of the base. Base templates can build on other base
-	// templates.
+	// Each Base template defines a base that other templates can build on.
+	// The map key is used as the name of the base. Base templates can
+	// build on other base templates.
 	Bases map[string]Spec `json:"bases"`
-	// Templates for the site as a whole. Each template is applied to the
-	// Site. The map key is used as the path for the rendered file relative
-	// to the output directory.
+	// Each Site template is applied to the [Site]. The map key is used as
+	// the path for the rendered file relative to the output directory.
 	Site map[string]Spec `json:"site"`
 	// Templates for each entity type.
 	Types map[glx.EntityType]TypeSpec `json:"types"`
@@ -30,14 +30,20 @@ type SiteSpec struct {
 // TypeSpec specifies templates for an entity type and for entities of that
 // type.
 type TypeSpec struct {
-	// Templates for the entity type as a whole. Each template is applied
-	// to the type's EntitySet. The map key is used as the path for the
-	// rendered file relative to the output directory.
+	// Each Type template is applied to the list of all entities of the
+	// type. Each entity list has a distinct type with methods relevant to
+	// the type of entity. For example, the list for
+	// [glx.EntityTypePersons] is [entity.PersonList], which has a
+	// GroupBySurname method. Each list type has an EntityType method that
+	// returns the [glx.EntityType] of its elements. Some lists have
+	// methods to sort, filter, group, or map the elements in ways useful
+	// to templates. The map key is used as the path for the rendered file
+	// relative to the output directory.
 	Type map[string]Spec `json:"type"`
-	// Templates for each entity of the type. Each template is applied to
-	// the entity. Each occurrence of "<id>" in the map key is replaced
-	// by the entity's ID, and the result is used as the path for the
-	// rendered file relative to the output directory.
+	// Each Entity template is applied to each entity of the type. Each
+	// occurrence of "<id>" in the map key is replaced by the entity's ID,
+	// and the result is used as the path for the rendered file relative to
+	// the output directory.
 	Entity map[string]Spec `json:"entity"`
 }
 
@@ -51,3 +57,6 @@ type Spec struct {
 	// directory.
 	Files []string `json:"files"`
 }
+
+// Import for doc reference.
+var _ entity.PersonList

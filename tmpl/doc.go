@@ -3,17 +3,17 @@ Package tmpl
 defines the templates, data, and functions
 that glx-web uses to render files.
 
-# Templates
-
 The glx-web command
 applies user-specified templates to render files.
 It does not supply any built-in templates.
 
-To specify the templates,
+To specify the templates and to supply custom data,
 write a config.yaml file in the template directory.
 The file is deserialized into a [Config].
 
-The configuration defines four kinds of templates:
+# Templates
+
+The [Config.Templates] field defines four kinds of templates:
 
   - Base templates,
     declared in [SiteSpec.Bases].
@@ -23,8 +23,7 @@ The configuration defines four kinds of templates:
 
   - Site templates,
     declared in [SiteSpec.Site].
-    Each site template is applied to a [Site]
-    to render a file about the site as a whole.
+    Each site template is applied to a [Site].
     You can render the site information to multiple files
     by specifying multiple site templates.
     The map key for the template
@@ -33,11 +32,11 @@ The configuration defines four kinds of templates:
 
   - Type templates,
     declared in [TypeSpec.Type].
-    Each type template is applied to an [EntitySet]
-    to render a file
-    about the set of entities of a given type
-    or about the entity type as a whole.
-    You can render an entity set to multiple files
+    Each type template is applied to a list of entities.
+    Each list type has an EntityType method
+    that returns the [glx.EntityType]
+    of the entities in the list.
+    You can render an entity list to multiple files
     by specifying multiple type templates.
     The map key for the template
     is used as the path for the rendered file
@@ -45,8 +44,7 @@ The configuration defines four kinds of templates:
 
   - Entity templates,
     declared in [TypeSpec.Entity].
-    Each entity template is applied to an entity
-    to render a file about that entity.
+    Each entity template is applied to an entity.
     You can render an entity to multiple files
     by specifying multiple Entity templates.
     Each occurrence of "<id>" in the map key for each template
@@ -56,8 +54,8 @@ The configuration defines four kinds of templates:
 
 # Custom Data
 
-The configuration also has a [Config.Data] field
-that you can use to supply custom data about the site.
+Use the [Config.Data] field
+to supply custom data about the site.
 This data is copied to [Site.Data],
 making it available to all templates.
 
@@ -86,7 +84,7 @@ that all templates can use:
 	    executing template. You can use this Store to compile data for use
 	    later in the template.
 
-See [tmpl.Site] and [tmpl.Store] for descriptions of the values returned by the
+See [Site] and [Store] for descriptions of the values returned by the
 site and store functions.
 */
 package tmpl

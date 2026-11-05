@@ -11,9 +11,9 @@ import (
 )
 
 type templateSet struct {
-	site      map[string]*template.Template
-	entitySet map[glx.EntityType]map[string]*template.Template
-	entity    map[glx.EntityType]map[string]*template.Template
+	site       map[string]*template.Template
+	entityType map[glx.EntityType]map[string]*template.Template
+	entity     map[glx.EntityType]map[string]*template.Template
 }
 
 func (s templateSet) ForSite() map[string]*template.Template {
@@ -21,7 +21,7 @@ func (s templateSet) ForSite() map[string]*template.Template {
 }
 
 func (s templateSet) ForType(e glx.EntityType) map[string]*template.Template {
-	return s.entitySet[e]
+	return s.entityType[e]
 }
 
 func (s templateSet) ForEntity(e glx.EntityType) map[string]*template.Template {
@@ -30,9 +30,9 @@ func (s templateSet) ForEntity(e glx.EntityType) map[string]*template.Template {
 
 func Templates(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) (templateSet, error) {
 	templates := templateSet{
-		site:      make(map[string]*template.Template),
-		entitySet: make(map[glx.EntityType]map[string]*template.Template),
-		entity:    make(map[glx.EntityType]map[string]*template.Template),
+		site:       make(map[string]*template.Template),
+		entityType: make(map[glx.EntityType]map[string]*template.Template),
+		entity:     make(map[glx.EntityType]map[string]*template.Template),
 	}
 
 	c := templateCompiler{
@@ -45,7 +45,7 @@ func Templates(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) 
 	templates.site = c.compileTemplates("site", specs.Site)
 
 	for et, typeSpec := range c.specs.Types {
-		templates.entitySet[et] = c.compileTemplates("type", typeSpec.Type)
+		templates.entityType[et] = c.compileTemplates("type", typeSpec.Type)
 		templates.entity[et] = c.compileTemplates("entity", typeSpec.Entity)
 	}
 
