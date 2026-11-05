@@ -4,7 +4,7 @@ package tmpl
 // templates via the site function.
 type Site struct {
 	// The data parsed from the configuration file's data field.
-	Data map[string]any
+	Data any
 	// A key/value store scoped to the site. The store is maintained
 	// throughout the rendering of the site. You can use this store to
 	// compile data to share across all templates.

@@ -9,7 +9,7 @@ import (
 type Config struct {
 	// User-defined data to make available to templates via the data
 	// function.
-	Data map[string]any `json:"data"`
+	Data any `json:"data"`
 	// Templates to render the site.
 	Templates SiteSpec `json:"templates"`
 }
