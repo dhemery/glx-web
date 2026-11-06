@@ -56,7 +56,7 @@ func (a *Assertion) ID() string {
 // If the participant is present,
 // the role appears before the person's name.
 // If the assertion date is present
-// its string value is prepended with "as of".
+// its string value is enclosed in parentheses.
 func (a *Assertion) String() string {
 	var parts []string
 	parts = append(parts, a.Subject.String())
@@ -72,7 +72,7 @@ func (a *Assertion) String() string {
 		parts = append(parts, a.Assertion.Participant.Role, a.Assertion.Participant.Person)
 	}
 	if a.Date.String() != "" {
-		parts = append(parts, "as of", a.Date.String())
+		parts = append(parts, "("+a.Date.String()+")")
 
 	}
 	return strings.Join(parts, " ")
