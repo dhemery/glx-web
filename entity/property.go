@@ -230,6 +230,21 @@ func parseEntryValue(ctx *context, rawValue any, def *glx.PropertyDefinition) (S
 	}
 }
 
+func resolverForProperty(vocabName, propName string) resolver {
+	def := propertyDefinition(vocabName, propName)
+	if def == nil {
+		return stringResolver(propName)
+	}
+	switch {
+	case def.ReferenceType != "":
+		return entityResolver{def.Label, def.ReferenceType}
+	case def.VocabularyType != "":
+		return vocabularyResolver{def.Label, def.VocabularyType}
+	default:
+		return stringResolver(def.Label)
+	}
+}
+
 var propertyVocabularies map[string]map[string]*glx.PropertyDefinition
 
 func initPropertyVocabularies(g *glx.GLXFile) {
@@ -252,14 +267,4 @@ func propertyDefinition(vocabName, propName string) *glx.PropertyDefinition {
 	}
 
 	return defs[propName]
-}
-
-func propertyLabel(vocabName, propName string) string {
-	def := propertyDefinition(vocabName, propName)
-
-	if def == nil {
-		return propName
-	}
-
-	return def.Label
 }

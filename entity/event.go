@@ -103,17 +103,17 @@ func (e *Event) compile(ctx *context) {
 	}
 }
 
-func (e *Event) addAssertion(a *Assertion) string {
+func (e *Event) addAssertion(a *Assertion) resolver {
 	e.Assertions = append(e.Assertions, a)
 
-	name := a.Assertion.Property
-	switch name {
+	propName := a.Assertion.Property
+	switch propName {
 	case "date":
-		return "Date"
+		return stringResolver("Date")
 	case "place":
-		return "Place"
+		return entityResolver{"Place", glx.EntityTypePlaces.Plural()}
 	default:
-		return propertyLabel(glx.PropEventProperties, name)
+		return resolverForProperty(glx.PropEventProperties, propName)
 	}
 }
 

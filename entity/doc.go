@@ -130,15 +130,16 @@ Currently this back-reference compilation does not include:
 # Assertions
 
 Each Assertion's Property field
-that names a known field or property
 is resolved to a Label
-for the asserted field or property.
-The original, unresolved Property string
-is available through the embedded [*glx.Assertion].
+for the asserted field or property
+if applicable.
 
-NOTE: Assertion's Value field
-is currently presented as a plain string,
-even if the property being asserted
-has reference type or vocabulary type.
+Each Assertion's Value field
+is resolved to an entity or VocabularyValue
+if applicable.
+Otherwise it resolves to a StringValue.
+
+The original, unresolved Property and Value strings
+are available through the embedded [*glx.Assertion].
 */
 package entity

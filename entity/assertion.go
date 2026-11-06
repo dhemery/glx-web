@@ -12,22 +12,29 @@ type Assertion struct {
 	*glx.Assertion
 	id string
 
-	Confidence  ConfidenceLevel
-	Citations   CitationList
-	Media       MediaList
-	Participant *Participant
-	// The label for the embedded assertion's property. If the property
-	// names a field of the subject, Property is the name of the field in
-	// Title Case. If the property names a defined property of the subject,
-	// Property is the Label from the property's [glx.PropertyDefinition].
-	// Otherwise the Property is a copy of the embedded assertion's
-	// Property.
-	Property string
-	Sources  SourceList
-	Subject  Entity
+	// The Subject of the assertion, resolved to an Entity.
+	Subject Entity
 
-	// TODO(feature): Find a way to resolve entity and vocabulary
-	// references in Value.
+	// The label for the embedded assertion's property. Property is derived
+	// from the field name or property definition if applicable. Otherwise
+	// Property is a copy of the embedded assertion's Property.
+	Property string
+
+	// The value of the asserted property. When the embedded assertion's
+	// Value corresponds to an entity or vocabulary term, Value is resolved
+	// to the appropriate entity or VocabularyValue. Otherwise Value is
+	// represented as a StringValue. The is_entity and is_vocabulary_value
+	// template functions are helpful for determining how to interact with
+	// this Value.
+	Value Stringer
+
+	Participant *Participant
+
+	Citations CitationList
+	Media     MediaList
+	Sources   SourceList
+
+	Confidence ConfidenceLevel
 }
 
 // EntityType returns [glx.EntityTypeAssertions].
@@ -128,7 +135,9 @@ func (a *Assertion) compile(ctx *context) {
 	}
 
 	if s, ok := a.Subject.(subject); ok {
-		a.Property = s.addAssertion(a)
+		resolver := s.addAssertion(a)
+		a.Property = resolver.Label()
+		a.Value = resolver.Value(ctx.Catalog, a.Assertion.Value)
 	}
 
 	for _, c := range a.Citations {
@@ -145,7 +154,56 @@ func (a *Assertion) compile(ctx *context) {
 }
 
 type subject interface {
-	addAssertion(*Assertion) string
+	addAssertion(*Assertion) resolver
+}
+
+type resolver interface {
+	Label() string
+	Value(*Catalog, string) Stringer
+}
+
+type entityResolver struct {
+	label    string
+	typeName string
+}
+
+func (er entityResolver) Label() string {
+	return er.label
+}
+
+func (er entityResolver) Value(catalog *Catalog, id string) Stringer {
+	e := catalog.entity(id, er.typeName)
+	if e == nil {
+		return StringValue(id)
+	}
+	return e
+}
+
+type stringResolver string
+
+func (sr stringResolver) Label() string {
+	return string(sr)
+}
+
+func (sr stringResolver) Value(_ *Catalog, s string) Stringer {
+	return StringValue(s)
+}
+
+type vocabularyResolver struct {
+	label     string
+	vocabName string
+}
+
+func (vr vocabularyResolver) Label() string {
+	return vr.label
+}
+
+func (vr vocabularyResolver) Value(_ *Catalog, term string) Stringer {
+	value, err := newVocabularyValue(vr.vocabName, term)
+	if err != nil {
+		return StringValue(term)
+	}
+	return value
 }
 
 var (

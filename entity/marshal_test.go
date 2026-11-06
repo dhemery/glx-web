@@ -50,7 +50,7 @@ func marshalAssertion(out *jsontext.Encoder, in *entity.Assertion) error {
 	}{
 		Date:        in.Date,
 		Participant: in.Participant,
-		Property:    in.PropertyLabel,
+		Property:    in.Property,
 		Subject:     in.Subject,
 	}
 	return json.MarshalEncode(out, &v)
