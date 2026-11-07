@@ -11,9 +11,8 @@ import (
 
 // JSON marshal options to reduce the JSON representation of the catalog to
 // only the details we want to compare. The resulting JSON omits each entity's
-// back-references and inner GLX entity. It also omits details of GLX
-// vocabularies (e.g. Description) that are not useful for validating catalog
-// structure.
+// back-references and inner GLX entity. It writes each primitive value and
+// vocabulary value as a string that shows its type and value.
 var catalogMarshalOptions = json.JoinOptions(
 	json.OmitZeroStructFields(true),
 	json.WithMarshalers(
@@ -28,10 +27,36 @@ var catalogMarshalOptions = json.JoinOptions(
 			json.MarshalToFunc(marshalParticipant),
 			json.MarshalToFunc(marshalPropertyEntry),
 
+			// Vocabulary Values
+			json.MarshalToFunc(func(out *jsontext.Encoder, in entity.ConfidenceLevel) error {
+				return json.MarshalEncode(out, fmt.Sprintf("ConfidenceLevel{%q}", in.Value()))
+			}),
+			json.MarshalToFunc(func(out *jsontext.Encoder, in entity.EventType) error {
+				return json.MarshalEncode(out, fmt.Sprintf("EventType{%q}", in.Value()))
+			}),
+			json.MarshalToFunc(func(out *jsontext.Encoder, in entity.ParticipantRole) error {
+				return json.MarshalEncode(out, fmt.Sprintf("ParticipantRole{%q}", in.Value()))
+			}),
+			// GenderType
+			// InformationType
+			// LegalStatus
+			// MediaType
+			// PlaceType
+			// RelationshipType
+			// RepositoryType
+			// SexType
+			// SourceNature
+
 			// Primitive Values
-			json.MarshalToFunc(marshalBoolValue),
-			json.MarshalToFunc(marshalIntValue),
-			json.MarshalToFunc(marshalStringValue),
+			json.MarshalToFunc(func(out *jsontext.Encoder, in entity.BoolValue) error {
+				return json.MarshalEncode(out, fmt.Sprintf("BoolValue{%t}", in))
+			}),
+			json.MarshalToFunc(func(out *jsontext.Encoder, in entity.IntValue) error {
+				return json.MarshalEncode(out, fmt.Sprintf("IntValue{%d}", in))
+			}),
+			json.MarshalToFunc(func(out *jsontext.Encoder, in entity.StringValue) error {
+				return json.MarshalEncode(out, fmt.Sprintf("StringValue{%q}", in))
+			}),
 
 			// GLX types
 			json.MarshalToFunc(marshalFieldDefinition),
@@ -54,10 +79,6 @@ func marshalAssertion(out *jsontext.Encoder, in *entity.Assertion) error {
 		Subject:     in.Subject,
 	}
 	return json.MarshalEncode(out, &v)
-}
-
-func marshalBoolValue(out *jsontext.Encoder, in entity.BoolValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("BoolValue{%t}", in)))
 }
 
 func marshalCitation(out *jsontext.Encoder, in *entity.Citation) error {
@@ -101,13 +122,6 @@ func marshalFieldDefinition(out *jsontext.Encoder, in *glx.FieldDefinition) erro
 		ValueType: in.ValueType,
 	}
 	return json.MarshalEncode(out, &v)
-}
-
-// Marshal IntValue as a formatted string instead of a number. Using string
-// prevents json.Unmarshal from unmarshaling the value as float64. The special
-// format allows Diff to match the IntValue type as well as the value.
-func marshalIntValue(out *jsontext.Encoder, in entity.IntValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("IntValue{%d}", in)))
 }
 
 func marshalParticipant(out *jsontext.Encoder, in *entity.Participant) error {
@@ -180,10 +194,6 @@ func marshalPropertyEntry(out *jsontext.Encoder, in entity.PropertyEntry) error 
 	}
 	return json.MarshalEncode(out, &v)
 
-}
-
-func marshalStringValue(out *jsontext.Encoder, in entity.StringValue) error {
-	return out.WriteToken(jsontext.String(fmt.Sprintf("StringValue{%q}", in)))
 }
 
 func marshalVocabularyEntry(out *jsontext.Encoder, in *glx.VocabularyEntry) error {

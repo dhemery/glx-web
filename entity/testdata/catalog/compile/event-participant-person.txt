@@ -21,23 +21,14 @@ events\[event-with-error\].Participants\[0\]: discarding participant: person mus
 -- want-catalog.yaml --
 events:
     event-with-error:
-        type:
-            definition:
-                label: Birth
-            value: birth
+        type: EventType{"birth"}
         properties: {}
         participants: [] # Ill-formed participant discarded
     event-well-formed:
-        type:
-            definition:
-                label: Birth
-            value: birth
+        type: EventType{"birth"}
         properties: {}
         participants:
-        -   role:
-                definition:
-                    label: Subject
-                value: subject
+        -   role: ParticipantRole{"subject"}
             person: existing-person
 persons:
     existing-person:

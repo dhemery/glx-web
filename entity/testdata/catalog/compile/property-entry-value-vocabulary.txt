@@ -27,7 +27,4 @@ persons:
                     label: Sex
                     vocabulary_type: sex_types
                 entries:
-                -   value:
-                        value: unknown
-                        definition:
-                            label: Unknown
+                -   value: unknown

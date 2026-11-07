@@ -24,17 +24,11 @@ places\[place-with-error\].Properties.population: property discarded: no entries
 places:
     place-with-error:
         name: Place With Error
-        type:
-            definition:
-                label: County
-            value: county
+        type: county
         properties: {}
     place-well-formed:
         name: Place Well Formed
-        type:
-            definition:
-                label: County
-            value: county
+        type: county
         properties:
             population:
                 definition:
