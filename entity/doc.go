@@ -1,8 +1,7 @@
 /*
 Package entity
 supplements a GLX archive and its entities
-with features that make them
-more convenient to render via templates.
+with convenient features that templates can use to render web pages.
 
 The top-level item of this package
 is the [Catalog] of all entities
@@ -97,15 +96,19 @@ The String method for each type returns the value's label.
 
 # Entity and Participant Lists
 
-Each entity type has an associated list type.
-Each list type
-has an EntityType method that
-returns the [glx.EntityType] of its entities.
+Each entity type has an associated list type
+that impelements [EntityList].
+There is also a [ParticipantList] type
+that implements [List].
 
-There is also a [ParticipantList] type.
+All of the lists implement methods
+for common set operations
+like intersection, union, difference.
+See the [List] and [EntityList] interfaces
+for the methods available on all of these lists.
 
-Some list types
-have methods to sort, filter, group, and map the elements
+Some list types have specialized methods
+to sort, filter, group, and map the elements
 in ways often useful for templates.
 For example, [PersonList.GroupBySurname]
 groups persons by surname.

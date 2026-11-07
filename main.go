@@ -6,18 +6,14 @@ It applies user-specified templates to render files:
   - for the list of all entities of each type,
   - and for the website as a whole.
 
-See [entity.Catalog]
-and the entity package documentation
-for details of how glx-web
+Package [entity]
 supplements a GLX archive and its entities
-with features that make them
-more convenient to render via templates.
+with convenient features that templates can use to render web pages.
 
-See [tmpl.Config]
-and the tmpl package documentation
-for details of how to specify templates
-and use the data and functions
-that glx-web makes available to templates.
+Package [tmpl] package
+defines how templates are configured
+and provides additional data and functions
+to templates.
 
 The glx-web project
 is a work in progress.

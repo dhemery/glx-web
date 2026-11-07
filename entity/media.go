@@ -1,9 +1,6 @@
 package entity
 
 import (
-	"iter"
-	"slices"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -39,21 +36,6 @@ func (m *Media) ID() string {
 // String returns the media's Title.
 func (m *Media) String() string {
 	return m.Title
-}
-
-type MediaList []*Media
-
-func (l MediaList) All() iter.Seq[*Media] {
-	return slices.Values(l)
-}
-
-func (l MediaList) EntityType() glx.EntityType {
-	return glx.EntityTypeMedia
-}
-
-// Sort returns the media sorted by String value.
-func (l MediaList) Sort() MediaList {
-	return sortedByString(l)
 }
 
 func newMedia(id string, inner *glx.Media) *Media {

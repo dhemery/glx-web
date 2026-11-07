@@ -1,7 +1,8 @@
 /*
 Package tmpl
-defines the templates, data, and functions
-that glx-web uses to render files.
+defines how templates are configured
+and provides additional data and functions
+to templates.
 
 The glx-web command
 applies user-specified templates to render files.
@@ -32,7 +33,9 @@ The [Config.Templates] field defines four kinds of templates:
 
   - Type templates,
     declared in [TypeSpec.Type].
-    Each type template is applied to a list of entities.
+    Each type template
+    is applied to an implementation of [entity.EntityList]
+    specialized for the type of entity it contains.
     Each list type has an EntityType method
     that returns the [glx.EntityType]
     of the entities in the list.

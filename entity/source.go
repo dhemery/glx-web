@@ -1,9 +1,6 @@
 package entity
 
 import (
-	"iter"
-	"slices"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -39,21 +36,6 @@ func (s *Source) ID() string {
 // String returns the source's Title.
 func (s *Source) String() string {
 	return s.Title
-}
-
-type SourceList []*Source
-
-func (l SourceList) All() iter.Seq[*Source] {
-	return slices.Values(l)
-}
-
-func (l SourceList) EntityType() glx.EntityType {
-	return glx.EntityTypeSources
-}
-
-// Sort returns the sources sorted by String value.
-func (l SourceList) Sort() SourceList {
-	return sortedByString(l)
 }
 
 func newSource(id string, inner *glx.Source) *Source {

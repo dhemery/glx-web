@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"iter"
-	"slices"
 	"strings"
 
 	"github.com/genealogix/glx/go-glx"
@@ -46,21 +44,6 @@ func (c *Citation) String() string {
 	}
 
 	return strings.Join(parts, ", ")
-}
-
-type CitationList []*Citation
-
-func (l CitationList) All() iter.Seq[*Citation] {
-	return slices.Values(l)
-}
-
-func (l CitationList) EntityType() glx.EntityType {
-	return glx.EntityTypeCitations
-}
-
-// Sort returns the citations sorted by String value.
-func (l CitationList) Sort() CitationList {
-	return sortedByString(l)
 }
 
 func newCitation(id string, inner *glx.Citation) *Citation {

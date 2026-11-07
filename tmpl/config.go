@@ -30,15 +30,14 @@ type SiteSpec struct {
 // TypeSpec specifies templates for an entity type and for entities of that
 // type.
 type TypeSpec struct {
-	// Each Type template is applied to the list of all entities of the
-	// type. Each entity list has a distinct type with methods relevant to
-	// the type of entity. For example, the list for
-	// [glx.EntityTypePersons] is [entity.PersonList], which has a
-	// GroupBySurname method. Each list type has an EntityType method that
-	// returns the [glx.EntityType] of its elements. Some lists have
-	// methods to sort, filter, group, or map the elements in ways useful
-	// to templates. The map key is used as the path for the rendered file
-	// relative to the output directory.
+	// Each Type template is applied to an implementation of
+	// entity.EntityList specialized for the type of entity it contains.
+	// For example, the list for glx.EntityTypePersons is
+	// entity.PersonList, which has a GroupBySurname method. Each entity
+	// list has an EntityType method that returns the glx.EntityType of
+	// its elements. Some lists have methods to sort, filter, group, or map
+	// the elements in ways useful to templates. The map key is used as the
+	// path for the rendered file relative to the output directory.
 	Type map[string]Spec `json:"type"`
 	// Each Entity template is applied to each entity of the type. Each
 	// occurrence of "<id>" in the map key is replaced by the entity's ID,

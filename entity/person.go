@@ -1,9 +1,6 @@
 package entity
 
 import (
-	"iter"
-	"slices"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -40,32 +37,6 @@ func (p *Person) ID() string {
 // String returns the person's DisplayName.
 func (p *Person) String() string {
 	return p.DisplayName()
-}
-
-type PersonList []*Person
-
-func (l PersonList) All() iter.Seq[*Person] {
-	return slices.Values(l)
-}
-
-func (l PersonList) EntityType() glx.EntityType {
-	return glx.EntityTypePersons
-}
-
-// Intersection returns the persons in l that appear in persons.
-func (l PersonList) Intersection(persons PersonList) PersonList {
-	var intersection PersonList
-	for _, p := range l {
-		if slices.Contains(persons, p) {
-			intersection = append(intersection, p)
-		}
-	}
-	return intersection
-}
-
-// Sort returns the persons sorted by String value.
-func (l PersonList) Sort() PersonList {
-	return sortedByString(l)
 }
 
 func extractSurname(props map[string]*Property) string {

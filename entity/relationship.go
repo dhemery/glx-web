@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"iter"
 	"slices"
 	"strings"
 
@@ -61,27 +60,12 @@ func (r *Relationship) String() string {
 	}
 }
 
-type RelationshipList []*Relationship
-
-func (l RelationshipList) All() iter.Seq[*Relationship] {
-	return slices.Values(l)
-}
-
-func (l RelationshipList) EntityType() glx.EntityType {
-	return glx.EntityTypeRelationships
-}
-
 func (l RelationshipList) Participants() ParticipantList {
 	var participants ParticipantList
 	for _, r := range l {
 		participants = slices.Concat(participants, r.Participants)
 	}
 	return participants
-}
-
-// Sort returns the relationships sorted by String value.
-func (l RelationshipList) Sort() RelationshipList {
-	return sortedByString(l)
 }
 
 // WithTypes returns the relationships in l whose Type is present in types.
