@@ -10,8 +10,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
-	"github.com/dhemery/glx-web/tmpl"
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -24,7 +24,7 @@ type templateSet interface {
 // state captures the global state available to each template via dot or
 // functions.
 type state interface {
-	Site() tmpl.Site
+	Site() context.Site
 	PrepareExecute()
 }
 

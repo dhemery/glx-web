@@ -26,13 +26,6 @@ func (p Property) Entry() *PropertyEntry {
 	return p.Entries[0]
 }
 
-// IsProperty reports whether v is a [*Property]. Templates can call this
-// function via the "is_property" template function.
-func IsProperty(v any) bool {
-	_, ok := v.(*Property)
-	return ok
-}
-
 // PropertyEntry holds a single entry of a property of an entity. Each
 // PropertyEntry has a date and fields even if the property's definition does
 // not specify them.

@@ -17,13 +17,6 @@ type Entity interface {
 	ID() string
 }
 
-// IsEntity reports whether v satisfies [Entity]. Templates can call this
-// function via the "is_entity" template function.
-func IsEntity(v any) bool {
-	_, ok := v.(Entity)
-	return ok
-}
-
 // Catalog is a collection of entities compiled from a GLX archive.
 type Catalog struct {
 	AssertionsByID    map[string]*Assertion    `json:"assertions,omitempty"`

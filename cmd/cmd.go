@@ -4,13 +4,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"os"
 
+	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
 	"github.com/dhemery/glx-web/internal/load"
 	"github.com/dhemery/glx-web/internal/render"
-	"github.com/dhemery/glx-web/tmpl"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/spf13/cobra"
 )
@@ -50,23 +49,6 @@ func init() {
 		"the template `dir`")
 }
 
-type state struct {
-	site  tmpl.Site
-	store tmpl.Store
-}
-
-func (s *state) Site() tmpl.Site {
-	return s.site
-}
-
-func (s *state) Store() tmpl.Store {
-	return s.store
-}
-
-func (s *state) PrepareExecute() {
-	s.store = make(tmpl.Store)
-}
-
 func run(_ *cobra.Command, _ []string) error {
 	g, err := load.GLX(os.DirFS(archiveDir))
 	if err != nil {
@@ -88,16 +70,7 @@ func run(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("loading configuration: %w", err)
 	}
 
-	site := tmpl.Site{Data: cfg.Data, Store: make(tmpl.Store)}
-	state := &state{site: site}
-
-	funcs := template.FuncMap{
-		"is_entity":           entity.IsEntity,
-		"is_property":         entity.IsProperty,
-		"is_vocabulary_value": entity.IsVocabularyValue,
-		"site":                state.Site,
-		"store":               state.Store,
-	}
+	state, funcs := context.Create(cfg.Data)
 
 	tmpls, err := load.Templates(templateDir, cfg.Templates, funcs)
 	if err != nil {

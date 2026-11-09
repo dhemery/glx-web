@@ -27,13 +27,6 @@ type VocabularyValue interface {
 	VocabularyEntry() *glx.VocabularyEntry
 }
 
-// IsVocabularyValue reports whether v is a [VocabularyValue]. Templates can call
-// this function via the "is_vocabulary_value" template function.
-func IsVocabularyValue(v any) bool {
-	_, ok := v.(VocabularyValue)
-	return ok
-}
-
 // A ConfidenceLevel is a value from the [glx.VocabConfidenceLevels] GLX vocabulary.
 // ConfidenceLevel implements [VocabularyValue].
 type ConfidenceLevel string
