@@ -52,17 +52,6 @@ func (l PersonList) EntityType() glx.EntityType {
 	return glx.EntityTypePersons
 }
 
-// Intersection returns the persons in l that appear in persons.
-func (l PersonList) Intersection(persons PersonList) PersonList {
-	var intersection PersonList
-	for _, p := range l {
-		if slices.Contains(persons, p) {
-			intersection = append(intersection, p)
-		}
-	}
-	return intersection
-}
-
 // Sort returns the persons sorted by String value.
 func (l PersonList) Sort() PersonList {
 	return sortedByString(l)
