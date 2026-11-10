@@ -4,7 +4,6 @@ package render
 import (
 	"errors"
 	"fmt"
-	"iter"
 	"os"
 	"path/filepath"
 	"strings"
@@ -77,21 +76,12 @@ func (r *Renderer) Render(catalog *entity.Catalog) error {
 	return r.Err
 }
 
-type ider interface {
-	ID() string
-}
-
-type entityList[T ider] interface {
-	All() iter.Seq[T]
-	EntityType() glx.EntityType
-}
-
-func (r *Renderer) renderEntities[S entityList[E], E ider](entities S) {
-	if r.Err != nil {
+func (r *Renderer) renderEntities[S ~[]E, E entity.Entity](entities S) {
+	if r.Err != nil || len(entities) == 0 {
 		return
 	}
 
-	entityType := entities.EntityType()
+	entityType := entities[0].EntityType()
 
 	for name, t := range r.Templates.ForType(entityType) {
 		fname := filepath.Join(r.OutputDir, name)
@@ -103,7 +93,7 @@ func (r *Renderer) renderEntities[S entityList[E], E ider](entities S) {
 	}
 
 	entityTemplates := r.Templates.ForEntity(entityType)
-	for entity := range entities.All() {
+	for _, entity := range entities {
 		id := entity.ID()
 		for name, t := range entityTemplates {
 			fname := filepath.Join(r.OutputDir, strings.ReplaceAll(name, "<id>", id))

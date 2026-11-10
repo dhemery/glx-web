@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"iter"
 	"slices"
 	"strings"
 
@@ -62,10 +61,6 @@ func (r *Relationship) String() string {
 }
 
 type RelationshipList []*Relationship
-
-func (l RelationshipList) All() iter.Seq[*Relationship] {
-	return slices.Values(l)
-}
 
 func (l RelationshipList) EntityType() glx.EntityType {
 	return glx.EntityTypeRelationships

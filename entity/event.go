@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"iter"
 	"slices"
 
 	"github.com/genealogix/glx/go-glx"
@@ -43,10 +42,6 @@ func (e *Event) String() string {
 }
 
 type EventList []*Event
-
-func (l EventList) All() iter.Seq[*Event] {
-	return slices.Values(l)
-}
 
 func (l EventList) ByDate() EventList {
 	return slices.SortedStableFunc(slices.Values(l), cmpEventDate)

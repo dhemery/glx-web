@@ -1,9 +1,6 @@
 package entity
 
 import (
-	"iter"
-	"slices"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -43,10 +40,6 @@ func (p *Person) String() string {
 }
 
 type PersonList []*Person
-
-func (l PersonList) All() iter.Seq[*Person] {
-	return slices.Values(l)
-}
 
 func (l PersonList) EntityType() glx.EntityType {
 	return glx.EntityTypePersons

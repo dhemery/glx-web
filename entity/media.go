@@ -1,9 +1,6 @@
 package entity
 
 import (
-	"iter"
-	"slices"
-
 	"github.com/genealogix/glx/go-glx"
 )
 
@@ -42,10 +39,6 @@ func (m *Media) String() string {
 }
 
 type MediaList []*Media
-
-func (l MediaList) All() iter.Seq[*Media] {
-	return slices.Values(l)
-}
 
 func (l MediaList) EntityType() glx.EntityType {
 	return glx.EntityTypeMedia
