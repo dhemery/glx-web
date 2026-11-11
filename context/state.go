@@ -2,6 +2,7 @@ package context
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"text/template"
 )
@@ -42,9 +43,9 @@ func (s Store) Delete(key string) string {
 }
 
 type state struct {
-	site    Site
-	stores  []Store
-	formats map[string]*template.Template
+	site     Site
+	stores   []Store
+	partials map[string]*template.Template
 }
 
 func (s *state) Site() Site {
@@ -63,26 +64,39 @@ func (s *state) Pop() {
 	s.stores = s.stores[:len(s.stores)-1]
 }
 
-func (s *state) SetFormats(formats map[string]*template.Template) {
-	s.formats = formats
+func (s *state) SetPartials(partials map[string]*template.Template) {
+	s.partials = partials
+}
+
+func (s *state) eval(name string, data any) (Store, error) {
+	result, err := s.executePartial(name, data, io.Discard)
+	if err != nil {
+		return nil, fmt.Errorf("eval: %w", err)
+	}
+	return result, nil
 }
 
 func (s *state) format(name string, data any) (string, error) {
 	var sb strings.Builder
+	if _, err := s.executePartial(name, data, &sb); err != nil {
+		return "", fmt.Errorf("format: %w", err)
+	}
+	return sb.String(), nil
+}
 
-	format, ok := s.formats[name]
+func (s *state) executePartial(name string, data any, w io.Writer) (Store, error) {
+	format, ok := s.partials[name]
 	if !ok {
-		return "", fmt.Errorf("no such format template: %q", name)
+		return nil, fmt.Errorf("no such partial template: %q", name)
 	}
 
 	s.Push()
 	defer s.Pop()
 
-	if err := format.Execute(&sb, data); err != nil {
-		return "", err
+	if err := format.Execute(w, data); err != nil {
+		return nil, err
 	}
-
-	return sb.String(), nil
+	return s.stores[len(s.stores)-1], nil
 }
 
 // Create creates the state and functions used by the rendering engine.

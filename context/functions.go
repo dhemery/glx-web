@@ -28,6 +28,7 @@ func newFuncMap(state *state) map[string]any {
 
 		// Format functions
 		"format": state.format,
+		"eval":   state.eval,
 	}
 
 	sh := sprout.New()

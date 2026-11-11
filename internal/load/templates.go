@@ -14,7 +14,7 @@ type templateSet struct {
 	site       map[string]*template.Template
 	entityType map[glx.EntityType]map[string]*template.Template
 	entity     map[glx.EntityType]map[string]*template.Template
-	format     map[string]*template.Template
+	partial    map[string]*template.Template
 }
 
 func (s templateSet) ForSite() map[string]*template.Template {
@@ -29,8 +29,8 @@ func (s templateSet) ForEntity(e glx.EntityType) map[string]*template.Template {
 	return s.entity[e]
 }
 
-func (s templateSet) ForFormat() map[string]*template.Template {
-	return s.format
+func (s templateSet) ForPartials() map[string]*template.Template {
+	return s.partial
 }
 
 func Templates(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) (templateSet, error) {
@@ -54,7 +54,7 @@ func Templates(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) 
 		templates.entity[et] = c.compileTemplates("entity", typeSpec.Entity)
 	}
 
-	templates.format = c.compileTemplates("format", specs.Format)
+	templates.partial = c.compileTemplates("format", specs.Partials)
 
 	return templates, c.err
 }

@@ -18,31 +18,40 @@ These functions supply data from the context to the template.
 	    to compile data to share across all templates.
 
 	store
-	    Returns a Store that persists for the life of the currently
-	    executing template. You can use this Store to compile data for use
-	    anywhere in the template, including in associated templates.
+	    Returns a Store that persists for the life of the template
+	    rendering the current file. You can use this Store to compile data
+	    for use anywhere in the template, including in associated
+	    templates.
 
-# Format Functions
+# Partial Execution Functions
 
-These functions apply your custom formats, defined in the config.yaml file.
+Each of these functions
+executes a named partial template to compute a result.
+Partial templates are specified in the config.yaml file.
 
-	format
-	    Returns the string produced by formatting arg2 via the format
-	    template named by arg1. The format template gets its own
-	    context, including its own store.
+Each call establishes a new context for the partial template,
+including a store that persists for the life of the partial.
+
+	eval <name> <value>
+	    Applies the named partial template to the value and returns the
+	    resulting store. The output written by the template is discarded.
+
+	format <name> <value>
+	    Applies the named partial template to the value and returns the
+	    output written by the template. The partial's store is discarded.
 
 # Type Test Functions
 
 These functions report about the types of their arguments.
 
-	is_entity
-	    Reports whether its argument satisfies entity.Entity.
+	is_entity <value>
+	    Reports whether the value satisfies entity.Entity.
 
-	is_property
-	    Reports whether its argument's type is *entity.Property.
+	is_property <value>
+	    Reports whether the value's type is *entity.Property.
 
-	is_vocabulary_value
-	    Reports whether its argument satisfies entity.VocabularyValue.
+	is_vocabulary_value <value>
+	    Reports whether the value satisfies entity.VocabularyValue.
 
 # Set-Like Functions
 
@@ -57,24 +66,24 @@ with two differences:
 
 See the descriptions for details.
 
-	difference
-	    Returns a new slice of the elements of arg1 that are not present in
-	    arg2. Both arguments must be a slices. Any element duplicated in
-	    arg1 is duplicated in the result if it is not present in arg2. The
-	    result preserves the order of elements in arg1.
+	difference <list1> <list2>
+	    Returns a new slice of the elements of list1 that are not present
+	    in list2. Both arguments must be a slices. Any element duplicated
+	    in list1 is duplicated in the result if it is not present in list2.
+	    The result preserves the order of elements in list1.
 
 
-	intersection
-	    Returns a new slice of the elements that are present in both arg1
-	    and arg2. Both arguments must be a slices. Any element duplicated
-	    in arg1 is duplicated in the result if it is present in arg2. The
-	    result preserves the order of elements in arg1.
+	intersection <list1> <list2>
+	    Returns a new slice of the elements that are present in both list1
+	    and list2. Both arguments must be a slices. Any element duplicated
+	    in list1 is duplicated in the result if it is present in list2. The
+	    result preserves the order of elements in list1.
 
-	union
-	    Returns a new slice of the elements that appear in arg1, arg2, or
+	union <list1> <list2>
+	    Returns a new slice of the elements that appear in list1, list2, or
 	    both. Both arguments must be a slices. Each element is present only
 	    once in the result. The result preserves the order of each
-	    element's first occurrence in the concatenation of arg1 and arg2.
+	    element's first occurrence in the concatenation of list1 and list2.
 
 [All]: https://docs.atom.codes/sprout/groups/all
 [Sprout]: https://docs.atom.codes/sprout

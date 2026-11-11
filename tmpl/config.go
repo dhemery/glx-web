@@ -87,9 +87,11 @@ type SiteSpec struct {
 	Site map[string]Spec `json:"site"`
 	// Templates for each entity type.
 	Types map[glx.EntityType]TypeSpec `json:"types"`
-	// Each Format template is applied by the format function to format a
-	// value as a string. The map key is used as the name of the format.
-	Format map[string]Spec `json:"format"`
+	// Each Partial template can be executed by the format and eval
+	// functions to return a string or other result. See the descriptions
+	// of those functions for details. The map key is used as the name of
+	// the partial.
+	Partials map[string]Spec `json:"partials"`
 }
 
 // TypeSpec specifies templates for an entity type and for entities of that
