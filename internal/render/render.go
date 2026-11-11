@@ -24,7 +24,8 @@ type templateSet interface {
 // functions.
 type state interface {
 	Site() context.Site
-	PrepareExecute()
+	Push()
+	Pop()
 }
 
 type Renderer struct {
@@ -117,7 +118,8 @@ func (r *Renderer) executeTemplate(fname string, dot any, tmpl *template.Templat
 	}
 	defer f.Close()
 
-	r.State.PrepareExecute()
+	r.State.Push()
+	defer r.State.Pop()
 
 	return tmpl.Execute(f, dot)
 }

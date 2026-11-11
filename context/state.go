@@ -1,6 +1,8 @@
 package context
 
 import (
+	"fmt"
+	"strings"
 	"text/template"
 )
 
@@ -40,8 +42,9 @@ func (s Store) Delete(key string) string {
 }
 
 type state struct {
-	site  Site
-	store Store
+	site    Site
+	stores  []Store
+	formats map[string]*template.Template
 }
 
 func (s *state) Site() Site {
@@ -49,15 +52,41 @@ func (s *state) Site() Site {
 }
 
 func (s *state) Store() Store {
-	return s.store
+	return s.stores[len(s.stores)-1]
 }
 
-func (s *state) PrepareExecute() {
-	s.store = make(Store)
+func (s *state) Push() {
+	s.stores = append(s.stores, make(Store))
+}
+
+func (s *state) Pop() {
+	s.stores = s.stores[:len(s.stores)-1]
+}
+
+func (s *state) SetFormats(formats map[string]*template.Template) {
+	s.formats = formats
+}
+
+func (s *state) format(name string, data any) (string, error) {
+	var sb strings.Builder
+
+	format, ok := s.formats[name]
+	if !ok {
+		return "", fmt.Errorf("no such format template: %q", name)
+	}
+
+	s.Push()
+	defer s.Pop()
+
+	if err := format.Execute(&sb, data); err != nil {
+		return "", err
+	}
+
+	return sb.String(), nil
 }
 
 // Create creates the state and functions used by the rendering engine.
-func Create(data any) (*state, template.FuncMap) {
+func Create(data any) (*state, map[string]any) {
 	site := Site{Data: data, Store: make(Store)}
 	state := &state{site: site}
 	return state, newFuncMap(state)

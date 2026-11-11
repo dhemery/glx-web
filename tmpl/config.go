@@ -61,7 +61,7 @@ making it available to all templates.
 package tmpl
 
 import (
-	context "github.com/dhemery/glx-web/context"
+	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
@@ -76,6 +76,7 @@ type Config struct {
 }
 
 // SiteSpec specifies the templates for the site and for each entity type.
+// Each template can use the functions defined by package [context].
 type SiteSpec struct {
 	// Each Base template defines a base that other templates can build on.
 	// The map key is used as the name of the base. Base templates can
@@ -86,6 +87,9 @@ type SiteSpec struct {
 	Site map[string]Spec `json:"site"`
 	// Templates for each entity type.
 	Types map[glx.EntityType]TypeSpec `json:"types"`
+	// Each Format template is applied by the format function to format a
+	// value as a string. The map key is used as the name of the format.
+	Format map[string]Spec `json:"format"`
 }
 
 // TypeSpec specifies templates for an entity type and for entities of that

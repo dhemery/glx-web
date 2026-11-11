@@ -7,7 +7,7 @@ Most are provided by the [Sprout] library.
 Templates can access all of the functions
 in Sprout's [All] registry group.
 
-# Data Functions
+# Context Functions
 
 These functions supply data from the context to the template.
 
@@ -21,6 +21,15 @@ These functions supply data from the context to the template.
 	    Returns a Store that persists for the life of the currently
 	    executing template. You can use this Store to compile data for use
 	    anywhere in the template, including in associated templates.
+
+# Format Functions
+
+These functions apply your custom formats, defined in the config.yaml file.
+
+	format
+	    Returns the string produced by formatting arg2 via the format
+	    template named by arg1. The format template gets its own
+	    context, including its own store.
 
 # Type Test Functions
 

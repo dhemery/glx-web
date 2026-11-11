@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"maps"
 	"reflect"
-	"text/template"
 
 	"github.com/dhemery/glx-web/entity"
 	"github.com/go-sprout/sprout"
 	"github.com/go-sprout/sprout/group/all"
 )
 
-func newFuncMap(state *state) template.FuncMap {
-	funcs := template.FuncMap{
+func newFuncMap(state *state) map[string]any {
+	funcs := map[string]any{
 		// Data functions
 		"site":  state.Site,
 		"store": state.Store,
@@ -26,6 +25,9 @@ func newFuncMap(state *state) template.FuncMap {
 		"difference":   difference,
 		"intersection": intersection,
 		"union":        union,
+
+		// Format functions
+		"format": state.format,
 	}
 
 	sh := sprout.New()

@@ -77,6 +77,8 @@ func run(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("loading templates: %w", err)
 	}
 
+	state.SetFormats(tmpls.ForFormat())
+
 	renderer := &render.Renderer{
 		Clean:     clean,
 		OutputDir: outputDir,
