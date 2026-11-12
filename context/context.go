@@ -75,39 +75,6 @@ func (c *ctx) InstallPartials(partials map[string]*template.Template) {
 	c.partials = partials
 }
 
-var errEmptyResultStack = errors.New("no active partial")
-
-// resultStack is the stack of results set by the currently executing partials.
-type resultStack []*any
-
-// push pushes a new unset result onto the stack.
-func (s *resultStack) push() {
-	*s = append(*s, nil)
-}
-
-// set sets the result at the top of the stack to the given result.
-func (s *resultStack) set(result any) (any, error) {
-	top := len(*s) - 1
-	if top < 0 {
-		return nil, errEmptyResultStack
-	}
-
-	(*s)[top] = &result
-
-	return result, nil
-}
-
-// pop removes the top result from the stack.
-func (s *resultStack) pop() error {
-	top := len(*s) - 1
-	if top < 0 {
-		return errEmptyResultStack
-	}
-
-	*s = (*s)[:top]
-	return nil
-}
-
 func (c *ctx) eval(name string, data any) (any, error) {
 	tmpl, ok := c.partials[name]
 	if !ok {
@@ -122,13 +89,45 @@ func (c *ctx) eval(name string, data any) (any, error) {
 		return nil, err
 	}
 
-	result := c.results[len(c.results)-1]
+	result := c.results.top()
 
-	// If the partial called return, return that result.
+	// If the partial set a result, return the result.
 	if result != nil {
 		return *result, nil
 	}
 
-	// The partial did not call return. Return its output.
+	// The partial did not set a result. Return its output.
 	return output.String(), nil
+}
+
+var errEmptyResultStack = errors.New("no active partial")
+
+// resultStack is the stack of results set by the currently executing partials.
+type resultStack []*any
+
+// push pushes a new unset result onto the stack.
+func (s *resultStack) push() {
+	*s = append(*s, nil)
+}
+
+// set sets the result at the top of the stack.
+func (s *resultStack) set(result any) (any, error) {
+	top := len(*s) - 1
+	if top < 0 {
+		return nil, errEmptyResultStack
+	}
+
+	(*s)[top] = &result
+
+	return result, nil
+}
+
+// top returns the top result from the stack.
+func (s *resultStack) top() *any {
+	return (*s)[len(*s)-1]
+}
+
+// pop removes the top result from the stack.
+func (s *resultStack) pop() {
+	*s = (*s)[:len(*s)-1]
 }
