@@ -1,6 +1,5 @@
 /*
-Package tmpl
-defines the templates, data, and functions
+Package tmpl assembles the templates
 that glx-web uses to render files.
 
 The glx-web command
@@ -23,7 +22,8 @@ The [Config.Templates] field defines five kinds of templates:
 
   - Site templates,
     declared in [SiteSpec.Site].
-    Each site template is applied to a [Site].
+    Each site template is applied
+    to the custom data supplied by the config file.
     You can render the site information to multiple files
     by specifying multiple site templates.
     The map key for the template
@@ -53,44 +53,18 @@ The [Config.Templates] field defines five kinds of templates:
     relative to the output directory.
 
   - Partial templates.
-    A partial template computes one or more values
-    instead of rendering to a file.
+    A partial template
+    is a template that computes a result
+    instead of writing to a file.
     To execute a partial template,
-    call the eval or format function.
+    call the eval function.
 
 # Custom Data
 
 Use the [Config.Data] field
 to supply custom data about the site.
-This data is copied to [Site.Data],
-making it available to all templates.
-
-# Functions
-
-The glx-web command defines several functions
-that all templates can use:
-
-	is_entity
-	    Reports whether its argument satisfies entity.Entity.
-
-	is_property
-	    Reports whether its argument's type is entity.Property.
-
-	is_vocabulary_value
-	    Reports whether its argument's type satisfies entity.VocabularyValue.
-
-	site
-	    Returns the Site, which includes the custom data supplied by the
-	    configuration file and a global key/value Store that persists
-	    across the execution of all templates. You can use this site Store
-	    to compile data to share across all templates.
-
-	store
-	    Returns a Store that persists for the life of the currently
-	    executing template. You can use this Store to compile data for use
-	    later in the template.
-
-See [Site] and [Store] for descriptions of the values returned by the
-site and store functions.
+The data is available to all templates
+via the context function.
+See [context.Context.Data].
 */
 package tmpl

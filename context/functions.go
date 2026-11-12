@@ -10,11 +10,14 @@ import (
 	"github.com/go-sprout/sprout/group/all"
 )
 
-func newFuncMap(state *state) map[string]any {
+func newFuncMap(c *ctx) map[string]any {
 	funcs := map[string]any{
-		// Data functions
-		"site":  state.Site,
-		"store": state.Store,
+		// Context functions
+		"context": func() Context { return c },
+
+		// Partial functions
+		"eval":   c.eval,
+		"return": c.results.set,
 
 		// Type test functions
 		"is_entity":           isEntity,
@@ -25,10 +28,6 @@ func newFuncMap(state *state) map[string]any {
 		"difference":   difference,
 		"intersection": intersection,
 		"union":        union,
-
-		// Format functions
-		"format": state.format,
-		"eval":   state.eval,
 	}
 
 	sh := sprout.New()

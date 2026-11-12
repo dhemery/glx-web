@@ -44,10 +44,10 @@ import (
 )
 
 // Imports to support doc comments.
+var _ context.Context
 var _ entity.Catalog
-var _ tmpl.Config
-var _ = context.Create
 var _ glx.ResearchLog
+var _ tmpl.Config
 
 func main() {
 	cmd.Execute()

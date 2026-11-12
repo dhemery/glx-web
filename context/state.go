@@ -1,107 +1,124 @@
 package context
 
 import (
+	"errors"
 	"fmt"
-	"io"
 	"strings"
 	"text/template"
 )
 
-// Site is the data passed to each Site template. It is also available to all
-// templates via the site function.
-type Site struct {
-	// The data parsed from the configuration file's data field.
-	Data any
-	// A key/value store scoped to the site. The store is maintained
-	// throughout the rendering of the site. You can use this store to
-	// compile data to share across all templates.
-	Store Store
+// Context holds information about the current state of rendering.
+// Templates can access the Context via the context function.
+type Context interface {
+	// Data returns the usr-supplied custom data from the config file.
+	Data() any
+
+	// Globals returns a map that templates can use to share information
+	// globally. Globals is initially empty. Its state persists from one
+	// template to the next.
+	Globals() map[string]any
+
+	// Locals returns a map that templates can use to share information
+	// while rendering a single file. Each Site, Type, and Entity template
+	// starts with a new, empty Locals.
+	Locals() map[string]any
 }
 
-// Store is a key-value store.
-type Store map[string]any
+var _ Context = &ctx{}
 
-// Set associates key with value.
-// It returns an empty string so that it produces no output
-// when called without assigning its return value.
-func (s Store) Set(key string, value any) string {
-	s[key] = value
-	return ""
-}
-
-// Get returns the value associated with key.
-func (s Store) Get(key string) any {
-	return s[key]
-}
-
-// Delete deletes key and its associated value from s.
-// It returns an empty string so that it produces no output
-// when called without assigning its return value.
-func (s Store) Delete(key string) string {
-	delete(s, key)
-	return ""
-}
-
-type state struct {
-	site     Site
-	stores   []Store
-	partials map[string]*template.Template
-}
-
-func (s *state) Site() Site {
-	return s.site
-}
-
-func (s *state) Store() Store {
-	return s.stores[len(s.stores)-1]
-}
-
-func (s *state) Push() {
-	s.stores = append(s.stores, make(Store))
-}
-
-func (s *state) Pop() {
-	s.stores = s.stores[:len(s.stores)-1]
-}
-
-func (s *state) SetPartials(partials map[string]*template.Template) {
-	s.partials = partials
-}
-
-func (s *state) eval(name string, data any) (Store, error) {
-	result, err := s.executePartial(name, data, io.Discard)
-	if err != nil {
-		return nil, fmt.Errorf("eval: %w", err)
+// New creates a new execution context with the given data.
+// The result implements [Context].
+func New(data any) (*ctx, template.FuncMap) {
+	c := &ctx{
+		data:    data,
+		globals: make(map[string]any),
 	}
+	return c, newFuncMap(c)
+}
+
+type ctx struct {
+	data    any
+	globals map[string]any
+	locals  map[string]any
+
+	partials map[string]*template.Template
+	results  resultStack
+}
+
+func (c *ctx) Data() any {
+	return c.data
+}
+
+func (c *ctx) Globals() map[string]any {
+	return c.globals
+}
+
+func (c *ctx) Locals() map[string]any {
+	return c.locals
+}
+
+func (c *ctx) StartPage() {
+	c.locals = make(map[string]any)
+}
+
+func (c *ctx) InstallPartials(partials map[string]*template.Template) {
+	c.partials = partials
+}
+
+var errEmptyResultStack = errors.New("no active partial")
+
+// resultStack is the stack of results set by the currently executing partials.
+type resultStack []*any
+
+// push pushes a new unset result onto the stack.
+func (s *resultStack) push() {
+	*s = append(*s, nil)
+}
+
+// set sets the result at the top of the stack to the given result.
+func (s *resultStack) set(result any) (any, error) {
+	top := len(*s) - 1
+	if top < 0 {
+		return nil, errEmptyResultStack
+	}
+
+	(*s)[top] = &result
+
 	return result, nil
 }
 
-func (s *state) format(name string, data any) (string, error) {
-	var sb strings.Builder
-	if _, err := s.executePartial(name, data, &sb); err != nil {
-		return "", fmt.Errorf("format: %w", err)
+// pop removes the top result from the stack.
+func (s *resultStack) pop() error {
+	top := len(*s) - 1
+	if top < 0 {
+		return errEmptyResultStack
 	}
-	return sb.String(), nil
+
+	*s = (*s)[:top]
+	return nil
 }
 
-func (s *state) executePartial(name string, data any, w io.Writer) (Store, error) {
-	format, ok := s.partials[name]
+func (c *ctx) eval(name string, data any) (any, error) {
+	tmpl, ok := c.partials[name]
 	if !ok {
 		return nil, fmt.Errorf("no such partial template: %q", name)
 	}
 
-	s.Push()
-	defer s.Pop()
+	c.results.push()
+	defer c.results.pop()
 
-	if err := format.Execute(w, data); err != nil {
+	var output strings.Builder
+	if err := tmpl.Execute(&output, data); err != nil {
 		return nil, err
 	}
-	return s.stores[len(s.stores)-1], nil
-}
 
-// Create creates the state and functions used by the rendering engine.
-func Create(data any) (*state, map[string]any) {
-	site := Site{Data: data, Store: make(Store)}
-	state := &state{site: site}
-	return state, newFuncMap(state)
+	result := c.results[len(c.results)-1]
+
+	// If the partial called return, return that result.
+	if result != nil {
+		return *result, nil
+	}
+
+	// The partial did not call return. Return its output.
+	return output.String(), nil
 }

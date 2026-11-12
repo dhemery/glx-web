@@ -9,36 +9,38 @@ in Sprout's [All] registry group.
 
 # Context Functions
 
-These functions supply data from the context to the template.
+See [Context] for the methods of the returned Context.
 
-	site
-	    Returns the Site, which includes the custom data supplied by the
-	    configuration file and a global key/value Store that persists
-	    across the execution of all templates. You can use this site Store
-	    to compile data to share across all templates.
+	context
+	    Returns the Context, which includes the custom data supplied by the
+	    configuration file as well as global and local data stores that
+	    templates can use to share data.
 
-	store
-	    Returns a Store that persists for the life of the template
-	    rendering the current file. You can use this Store to compile data
-	    for use anywhere in the template, including in associated
-	    templates.
+# Partial Template Functions
 
-# Partial Execution Functions
-
-Each of these functions
-executes a named partial template to compute a result.
+A partial template (or simply "partial")
+is a template executed by eval
+to compute a result
+instead of writing to an output file.
 Partial templates are specified in the config.yaml file.
 
-Each call establishes a new context for the partial template,
-including a store that persists for the life of the partial.
-
 	eval <name> <value>
-	    Applies the named partial template to the value and returns the
-	    resulting store. The output written by the template is discarded.
+	    Returns the result of applying the named partial template to the
+	    value. By default eval returns the text written by the partial. If
+	    the partial calls return, eval instead discards the partial's
+	    output and returns the result set by the last call to return.
 
-	format <name> <value>
-	    Applies the named partial template to the value and returns the
-	    output written by the template. The partial's store is discarded.
+	return <value>
+	    Sets the result for the partial at the top of the stack (see note
+	    below) and returns the value.
+
+Context maintains a stack of partials.
+Executing a partial via the eval function
+pushes the partial onto the stack.
+When the the completes,
+the partial is popped off the stack.
+A partial can set its result
+by calling the return function.
 
 # Type Test Functions
 

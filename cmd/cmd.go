@@ -70,21 +70,21 @@ func run(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("loading configuration: %w", err)
 	}
 
-	state, funcs := context.Create(cfg.Data)
+	ctx, funcs := context.New(cfg.Data)
 
 	tmpls, err := load.Templates(templateDir, cfg.Templates, funcs)
 	if err != nil {
 		return fmt.Errorf("loading templates: %w", err)
 	}
 
-	state.SetPartials(tmpls.ForPartials())
+	ctx.InstallPartials(tmpls.ForPartials())
 
 	renderer := &render.Renderer{
 		Clean:     clean,
 		OutputDir: outputDir,
 		StaticDir: staticDir,
 		Templates: tmpls,
-		State:     state,
+		Context:   ctx,
 	}
 
 	return renderer.Render(catalog)

@@ -9,7 +9,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 )
@@ -20,12 +19,9 @@ type templateSet interface {
 	ForEntity(glx.EntityType) map[string]*template.Template
 }
 
-// state captures the global state available to each template via dot or
-// functions.
-type state interface {
-	Site() context.Site
-	Push()
-	Pop()
+type context interface {
+	Data() any
+	StartPage()
 }
 
 type Renderer struct {
@@ -33,7 +29,7 @@ type Renderer struct {
 	OutputDir string
 	StaticDir string
 	Templates templateSet
-	State     state
+	Context   context
 	Err       error
 }
 
@@ -58,7 +54,7 @@ func (r *Renderer) Render(catalog *entity.Catalog) error {
 
 	for name, tmpl := range r.Templates.ForSite() {
 		fname := filepath.Join(r.OutputDir, name)
-		err := r.executeTemplate(fname, r.State.Site(), tmpl)
+		err := r.executeTemplate(fname, r.Context.Data(), tmpl)
 		if err != nil {
 			return fmt.Errorf("rendering %s: %w", fname, err)
 		}
@@ -118,8 +114,7 @@ func (r *Renderer) executeTemplate(fname string, dot any, tmpl *template.Templat
 	}
 	defer f.Close()
 
-	r.State.Push()
-	defer r.State.Pop()
+	r.Context.StartPage()
 
 	return tmpl.Execute(f, dot)
 }
