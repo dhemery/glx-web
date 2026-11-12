@@ -21,7 +21,7 @@ type templateSet interface {
 
 type context interface {
 	Data() any
-	StartPage()
+	StartPage(string)
 }
 
 type Renderer struct {
@@ -53,10 +53,9 @@ func (r *Renderer) Render(catalog *entity.Catalog) error {
 	}
 
 	for name, tmpl := range r.Templates.ForSite() {
-		fname := filepath.Join(r.OutputDir, name)
-		err := r.executeTemplate(fname, r.Context.Data(), tmpl)
+		err := r.executeTemplate(name, r.Context.Data(), tmpl)
 		if err != nil {
-			return fmt.Errorf("rendering %s: %w", fname, err)
+			return fmt.Errorf("rendering %s: %w", name, err)
 		}
 	}
 
@@ -81,10 +80,9 @@ func (r *Renderer) renderEntities[S ~[]E, E entity.Entity](entities S) {
 	entityType := entities[0].EntityType()
 
 	for name, t := range r.Templates.ForType(entityType) {
-		fname := filepath.Join(r.OutputDir, name)
-		err := r.executeTemplate(fname, entities, t)
+		err := r.executeTemplate(name, entities, t)
 		if err != nil {
-			r.Err = fmt.Errorf("rendering %s: %w", fname, err)
+			r.Err = fmt.Errorf("rendering %s: %w", name, err)
 			return
 		}
 	}
@@ -93,7 +91,7 @@ func (r *Renderer) renderEntities[S ~[]E, E entity.Entity](entities S) {
 	for _, entity := range entities {
 		id := entity.ID()
 		for name, t := range entityTemplates {
-			fname := filepath.Join(r.OutputDir, strings.ReplaceAll(name, "<id>", id))
+			fname := strings.ReplaceAll(name, "<id>", id)
 
 			err := r.executeTemplate(fname, entity, t)
 			if err != nil {
@@ -104,7 +102,9 @@ func (r *Renderer) renderEntities[S ~[]E, E entity.Entity](entities S) {
 	}
 }
 
-func (r *Renderer) executeTemplate(fname string, dot any, tmpl *template.Template) error {
+func (r *Renderer) executeTemplate(name string, dot any, tmpl *template.Template) error {
+	fname := filepath.Join(r.OutputDir, name)
+
 	if err := os.MkdirAll(filepath.Dir(fname), 0755); err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (r *Renderer) executeTemplate(fname string, dot any, tmpl *template.Templat
 	}
 	defer f.Close()
 
-	r.Context.StartPage()
+	r.Context.StartPage(name)
 
 	return tmpl.Execute(f, dot)
 }

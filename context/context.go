@@ -22,6 +22,10 @@ type Context interface {
 	// while rendering a single file. Each Site, Type, and Entity template
 	// starts with a new, empty Locals.
 	Locals() map[string]any
+
+	// Path returns the path to the file being rendered, relative to the
+	// output directory.
+	Path() string
 }
 
 var _ Context = &ctx{}
@@ -40,6 +44,7 @@ type ctx struct {
 	data    any
 	globals map[string]any
 	locals  map[string]any
+	path    string
 
 	partials map[string]*template.Template
 	results  resultStack
@@ -57,8 +62,13 @@ func (c *ctx) Locals() map[string]any {
 	return c.locals
 }
 
-func (c *ctx) StartPage() {
+func (c *ctx) Path() string {
+	return c.path
+}
+
+func (c *ctx) StartPage(path string) {
 	c.locals = make(map[string]any)
+	c.path = path
 }
 
 func (c *ctx) InstallPartials(partials map[string]*template.Template) {
