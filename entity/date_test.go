@@ -78,25 +78,44 @@ func TestCompareDates(t *testing.T) {
 				t.Errorf("CompareDateStrings(%q, %q) = %d, want %d", d, d, got, want)
 			}
 
+			date, _ := d.Parse()
+			got = entity.CompareDates(date, date)
+			if got != want {
+				t.Errorf("CompareDates(%s, %s) = %d, want %d", d, d, got, want)
+			}
+
 		}
 
 		// Compare each date to each date later in the slice.
 		for i, x := range dateStrings[:len(dateStrings)-1] {
+			xdate, _ := x.Parse()
 			for _, y := range dateStrings[i+1:] {
-				got := entity.CompareDateStrings(x, y)
+				ydate, _ := y.Parse()
+
 				// The slice is ordered as desired, so we want
 				// the result to indicate x < y.
 				want := -1
+				got := entity.CompareDateStrings(x, y)
 				if got != want {
 					t.Errorf("CompareDateStrings(x=%q, y=%q) = %d, want %d", x, y, got, want)
 				}
 
+				got = entity.CompareDates(xdate, ydate)
+				if got != want {
+					t.Errorf("CompareDates(x=%s, y=%s) = %d, want %d", x, y, got, want)
+				}
+
 				// Swap the order of the arguments, and so swap
 				// the sign of the desired result.
-				got = entity.CompareDateStrings(y, x)
 				want = -want
+				got = entity.CompareDateStrings(y, x)
 				if got != 1 {
 					t.Errorf("CompareDateStrings(y=%q, x=%q) = %d, want %d", y, x, got, want)
+				}
+
+				got = entity.CompareDates(ydate, xdate)
+				if got != 1 {
+					t.Errorf("CompareDates(y=%s, x=%s) = %d, want %d", y, x, got, want)
 				}
 			}
 		}
