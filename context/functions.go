@@ -28,6 +28,9 @@ func newFuncMap(c *ctx) map[string]any {
 		"difference":   difference,
 		"intersection": intersection,
 		"union":        union,
+
+		// Date functions
+		"datestamp": entity.DateStringStamp,
 	}
 
 	sh := sprout.New()

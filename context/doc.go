@@ -16,6 +16,15 @@ See [Context] for the methods of the returned Context.
 	    configuration file as well as global and local data stores that
 	    templates can use to share data.
 
+# Date Functions
+
+Date functions operate on strings that represent GLX dates. See [glxdate] for
+detailed documentation of the GLX date format.
+
+	datestamp <datestring>
+	    Returns an integer datestamp that represents the sort order of the
+	    date.
+
 # Partial Template Functions
 
 A partial template (or simply "partial")
@@ -41,19 +50,6 @@ When the the completes,
 the partial is popped off the stack.
 A partial can set its result
 by calling the return function.
-
-# Type Test Functions
-
-These functions report about the types of their arguments.
-
-	is_entity <value>
-	    Reports whether the value satisfies entity.Entity.
-
-	is_property <value>
-	    Reports whether the value's type is *entity.Property.
-
-	is_vocabulary_value <value>
-	    Reports whether the value satisfies entity.VocabularyValue.
 
 # Set-Like Functions
 
@@ -87,7 +83,26 @@ See the descriptions for details.
 	    once in the result. The result preserves the order of each
 	    element's first occurrence in the concatenation of list1 and list2.
 
+# Type Test Functions
+
+These functions report about the types of their arguments.
+
+	is_entity <value>
+	    Reports whether the value satisfies entity.Entity.
+
+	is_property <value>
+	    Reports whether the value's type is *entity.Property.
+
+	is_vocabulary_value <value>
+	    Reports whether the value satisfies entity.VocabularyValue.
+
 [All]: https://docs.atom.codes/sprout/groups/all
 [Sprout]: https://docs.atom.codes/sprout
 */
 package context
+
+import (
+	"github.com/genealogix/glx/go-glx/glxdate"
+)
+
+var _ = glxdate.Date{}
