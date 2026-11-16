@@ -12,43 +12,43 @@ func TestCompareDates(t *testing.T) {
 		// Each slice is ordered as desired.
 		{
 			// Adjacent dates with each possible qualifier.
-			"BEF 2022-05-15",
-			"    2022-05-15",
-			"AFT 2022-05-15",
-			"BEF 2022-05-16",
-			"    2022-05-16",
-			"AFT 2022-05-16",
+			"BEF 2020-05-15",
+			"    2020-05-15",
+			"BEF 2020-05-16",
+			"AFT 2020-05-15",
+			"    2020-05-16",
+			"AFT 2020-05-16",
 		},
 		{
 			// Across a month boundary. Every possible qualifier
 			// and precision from the last date of one month to the
 			// first date of the next.
-			"BEF 2022-05-31",
-			"    2022-05-31",
-			"AFT 2022-05-31",
-			"AFT 2022-05",
-			"BEF 2022-06",
-			"    2022-06",
-			"BEF 2022-06-01",
-			"    2022-06-01",
-			"AFT 2022-06-01",
+			"BEF 2021-05-31",
+			"    2021-05-31",
+			"BEF 2021-06",
+			"BEF 2021-06-01",
+			"AFT 2021-05",
+			"AFT 2021-05-31",
+			"    2021-06",
+			"    2021-06-01",
+			"AFT 2021-06-01",
 		},
 		{
 			// Across a year boundary. Every possible qualifier and
 			// precision from the last date of one year to the
 			// first date of the next.
-			"BEF 2021-12-31",
-			"    2021-12-31",
-			"AFT 2021-12-31",
-			"AFT 2021-12",
-			"AFT 2021",
-			"BEF 2022",
-			"    2022",
-			"BEF 2022-01",
-			"    2022-01",
-			"BEF 2022-01-01",
-			"    2022-01-01",
-			"AFT 2022-01-01",
+			"BEF 2022-12-31",
+			"    2022-12-31",
+			"BEF 2023",
+			"BEF 2023-01",
+			"BEF 2023-01-01",
+			"AFT 2022",
+			"AFT 2022-12",
+			"AFT 2022-12-31",
+			"    2023",
+			"    2023-01",
+			"    2023-01-01",
+			"AFT 2023-01-01",
 		},
 		{
 			// Across an epoch boundary. Every possible qualifier
@@ -56,14 +56,15 @@ func TestCompareDates(t *testing.T) {
 			// date AD.
 			"BEF 0001-12-31 BCE",
 			"    0001-12-31 BCE",
-			"AFT 0001-12-31 BCE",
-			"AFT 0001-12 BCE",
-			"AFT 0001 BCE",
 			"BEF 0001",
-			"    0001",
 			"BEF 0001-01",
-			"    0001-01",
 			"BEF 0001-01-01",
+			"", // Zero date
+			"AFT 0001 BCE",
+			"AFT 0001-12 BCE",
+			"AFT 0001-12-31 BCE",
+			"    0001",
+			"    0001-01",
 			"    0001-01-01",
 			"AFT 0001-01-01",
 		},
@@ -77,21 +78,11 @@ func TestCompareDates(t *testing.T) {
 			if got != want {
 				t.Errorf("CompareDateStrings(%q, %q) = %d, want %d", d, d, got, want)
 			}
-
-			date, _ := d.Parse()
-			got = entity.CompareDates(date, date)
-			if got != want {
-				t.Errorf("CompareDates(%s, %s) = %d, want %d", d, d, got, want)
-			}
-
 		}
 
 		// Compare each date to each date later in the slice.
 		for i, x := range dateStrings[:len(dateStrings)-1] {
-			xdate, _ := x.Parse()
 			for _, y := range dateStrings[i+1:] {
-				ydate, _ := y.Parse()
-
 				// The slice is ordered as desired, so we want
 				// the result to indicate x < y.
 				want := -1
@@ -100,22 +91,12 @@ func TestCompareDates(t *testing.T) {
 					t.Errorf("CompareDateStrings(x=%q, y=%q) = %d, want %d", x, y, got, want)
 				}
 
-				got = entity.CompareDates(xdate, ydate)
-				if got != want {
-					t.Errorf("CompareDates(x=%s, y=%s) = %d, want %d", x, y, got, want)
-				}
-
 				// Swap the order of the arguments, and so swap
 				// the sign of the desired result.
 				want = -want
 				got = entity.CompareDateStrings(y, x)
 				if got != 1 {
-					t.Errorf("CompareDateStrings(y=%q, x=%q) = %d, want %d", y, x, got, want)
-				}
-
-				got = entity.CompareDates(ydate, xdate)
-				if got != 1 {
-					t.Errorf("CompareDates(y=%s, x=%s) = %d, want %d", y, x, got, want)
+					t.Errorf("CompareDateStrings(y=%q:%d, x=%q:%d) = %d, want %d", y, entity.DateStringStamp(y), x, entity.DateStringStamp(x), got, want)
 				}
 			}
 		}

@@ -39,30 +39,16 @@ func CompareDates(x, y glxdate.Date) int {
 }
 
 const (
-	// Tie-breakers break ties between otherwise equal dates.
-	// tieBreakerBefore < tieBreakerUnqualified < tieBreakerAfter.
-	tieBreakerBefore      = 0
-	tieBreakerUnqualified = 1
-	tieBreakerAfter       = 2
-
-	// Bit width of "fields" for month, day, and tie-breaker.
-	widthTieBreaker = 2
-	widthDay        = 6 // 6 instead of 5 to allow AFT to use a day value > 31.
-	widthMonth      = 4
+	// Bit width of "fields" for month, day, and offset.
+	widthOffset = 4
+	widthDay    = 5
+	widthMonth  = 4
 
 	// Amount to shift each field to make room for the higher-precision
 	// fields.
-	shiftDay   = widthTieBreaker         // Make room for tie-breaker field.
-	shiftMonth = shiftDay + widthDay     // Make room for day and tie-breaker fields.
-	shiftYear  = shiftMonth + widthMonth // Make room for month, day, and tie-breaker fields.
-
-	// The maximum value that will fit in the day field. This value
-	// compares higher than any actual day.
-	afterAnyActualDay = 1<<widthDay - 1
-
-	// The maximum value that will fit in month field. This compares higher
-	// than any actual month.
-	afterAnyActualMonth = 1<<widthMonth - 1
+	shiftDay   = widthOffset             // Make room for offset field.
+	shiftMonth = shiftDay + widthDay     // Make room for day and offset fields.
+	shiftYear  = shiftMonth + widthMonth // Make room for month, day, and offset fields.
 )
 
 // DateStamp returns an integer that represents the sort order of the date.
@@ -105,39 +91,60 @@ const (
 // The result of comparing the datestamps of dates from different calendars is
 // undefined.
 func DateStamp(date glxdate.Date) int {
-	var tieBreaker int
+	var year, month, day, offset int
 
-	// Use BEF and AFT qualifiers to break ties beween otherwise equal
-	// dates.
 	switch date.Qualifier() {
 	case glxdate.QualifierBefore:
-		tieBreaker = tieBreakerBefore
+		year, month, day = dateParts(date)
+		offset = int(date.Precision())
 	case glxdate.QualifierAfter:
-		tieBreaker = tieBreakerAfter
-	default:
-		tieBreaker = tieBreakerUnqualified
+		year, month, day = nextDateParts(date)
+		offset = 4 + int(date.Precision())
+	case glxdate.QualifierNone:
+		year, month, day = dateParts(date)
+		offset = 8 + int(date.Precision())
+	}
+
+	return year<<shiftYear + month<<shiftMonth + day<<shiftDay + offset
+}
+
+func nextDateParts(date glxdate.Date) (year, month, day int) {
+	year = date.Year()
+	if year <= 0 {
+		year++
+	}
+	month, _ = date.Month()
+	day, _ = date.Day()
+	switch date.Precision() {
+	case glxdate.PrecisionDay:
+		if day < 31 {
+			return year, month, day + 1
+		}
+		fallthrough
+	case glxdate.PrecisionMonth:
+		if month < 12 {
+			return year, month + 1, 1
+		}
+		fallthrough
+	case glxdate.PrecisionYear:
+		return year + 1, 1, 1
+	}
+	return year, 1, 1
+}
+
+func dateParts(date glxdate.Date) (int, int, int) {
+	year := date.Year()
+	if year <= 0 {
+		year++
+	}
+	month, ok := date.Month()
+	if !ok {
+		month = 1
 	}
 
 	day, ok := date.Day()
 	if !ok {
-		// No day is specified. For AFT dates use a "day" that compares
-		// higher than any actual day. For other dates use 0, which
-		// compares lower.
-		day = 0
-		if date.Qualifier() == glxdate.QualifierAfter {
-			day = afterAnyActualDay
-		}
+		day = 1
 	}
-	month, ok := date.Month()
-	if !ok {
-		// No month is specified. For AFT dates use a "month" that
-		// compares higher than any actual month. For other dates use
-		// 0, which compares lower.
-		month = 0
-		if date.Qualifier() == glxdate.QualifierAfter {
-			month = afterAnyActualMonth
-		}
-	}
-
-	return date.Year()<<shiftYear + month<<shiftMonth + day<<shiftDay + tieBreaker
+	return year, month, day
 }
