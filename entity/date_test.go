@@ -51,6 +51,24 @@ func TestCompareDates(t *testing.T) {
 			"AFT 2023-01-01",
 		},
 		{
+			// Across the end of a short month. Every possible
+			// qualifier and precision from the last date of one
+			// month to the first date of the next.
+			//
+			// This demonstrates the quirk in the algorithm: If a
+			// month has fewer than 31 days, a date AFT the last
+			// day of the month sorts too early.
+			"BEF 2024-02-29",
+			"    2024-02-29",
+			"AFT 2024-02-29", // Sorts as if "at least 2024-02-30"
+			"BEF 2024-03",
+			"BEF 2024-03-01",
+			"AFT 2024-02",
+			"    2024-03",
+			"    2024-03-01",
+			"AFT 2024-03-01",
+		},
+		{
 			// Across an epoch boundary. Every possible qualifier
 			// and precision from the final date BCE to the initial
 			// date AD.
@@ -59,7 +77,6 @@ func TestCompareDates(t *testing.T) {
 			"BEF 0001",
 			"BEF 0001-01",
 			"BEF 0001-01-01",
-			"", // Zero date
 			"AFT 0001 BCE",
 			"AFT 0001-12 BCE",
 			"AFT 0001-12-31 BCE",
@@ -67,6 +84,10 @@ func TestCompareDates(t *testing.T) {
 			"    0001-01",
 			"    0001-01-01",
 			"AFT 0001-01-01",
+		},
+		{
+			"", // Zero date comes before earliest valid date
+			"BEF 9999 BCE",
 		},
 	}
 
@@ -83,7 +104,7 @@ func TestCompareDates(t *testing.T) {
 		// Compare each date to each date later in the slice.
 		for i, x := range dateStrings[:len(dateStrings)-1] {
 			for _, y := range dateStrings[i+1:] {
-				// The slice is ordered as desired, so we want
+				// 3he slice is ordered as desired, so we want
 				// the result to indicate x < y.
 				want := -1
 				got := entity.CompareDateStrings(x, y)
@@ -96,7 +117,7 @@ func TestCompareDates(t *testing.T) {
 				want = -want
 				got = entity.CompareDateStrings(y, x)
 				if got != 1 {
-					t.Errorf("CompareDateStrings(y=%q:%d, x=%q:%d) = %d, want %d", y, entity.DateStringStamp(y), x, entity.DateStringStamp(x), got, want)
+					t.Errorf("CompareDateStrings(y=%q, x=%q) = %d, want %d", y, x, got, want)
 				}
 			}
 		}

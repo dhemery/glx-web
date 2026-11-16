@@ -39,6 +39,12 @@ func CompareDates(x, y glxdate.Date) int {
 }
 
 const (
+	// Datestamp offsets per qualifier. Note that offsetAfter is applied
+	// after adjusting the date to the next day.
+	offsetBefore    = 0
+	offsetFrom      = 4
+	offsetUnbounded = 8
+
 	// Bit width of "fields" for month, day, and offset.
 	widthOffset = 4
 	widthDay    = 5
@@ -91,60 +97,56 @@ const (
 // The result of comparing the datestamps of dates from different calendars is
 // undefined.
 func DateStamp(date glxdate.Date) int {
-	var year, month, day, offset int
+	day, _ := date.Day()
+	month, _ := date.Month()
+	year := date.Year()
+	if year == 0 {
+		// Sort a zero date before the earliest valid date.
+		year = -10000
+	}
+	if year < 0 {
+		// Increment BCE year so that:
+		// "BEF 1-01-01" < "AFT 1-12-31 BCE"  < "1-01-01"
+		year++
+	}
+
+	var qualifierOffset int
 
 	switch date.Qualifier() {
 	case glxdate.QualifierBefore:
-		year, month, day = dateParts(date)
-		offset = int(date.Precision())
+		year, month, day = dateParts(year, month, day)
+		qualifierOffset = offsetBefore
 	case glxdate.QualifierAfter:
-		year, month, day = nextDateParts(date)
-		offset = 4 + int(date.Precision())
-	case glxdate.QualifierNone:
-		year, month, day = dateParts(date)
-		offset = 8 + int(date.Precision())
+		year, month, day = nextDateParts(year, month, day)
+		qualifierOffset = offsetFrom
+	default:
+		year, month, day = dateParts(year, month, day)
+		qualifierOffset = offsetUnbounded
 	}
 
+	// A higher-precision date sorts after an otherwise equivalent
+	// lower-precision date.
+	precisionOffset := int(date.Precision())
+	offset := qualifierOffset + precisionOffset
 	return year<<shiftYear + month<<shiftMonth + day<<shiftDay + offset
 }
 
-func nextDateParts(date glxdate.Date) (year, month, day int) {
-	year = date.Year()
-	if year <= 0 {
-		year++
-	}
-	month, _ = date.Month()
-	day, _ = date.Day()
-	switch date.Precision() {
-	case glxdate.PrecisionDay:
-		if day < 31 {
-			return year, month, day + 1
-		}
-		fallthrough
-	case glxdate.PrecisionMonth:
-		if month < 12 {
-			return year, month + 1, 1
-		}
-		fallthrough
-	case glxdate.PrecisionYear:
-		return year + 1, 1, 1
-	}
-	return year, 1, 1
-}
-
-func dateParts(date glxdate.Date) (int, int, int) {
-	year := date.Year()
-	if year <= 0 {
-		year++
-	}
-	month, ok := date.Month()
-	if !ok {
+func dateParts(year, month, day int) (int, int, int) {
+	if month == 0 {
 		month = 1
 	}
-
-	day, ok := date.Day()
-	if !ok {
+	if day == 0 {
 		day = 1
 	}
 	return year, month, day
+}
+
+func nextDateParts(year, month, day int) (int, int, int) {
+	if day > 0 && day < 31 {
+		return year, month, day + 1
+	}
+	if month > 0 && month < 12 {
+		return year, month + 1, 1
+	}
+	return year + 1, 1, 1
 }
