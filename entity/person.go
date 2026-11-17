@@ -50,6 +50,28 @@ func (l PersonList) Sort() PersonList {
 	return sortedByString(l)
 }
 
+// Coparticipants returns a slice of all coparticipants in this person's
+// relationships.
+func (p *Person) Coparticipants() []*Coparticipant {
+	var cops []*Coparticipant
+	for _, r := range p.Relationships {
+		for _, pt := range r.Participants {
+			if pt.Person == p {
+				continue
+			}
+			cops = append(cops, &Coparticipant{pt, r})
+		}
+	}
+	return cops
+}
+
+// A Coparticipant represents a person's participation in a relationship with
+// some other person.
+type Coparticipant struct {
+	Participant  *Participant
+	Relationship *Relationship
+}
+
 func extractSurname(props map[string]*Property) string {
 	nameProp, ok := props["name"]
 	if !ok {
