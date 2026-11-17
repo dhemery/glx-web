@@ -33,7 +33,7 @@ func (s templateSet) ForPartials() map[string]*template.Template {
 	return s.partial
 }
 
-func Templates(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) (templateSet, error) {
+func Templates(templateDir string, specs tmpl.Config, funcs template.FuncMap) (templateSet, error) {
 	templates := templateSet{
 		site:       make(map[string]*template.Template),
 		entityType: make(map[glx.EntityType]map[string]*template.Template),
@@ -47,9 +47,9 @@ func Templates(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) 
 		bases:       make(map[string]*template.Template),
 	}
 
-	templates.site = c.compileTemplates("site", specs.Site)
+	templates.site = c.compileTemplates("site", specs.Templates.Site)
 
-	for et, typeSpec := range c.specs.Types {
+	for et, typeSpec := range c.specs.Templates.Types {
 		templates.entityType[et] = c.compileTemplates("type", typeSpec.Type)
 		templates.entity[et] = c.compileTemplates("entity", typeSpec.Entity)
 	}
@@ -62,7 +62,7 @@ func Templates(templateDir string, specs tmpl.SiteSpec, funcs template.FuncMap) 
 type templateCompiler struct {
 	templateDir string
 	funcs       template.FuncMap
-	specs       tmpl.SiteSpec
+	specs       tmpl.Config
 	bases       map[string]*template.Template
 	err         error
 }
@@ -128,7 +128,7 @@ func (c *templateCompiler) base(name string) (*template.Template, error) {
 
 	// If base has not been compiled, compile it now.
 	if !ok {
-		baseSpec, ok := c.specs.Bases[name]
+		baseSpec, ok := c.specs.Templates.Bases[name]
 		if !ok {
 			return nil, fmt.Errorf("base template %q: no such base", name)
 		}

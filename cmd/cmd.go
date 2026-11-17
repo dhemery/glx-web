@@ -72,7 +72,7 @@ func run(_ *cobra.Command, _ []string) error {
 
 	ctx, funcs := context.New(cfg.Data)
 
-	tmpls, err := load.Templates(templateDir, cfg.Templates, funcs)
+	tmpls, err := load.Templates(templateDir, cfg, funcs)
 	if err != nil {
 		return fmt.Errorf("loading templates: %w", err)
 	}

@@ -9,14 +9,17 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-// Config specifies the templates  and data used by glx-web.
+// Config specifies the templates and data used by glx-web.
 type Config struct {
 	// User-defined data available to each template. Each Site template is
 	// applied directly to this value. Other templates can access the data
 	// via the config function.
 	Data any `json:"data"`
-	// Templates to render the site.
+	// Templates to render the site files.
 	Templates SiteSpec `json:"templates"`
+	// Each Partial template can be executed by the eval function to
+	// compute a result. The map key is used as the name of the partial.
+	Partials map[string]Spec `json:"partials"`
 }
 
 // SiteSpec specifies the templates for the site and for each entity type.
@@ -32,9 +35,6 @@ type SiteSpec struct {
 	Site map[string]Spec `json:"site"`
 	// Templates for each entity type.
 	Types map[glx.EntityType]TypeSpec `json:"types"`
-	// Each Partial template can be executed by the eval function to
-	// compute a result. The map key is used as the name of the partial.
-	Partials map[string]Spec `json:"partials"`
 }
 
 // TypeSpec specifies templates for an entity type and for entities of that
@@ -60,11 +60,15 @@ type TypeSpec struct {
 // Spec specifies a template. The template is compiled by cloning the base and
 // parsing the files into it. If no base is named, there must be at least one
 // file, and the first file must define the body of the template.
+//
+// If the Spec needs one file and no base, you can represent it in YAML as a
+// scalar single string instead of a mapping.
 type Spec struct {
 	// The name of the base template to build on.
 	Base string `json:"base"`
 	// The paths to the template files to parse relative to the template
-	// directory.
+	// directory. If Files needs one file, you can represent it in YAML as
+	// a scalar string instead of a sequence of strings.
 	Files FileList `json:"files"`
 }
 
@@ -73,26 +77,52 @@ type FileList []string
 
 const yamlTagString = "!!str"
 
+// UnmarshalYAML unmarshals the Spec from either a mapping or a single string.
+func (s *Spec) UnmarshalYAML(n *yaml.Node) error {
+	switch n.Kind {
+	case yaml.ScalarNode:
+		if n.Tag != yamlTagString {
+			return fmt.Errorf("Spec: want mapping or string, got %s: %q", n.Tag, n.Value)
+		}
+		s.Files = []string{n.Value}
+		return nil
+	case yaml.MappingNode:
+		var local struct {
+			Base  string
+			Files FileList
+		}
+		if err := n.Decode(&local); err != nil {
+			return err
+		}
+		s.Base, s.Files = local.Base, local.Files
+		return nil
+	}
+
+	return fmt.Errorf("Spec: want string or mapping, got %s: %q", n.Tag, n.Value)
+}
+
+// UnmarshalYAML unmarshalss the FileList from either a sequence of strings or
+// a single string.
 func (fl *FileList) UnmarshalYAML(n *yaml.Node) error {
 	switch n.Kind {
 	case yaml.ScalarNode:
 		if n.Tag != yamlTagString {
-			return fmt.Errorf("files: want string, got %s: %q", n.Tag, n.Value)
+			return fmt.Errorf("FileList: want string, got %s: %q", n.Tag, n.Value)
 		}
 		*fl = []string{n.Value}
 		return nil
 	case yaml.SequenceNode:
 		var files []string
-		for _, v := range n.Content {
-			if v.Tag != yamlTagString {
-				return fmt.Errorf("files: want string, got %s: %q", v.Tag, v.Value)
+		for _, contentNode := range n.Content {
+			if contentNode.Tag != yamlTagString {
+				return fmt.Errorf("FileList: want string, got %s: %q", contentNode.Tag, contentNode.Value)
 			}
-			files = append(files, v.Value)
+			files = append(files, contentNode.Value)
 		}
 		*fl = files
 		return nil
 	}
-	return fmt.Errorf("files: want string or array, got %s: %q", n.Tag, n.Value)
+	return fmt.Errorf("FileList: want string or array, got %s: %q", n.Tag, n.Value)
 }
 
 // Import for doc reference.
