@@ -1,9 +1,12 @@
 package tmpl
 
 import (
+	"fmt"
+
 	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
+	"go.yaml.in/yaml/v3"
 )
 
 // Config specifies the templates  and data used by glx-web.
@@ -62,7 +65,34 @@ type Spec struct {
 	Base string `json:"base"`
 	// The paths to the template files to parse relative to the template
 	// directory.
-	Files []string `json:"files"`
+	Files FileList `json:"files"`
+}
+
+// FileList is the list of files to parse into a single template.
+type FileList []string
+
+const yamlTagString = "!!str"
+
+func (fl *FileList) UnmarshalYAML(n *yaml.Node) error {
+	switch n.Kind {
+	case yaml.ScalarNode:
+		if n.Tag != yamlTagString {
+			return fmt.Errorf("files: want string, got %s: %q", n.Tag, n.Value)
+		}
+		*fl = []string{n.Value}
+		return nil
+	case yaml.SequenceNode:
+		var files []string
+		for _, v := range n.Content {
+			if v.Tag != yamlTagString {
+				return fmt.Errorf("files: want string, got %s: %q", v.Tag, v.Value)
+			}
+			files = append(files, v.Value)
+		}
+		*fl = files
+		return nil
+	}
+	return fmt.Errorf("files: want string or array, got %s: %q", n.Tag, n.Value)
 }
 
 // Import for doc reference.
