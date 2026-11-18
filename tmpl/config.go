@@ -13,7 +13,7 @@ import (
 type Config struct {
 	// User-defined data available to each template. Each Site template is
 	// applied directly to this value. Other templates can access the data
-	// via the config function.
+	// via the context function.
 	Data any `json:"data"`
 	// Templates to render the site files.
 	Templates SiteSpec `json:"templates"`
