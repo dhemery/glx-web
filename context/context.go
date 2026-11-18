@@ -10,7 +10,8 @@ import (
 // Context holds information about the current state of rendering.
 // Templates can access the Context via the context function.
 type Context interface {
-	// Data returns the usr-supplied custom data from the config file.
+	// Data returns the user-supplied custom data  read from the config
+	// file.
 	Data() any
 
 	// Globals returns a map that templates can use to share information

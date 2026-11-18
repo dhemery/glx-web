@@ -12,7 +12,7 @@ The file is deserialized into a [Config].
 
 # Templates
 
-The [Config.Templates] field defines five kinds of templates:
+The [Config.Templates] field defines four kinds of templates:
 
   - Base templates,
     declared in [SiteSpec.Bases].
@@ -52,12 +52,15 @@ The [Config.Templates] field defines five kinds of templates:
     and the result is used as the path for the rendered file
     relative to the output directory.
 
-  - Partial templates.
-    A partial template
-    is a template that computes a result
-    instead of writing to a file.
-    To execute a partial template,
-    call the eval function.
+# Partial Templates
+
+Use the [Config.Partials] field
+to declare partial templates.
+A partial template
+is a template that computes a result
+instead of writing to a file.
+To execute a partial template,
+call the eval function.
 
 # Custom Data
 

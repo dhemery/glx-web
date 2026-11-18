@@ -19,8 +19,8 @@ type Config struct {
 	Templates SiteSpec `json:"templates"`
 	// Each Partial template can be executed by the eval function to
 	// compute a result. The map key is used as the name of the partial.
-	// The map value is the list of template file paths to parse relative
-	// to the template directory.
+	// The map value is the list of files to parse to build the template.
+	// The first file must define the body of the partial.
 	Partials map[string]FileList `json:"partials"`
 }
 
@@ -59,27 +59,27 @@ type TypeSpec struct {
 	Entity map[string]Spec `json:"entity"`
 }
 
-// Spec specifies a template. The template is compiled by cloning the base and
+// Spec specifies a template. The template is built by cloning the base and
 // parsing the files into it. If no base is named, there must be at least one
 // file, and the first file must define the body of the template.
 //
-// If the Spec needs one file and no base, you can represent it in YAML as a
-// scalar single string instead of a mapping.
+// If the Spec needs only one file and no base, you can represent it in YAML as
+// a single string that names the file.
 type Spec struct {
 	// The name of the base template to build on.
 	Base string `json:"base"`
-	// The paths to the template files to parse relative to the template
-	// directory. If Files needs one file, you can represent it in YAML as
-	// a scalar string instead of a sequence of strings.
+	// The list of files to parse to build the template.
 	Files FileList `json:"files"`
 }
 
-// FileList is the list of files to parse into a single template.
+// FileList is the list of files to parse to build a single template. All file
+// names are relative to the template directory. If Files needs only one file,
+// you can represent it in YAML as a single string that names the file.
 type FileList []string
 
 const yamlTagString = "!!str"
 
-// UnmarshalYAML unmarshals the Spec from either a mapping or a single string.
+// UnmarshalYAML unmarshals a Spec from either a mapping or a single string.
 func (s *Spec) UnmarshalYAML(n *yaml.Node) error {
 	switch n.Kind {
 	case yaml.ScalarNode:
@@ -103,8 +103,8 @@ func (s *Spec) UnmarshalYAML(n *yaml.Node) error {
 	return fmt.Errorf("Spec: want string or mapping, got %s: %q", n.Tag, n.Value)
 }
 
-// UnmarshalYAML unmarshalss the FileList from either a sequence of strings or
-// a single string.
+// UnmarshalYAML unmarshalss a FileList from either a sequence of strings or a
+// single string.
 func (fl *FileList) UnmarshalYAML(n *yaml.Node) error {
 	switch n.Kind {
 	case yaml.ScalarNode:
