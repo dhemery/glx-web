@@ -16,7 +16,7 @@ import (
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
 	"github.com/google/go-cmp/cmp"
-	"go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v4"
 	"golang.org/x/tools/txtar"
 )
 
@@ -134,7 +134,7 @@ func readCatalogTestCase(fsys fs.FS, fname string) (*catalogTestCase, error) {
 	}
 
 	var wantCatalog any
-	err = yaml.Unmarshal(catalogYAML, &wantCatalog)
+	err = yaml.Load(catalogYAML, &wantCatalog)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshaling want-catalog.yaml: %w", err)
 	}

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/dhemery/glx-web/tmpl"
-	"go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v4"
 )
 
 func Config(templateDir string) (tmpl.Config, error) {
@@ -17,12 +17,13 @@ func Config(templateDir string) (tmpl.Config, error) {
 	}
 	defer configFile.Close()
 
-	dec := yaml.NewDecoder(configFile)
-	// Complain about unknown fields.
-	dec.KnownFields(true)
+	loader, err := yaml.NewLoader(configFile, yaml.WithKnownFields())
+	if err != nil {
+		return tmpl.Config{}, err
+	}
 
 	var tmplConfig tmpl.Config
-	if err = dec.Decode(&tmplConfig); err != nil {
+	if err = loader.Load(&tmplConfig); err != nil {
 		return tmpl.Config{}, fmt.Errorf("%s: %w", configFileName, err)
 	}
 

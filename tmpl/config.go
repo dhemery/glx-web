@@ -6,7 +6,7 @@ import (
 	"github.com/dhemery/glx-web/context"
 	"github.com/dhemery/glx-web/entity"
 	"github.com/genealogix/glx/go-glx"
-	"go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // Config specifies the templates and data used by glx-web.
