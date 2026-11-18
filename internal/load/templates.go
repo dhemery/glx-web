@@ -54,7 +54,7 @@ func Templates(templateDir string, specs tmpl.Config, funcs template.FuncMap) (t
 		templates.entity[et] = c.compileTemplates("entity", typeSpec.Entity)
 	}
 
-	templates.partial = c.compileTemplates("format", specs.Partials)
+	templates.partial = c.compilePartials(specs.Partials)
 
 	return templates, c.err
 }
@@ -73,7 +73,7 @@ func (c *templateCompiler) compileTemplates(context string, specs map[string]tmp
 	}
 	tt := make(map[string]*template.Template)
 	for name, spec := range specs {
-		t, err := c.compileTemplate(spec)
+		t, err := c.compileSpec(spec)
 		if err != nil {
 			c.err = fmt.Errorf("%s template %q: %w", context, name, err)
 			return nil
@@ -83,7 +83,24 @@ func (c *templateCompiler) compileTemplates(context string, specs map[string]tmp
 	return tt
 }
 
-func (c *templateCompiler) compileTemplate(spec tmpl.Spec) (*template.Template, error) {
+func (c *templateCompiler) compilePartials(specs map[string]tmpl.FileList) map[string]*template.Template {
+	if c.err != nil {
+		return nil
+	}
+
+	tt := make(map[string]*template.Template)
+	for name, files := range specs {
+		t, err := c.compileFileList(files)
+		if err != nil {
+			c.err = fmt.Errorf("partial %q: %w", name, err)
+			return nil
+		}
+		tt[name] = t
+	}
+	return tt
+}
+
+func (c *templateCompiler) compileSpec(spec tmpl.Spec) (*template.Template, error) {
 	base, err := c.base(spec.Base)
 	if err != nil {
 		return nil, err
@@ -109,11 +126,26 @@ func (c *templateCompiler) compileTemplate(spec tmpl.Spec) (*template.Template, 
 		}
 	}
 
-	var fnames []string
-	for _, fname := range spec.Files {
-		fnames = append(fnames, filepath.Join(c.templateDir, fname))
+	return c.parseFiles(base, spec.Files)
+}
+
+func (c *templateCompiler) compileFileList(files tmpl.FileList) (*template.Template, error) {
+	if len(files) == 0 {
+		return nil, errors.New("no files")
 	}
-	return base.ParseFiles(fnames...)
+
+	name := filepath.Base(files[0])
+	return c.parseFiles(template.New(name).Funcs(c.funcs), files)
+}
+
+func (c *templateCompiler) parseFiles(t *template.Template, fnames tmpl.FileList) (*template.Template, error) {
+	for _, fname := range fnames {
+		_, err := t.ParseFiles(filepath.Join(c.templateDir, fname))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return t, nil
 }
 
 // Return the named base template, compiling it first if necessary.
@@ -132,7 +164,7 @@ func (c *templateCompiler) base(name string) (*template.Template, error) {
 		if !ok {
 			return nil, fmt.Errorf("base template %q: no such base", name)
 		}
-		base, err = c.compileTemplate(baseSpec)
+		base, err = c.compileSpec(baseSpec)
 		if err != nil {
 			return nil, fmt.Errorf("base template %q: %w", name, err)
 		}

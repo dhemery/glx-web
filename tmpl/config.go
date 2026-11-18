@@ -19,7 +19,9 @@ type Config struct {
 	Templates SiteSpec `json:"templates"`
 	// Each Partial template can be executed by the eval function to
 	// compute a result. The map key is used as the name of the partial.
-	Partials map[string]Spec `json:"partials"`
+	// The map value is the list of template file paths to parse relative
+	// to the template directory.
+	Partials map[string]FileList `json:"partials"`
 }
 
 // SiteSpec specifies the templates for the site and for each entity type.
